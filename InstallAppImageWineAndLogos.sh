@@ -190,7 +190,7 @@ IFS=$IFS_TMP
 make_dir "$HOME/Desktop"
 mv $WORKDIR/Logos.sh $HOME/Desktop
 
-env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks winxp
+#env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks winxp
 
 if gtk_question "Do you want to clean the temp files?"; then
     clean_all
