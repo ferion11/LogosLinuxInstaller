@@ -163,7 +163,7 @@ gtk_continue_question "Now the script will download and install Logos Bible in y
 
 gtk_download "https://downloads.logoscdn.com/LBS8/Installer/8.10.0.0032/Logos-x86.msi" "$WORKDIR"
 
-LC_ALL=C wine start $WORKDIR/Logos-x86.msi
+LC_ALL=C wine msiexec /i $WORKDIR/Logos-x86.msi
 
 #------- making the start script -------
 IFS_TMP=$IFS
@@ -187,9 +187,13 @@ chmod +x $WORKDIR/Logos.sh
 IFS=$IFS_TMP
 #------------------------------
 
+make_dir "$HOME/Desktop"
 mv $WORKDIR/Logos.sh $HOME/Desktop
 
-clean_all
+if ! gtk_question "Do you want to clean the temp files?"; then
+    clean_all
+fi
+
 gtk_info "Logos Bible Installed. You can run it from the script Logos.sh on your Desktop."
 
 echo "End!"
