@@ -123,14 +123,14 @@ gtk_download() {
 echo 'Searching for dependencies:'
 
 if [ -z "$DISPLAY" ]; then
-    echo "You want to run without X, but it don't work."
+    echo "* You want to run without X, but it don't work."
     exit 1
 fi
 
 if have_dep zenity; then
     echo '* Zenity is installed!'
 else
-    echo 'Your system does not have Zenity. Please install Zenity package.'
+    echo '* Your system does not have Zenity. Please install Zenity package.'
     exit 1
 fi
 
@@ -138,6 +138,18 @@ if have_dep wget; then
     echo '* wget is installed!'
 else
     gtk_fatal_error "Your system does not have wget. Please install wget package."
+fi
+
+if have_dep sed; then
+    echo '* command sed is installed!'
+else
+    gtk_fatal_error "Your system does not have command sed. Please install command sed package."
+fi
+
+if have_dep grep; then
+    echo '* command grep is installed!'
+else
+    gtk_fatal_error "Your system does not have command grep. Please install command grep package."
 fi
 
 echo "Starting Zenity GUI..."
