@@ -194,13 +194,13 @@ chmod +x "$WORKDIR/winetricks"
 env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks ddr=gdi | zenity --progress --title="Winetricks" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
 env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks settings fontsmooth=rgb | zenity --progress --title="Winetricks" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
 env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks andale arial calibri cambria candara comicsans consolas constantia corbel courier georgia impact times trebuchet verdana webdings corefonts eufonts lucida meiryo tahoma | zenity --progress --title="Winetricks" --text="Winetricks installing fonts..." --pulsate --auto-close
-env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet..." --pulsate --auto-close
+env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.0 and 4.8..." --pulsate --auto-close
 
 gtk_continue_question "Now the script will download and install Logos Bible in your ~/.wine32. You will need to interact with the installer. Do you wish to continue?"
 
 gtk_download "https://downloads.logoscdn.com/LBS8/Installer/8.10.0.0032/Logos-x86.msi" "$WORKDIR"
 
-LC_ALL=C wine msiexec /i $WORKDIR/Logos-x86.msi
+LC_ALL=C wine msiexec /i $WORKDIR/Logos-x86.msi | zenity --progress --title="Logos Bible Installer" --text="Starting the Logos Bible Installer..." --pulsate --auto-close
 
 #------- making the start script -------
 IFS_TMP=$IFS
@@ -233,7 +233,9 @@ if gtk_question "Do you want to clean the temp files?"; then
     clean_all
 fi
 
-gtk_info "Logos Bible Installed. You can run it from the script Logos.sh on your Desktop."
+if gtk_question "Logos Bible Installed!\nYou can run it from the script Logos.sh on your Desktop.\nDo you want to run it now?"; then
+	$HOME/Desktop/Logos.sh
+fi
 
 echo "End!"
 exit 0
