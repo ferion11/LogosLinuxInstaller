@@ -63,7 +63,7 @@ gtk_download() {
     if [ "$2" != "${2%/}" ]; then
         # it has '/' at the end or it is existing directory
         TARGET="$2/${1##*/}"
-        [ -d "$2" ] || mkdir -p "$2" || error "Cannot create $2"
+        [ -d "$2" ] || mkdir -p "$2" || gtk_fatal_error "Cannot create $2"
     elif [ -d "$2" ]; then
         # it's existing directory
         TARGET="$2/${1##*/}"
@@ -71,24 +71,49 @@ gtk_download() {
         # $2 is file
         TARGET="$2"
         # ensure that directory, where the target file will be exists
-        [ -d "${2%/*}" ] || mkdir -p "${2%/*}" || $error "Cannot create directory ${2%/*}"
+        [ -d "${2%/*}" ] || mkdir -p "${2%/*}" || gtk_fatal_error "Cannot create directory ${2%/*}"
     fi
     
+    pipe="/tmp/.pipe__gtk_download__function"
+    rm -rf $pipe
+    mkfifo $pipe
+    
     # download with output to dialog progress bar
-    ( wget -c "$1" -O "$TARGET" -o /dev/stdout | while read I; do
-        I="${I//*.......... .......... .......... .......... .......... /}"
-        I="${I%%%*}"
-        # report changes only
-        if [ "$I" ] && [ "$J" != "$I" ]; then
-            echo "$I"
-            J="$I"
+    wget -c "$1" -O "$TARGET" 2>&1 | while read data; do
+        if [ "`echo $data | grep '^Length:'`" ]; then
+            total_size=`echo $data | grep "^Length:" | sed 's/.*\((.*)\).*/\1/' |  tr -d '()'` 
+            if [ ${#total_size} -ge 10 ]; then total_size="Getting..." ; fi
         fi
-    done ) | zenity --progress --title "Downloading $FILENAME..." --text="Downloading:\n$1\n\ninto:\n$2" --percentage=0 --auto-close --auto-kill
+        
+        if [ "`echo $data | grep '[0-9]*%' `" ];then 
+            percent=`echo $data | grep -o "[0-9]*%" | tr -d '%'` 
+            if [ ${#percent} -ge 3 ]; then percent="0" ; fi
+            
+            current=`echo $data | grep "[0-9]*%" | sed 's/\([0-9BKMG]\+\).*/\1/' ` 
+            if [ ${#current} -ge 10 ]; then current="Getting..." ; fi
+            
+            speed=`echo $data | grep "[0-9]*%" | sed 's/.*\(% [0-9BKMG.]\+\).*/\1/' | tr -d ' %'` 
+            if [ ${#speed} -ge 10 ]; then speed="Getting..." ; fi
+            
+            remain=`echo $data | grep -o "[0-9A-Za-z]*$" ` 
+            if [ ${#remain} -ge 10 ]; then remain="Getting..." ; fi
+        fi
+        
+        # report
+        echo "$percent"
+        echo "#Downloading: $1\ninto: $2\n\n$current of $total_size ($percent%)\nSpeed : $speed/Sec\nEstimated time : $remain"
+        
+    done > $pipe &
+    
+    zenity --progress --title "Downloading $FILENAME..." --text="Downloading: $1\ninto: $2\n" --percentage=0 --auto-close --auto-kill < $pipe
     
     if [ "$?" = -1 ] ; then
         pkill -9 wget
+        rm -rf $pipe
         gtk_fatal_error "The installation is cancelled!"
     fi
+    
+    rm -rf $pipe
 }
 
 #--------------
