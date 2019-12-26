@@ -216,14 +216,14 @@ env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks lucida | zenity --progress --tit
 env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks meiryo | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (20/21) meiryo" --pulsate --auto-close
 env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks tahoma | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (21/21) tahoma" --pulsate --auto-close
 
-env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks dotnet40 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.0..." --pulsate --auto-close
-env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.8 update..." --pulsate --auto-close
+env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks dotnet40 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.0...\nNOTE: Will need interaction" --pulsate --auto-close
+env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.8 update...\nNOTE: Will need interaction" --pulsate --auto-close
 
 gtk_continue_question "Now the script will download and install Logos Bible in your ~/.wine32. You will need to interact with the installer. Do you wish to continue?"
 
 gtk_download "https://downloads.logoscdn.com/LBS8/Installer/8.10.0.0032/Logos-x86.msi" "$WORKDIR"
 
-LC_ALL=C wine msiexec /i $WORKDIR/Logos-x86.msi | zenity --progress --title="Logos Bible Installer" --text="Starting the Logos Bible Installer..." --pulsate --auto-close
+LC_ALL=C wine msiexec /i $WORKDIR/Logos-x86.msi | zenity --progress --title="Logos Bible Installer" --text="Starting the Logos Bible Installer...\nNOTE: Will need interaction" --pulsate --auto-close
 
 #------- making the start script -------
 IFS_TMP=$IFS
@@ -257,7 +257,7 @@ if gtk_question "Do you want to clean the temp files?"; then
     clean_all
 fi
 
-if gtk_question "Logos Bible Installed!\nYou can run it from the script Logos.sh on your Desktop.\nDo you want to run it now?"; then
+if gtk_question "Logos Bible Installed!\nYou can run it from the script Logos.sh on your Desktop.\nDo you want to run it now?\nNOTE: Just close the error on the first execution."; then
 	$HOME/Desktop/Logos.sh
 fi
 
