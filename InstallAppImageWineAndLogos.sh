@@ -232,6 +232,7 @@ LOGOS_EXE=$(find $HOME/.wine32 -name Logos.exe |  grep "Logos\/Logos.exe")
 rm -rf $WORKDIR/Logos.sh
 
 cat > $WORKDIR/Logos.sh << EOF
+#!/bin/bash
 export PATH=$APPDIR_BIN:\$PATH
 # Save IFS
 IFS_TMP=\$IFS
