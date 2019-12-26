@@ -171,7 +171,7 @@ else
     chmod +x "$WORKDIR/$APPIMAGE_NAME"
     
     make_dir "$APPDIR"
-    mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR"
+    mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
 fi
 
 # Making the links (and dir)
@@ -184,17 +184,17 @@ fi
 gtk_continue_question "Now the script will create, if you don't have, one Wine Bottle in ~/.wine32. You can cancel the instalation of Mono, because we will install the MS DotNet. Do you wish to continue?"
 
 export PATH=$APPDIR_BIN:$PATH
-wine wineboot
+wine wineboot | zenity --progress --title="Wineboot" --text="Wine is updating ~/.wine32..." --pulsate --auto-close
 
 gtk_continue_question "Now the script will install the winetricks packages in your ~/.wine32. You will need to interact with some of these installers. Do you wish to continue?"
 
 gtk_download "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" "$WORKDIR"
 chmod +x "$WORKDIR/winetricks"
 
-env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks ddr=gdi
-env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks settings fontsmooth=rgb
-env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks andale arial calibri cambria candara comicsans consolas constantia corbel courier georgia impact times trebuchet verdana webdings corefonts eufonts lucida meiryo tahoma
-env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks dotnet48
+env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks ddr=gdi | zenity --progress --title="Winetricks" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
+env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks settings fontsmooth=rgb | zenity --progress --title="Winetricks" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
+env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks andale arial calibri cambria candara comicsans consolas constantia corbel courier georgia impact times trebuchet verdana webdings corefonts eufonts lucida meiryo tahoma | zenity --progress --title="Winetricks" --text="Winetricks installing fonts..." --pulsate --auto-close
+env WINEPREFIX=~/.wine32 sh $WORKDIR/winetricks dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet..." --pulsate --auto-close
 
 gtk_continue_question "Now the script will download and install Logos Bible in your ~/.wine32. You will need to interact with the installer. Do you wish to continue?"
 
