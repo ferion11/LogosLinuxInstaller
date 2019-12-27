@@ -160,13 +160,26 @@ echo "Starting Zenity GUI..."
 #==========================
 
 #======= Uninstall =============
-uninstall_links_scripts() {
+uninstall_appimage_scripts() {
     rm -rf $HOME/Desktop/Logos.sh
-    #rm -rf 
+    rm -rf $APPDIR_BIN
+}
+
+uninstall_appimage() {
+    rm -rf $APPDIR
+}
+
+uninstall_wine32_bottle() {
+    rm -rf $HOME/.wine32
+}
+
+uninstall_wine32_app() {
+    wine uninstaller
 }
 #==========================
 
 #======= Main =============
+export PATH=$APPDIR_BIN:$PATH
 
 gtk_continue_question "This script will unistall the AppImage of wine and Logos Bible.\nYou can select just the Logos Bible.\nDo you wish to continue?"
 
@@ -181,19 +194,21 @@ resp=$(zenity --width=400 --height=250 \
     FALSE "5- AppImage and directory ~/AppImage")
 
 if [[ $resp = 1* ]]; then
-    echo "All option: TODO!"
+    uninstall_appimage_scripts | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$HOME/Desktop/Logos.sh\n$APPDIR_BIN" --pulsate --auto-close
+    uninstall_appimage | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$APPDIR" --pulsate --auto-close
+    uninstall_wine32_bottle | zenity --progress --title="Uninstall" --text="Uninstaller is removing ~/.wine32..." --pulsate --auto-close
 else
     if [[ $resp = 2* ]]; then
-        echo "Option 2: TODO!"
+        uninstall_wine32_app | zenity --progress --title="Uninstall" --text="Wine is running Uninstaller for ~/.wine32..." --pulsate --auto-close
     else
         if [[ $resp = 3* ]]; then
-            echo "Option 3: TODO!"
+            uninstall_appimage_scripts | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$HOME/Desktop/Logos.sh\n$APPDIR_BIN" --pulsate --auto-close
         else
             if [[ $resp = 4* ]]; then
-                echo "Option 4: TODO!"
+                uninstall_wine32_bottle | zenity --progress --title="Uninstall" --text="Uninstaller is removing ~/.wine32..." --pulsate --auto-close
             else
                 if [[ $resp = 5* ]]; then
-                    echo "Option 5: TODO!"
+                    uninstall_appimage | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$APPDIR" --pulsate --auto-close
                 fi
             fi
         fi
