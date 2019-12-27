@@ -159,7 +159,14 @@ fi
 echo "Starting Zenity GUI..."
 #==========================
 
-#======= Devs =============
+#======= Uninstall =============
+uninstall_links_scripts() {
+    rm -rf $HOME/Desktop/Logos.sh
+    #rm -rf 
+}
+#==========================
+
+#======= Main =============
 
 gtk_continue_question "This script will unistall the AppImage of wine and Logos Bible.\nYou can select just the Logos Bible.\nDo you wish to continue?"
 
@@ -176,7 +183,21 @@ resp=$(zenity --width=400 --height=250 \
 if [[ $resp = 1* ]]; then
     echo "All option: TODO!"
 else
-    echo "other option: TODO!"
+    if [[ $resp = 2* ]]; then
+        echo "Option 2: TODO!"
+    else
+        if [[ $resp = 3* ]]; then
+            echo "Option 3: TODO!"
+        else
+            if [[ $resp = 4* ]]; then
+                echo "Option 4: TODO!"
+            else
+                if [[ $resp = 5* ]]; then
+                    echo "Option 5: TODO!"
+                fi
+            fi
+        fi
+    fi
 fi
 
 echo "End!"

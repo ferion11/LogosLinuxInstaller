@@ -161,7 +161,7 @@ fi
 echo "Starting Zenity GUI..."
 #==========================
 
-#======= Devs =============
+#======= Main =============
 
 gtk_continue_question "This script will download and install the AppImage of wine, configure, and install Logos Bible v$LOGOS_VERSION. Do you wish to continue?"
 
