@@ -192,6 +192,13 @@ gtk_continue_question "Now the script will create, if you don't have, one Wine B
 export PATH=$APPDIR_BIN:$PATH
 wine wineboot | zenity --progress --title="Wineboot" --text="Wine is updating ~/.wine32..." --pulsate --auto-close
 
+cat > $WORKDIR/disable-winemenubuilder.reg << EOF
+[HKEY_CURRENT_USER\Software\Wine\DllOverrides]
+"winemenubuilder.exe"=""
+EOF
+
+wine regedit.exe $WORKDIR/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in ~/.wine32:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
+
 gtk_continue_question "Now the script will install the winetricks packages in your ~/.wine32. You will need to interact with some of these installers. Do you wish to continue?"
 
 gtk_download "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" "$WORKDIR"
