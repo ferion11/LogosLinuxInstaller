@@ -140,6 +140,12 @@ else
     gtk_fatal_error "Your system does not have wget. Please install wget package."
 fi
 
+if have_dep find; then
+    echo '* command find is installed!'
+else
+    gtk_fatal_error "Your system does not have command find. Please install command find package."
+fi
+
 if have_dep sed; then
     echo '* command sed is installed!'
 else
