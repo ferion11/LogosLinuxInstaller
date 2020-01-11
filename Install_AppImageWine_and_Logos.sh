@@ -6,7 +6,8 @@ WORKDIR="/tmp/workingLogosTemp"
 APPDIR="$HOME/AppImage"
 APPDIR_BIN="$APPDIR/bin"
 APPIMAGE_NAME="wine-i386_x86_64-archlinux.AppImage"
-WINEDIR=~/.wine32
+#WINEDIR=~/.wine32
+WINEDIR="$HOME/.wine32"
 
 #======= Aux =============
 die() { echo >&2 "$*"; exit 1; };
