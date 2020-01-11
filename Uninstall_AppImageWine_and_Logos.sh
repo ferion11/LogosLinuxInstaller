@@ -6,6 +6,8 @@ APPIMAGE_NAME="wine-i386_x86_64-archlinux.AppImage"
 WINEDIR="$HOME/.wine32"
 
 #======= Aux =============
+die() { echo >&2 "$*"; exit 1; };
+
 have_dep() {
     command -v "$1" >/dev/null 2>&1
 }
