@@ -158,69 +158,49 @@ else
 	gtk_fatal_error "Your system does not have command grep. Please install command grep package."
 fi
 
+if have_dep md5sum; then
+	echo '* command md5sum is installed!'
+else
+	gtk_fatal_error "Your system does not have command md5sum. Please install command md5sum package."
+fi
+
 echo "Starting Zenity GUI..."
 #==========================
 
-#======= Uninstall =============
-uninstall_appimage_scripts() {
-	rm -rf $HOME/Desktop/Logos.sh
-	rm -rf $APPDIR_BIN
-}
-
-uninstall_appimage() {
-	rm -rf $APPDIR
-}
-
-uninstall_wine32_bottle() {
-	rm -rf $HOME/.wine32
-}
-
-uninstall_wine32_app() {
-	wine uninstaller
-}
+#======= Update =============
 #==========================
 
 #======= Main =============
 export PATH=$APPDIR_BIN:$PATH
 
-gtk_continue_question "This script will unistall the AppImage of wine and Logos Bible.\nYou can select just the Logos Bible.\nDo you wish to continue?"
+gtk_continue_question "This script will update the AppImage of wine for Logos Bible.\nDo you wish to continue?"
 
-resp=$(zenity --width=400 --height=250 \
-	--title="Uninstall Logos Bible" \
-	--text="Select what you want uninstalled.\nYou can select just the Logos Bible or the default \"Uninstall All\" option." \
-	--list --radiolist --column "S" --column "Descrition" \
-	TRUE "1- Uninstall All." \
-	FALSE "2- Logos Bible or other Windows Application." \
-	FALSE "3- AppImage Links and Desktop script" \
-	FALSE "4- Wine Bottle in ~/.wine32" \
-	FALSE "5- AppImage and directory ~/AppImage")
+make_dir "$WORKDIR"
 
-if [[ $resp = 1* ]]; then
-	uninstall_appimage_scripts | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$HOME/Desktop/Logos.sh\n$APPDIR_BIN" --pulsate --auto-close
-	uninstall_appimage | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$APPDIR" --pulsate --auto-close
-	uninstall_wine32_bottle | zenity --progress --title="Uninstall" --text="Uninstaller is removing ~/.wine32..." --pulsate --auto-close
-	gtk_info "Operation complete!"
-else
-	if [[ $resp = 2* ]]; then
-		uninstall_wine32_app | zenity --progress --title="Uninstall" --text="Wine is running Uninstaller for ~/.wine32..." --pulsate --auto-close
-		gtk_info "Operation complete!"
-	else
-		if [[ $resp = 3* ]]; then
-			uninstall_appimage_scripts | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$HOME/Desktop/Logos.sh\n$APPDIR_BIN" --pulsate --auto-close
-			gtk_info "Operation complete!"
-		else
-			if [[ $resp = 4* ]]; then
-				uninstall_wine32_bottle | zenity --progress --title="Uninstall" --text="Uninstaller is removing ~/.wine32..." --pulsate --auto-close
-				gtk_info "Operation complete!"
-			else
-				if [[ $resp = 5* ]]; then
-					uninstall_appimage | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$APPDIR" --pulsate --auto-close
-					gtk_info "Operation complete!"
-				fi
-			fi
-		fi
-	fi
+# Geting the new the AppImage zsync and compare the md5sum:
+gtk_download "https://github.com/ferion11/Wine_Appimage/releases/download/continuous/wine-i386_x86_64-archlinux.AppImage.zsync" "$WORKDIR"
+
+MD5SUM_OLD=$(md5sum "$APPDIR/$APPIMAGE_NAME.zsync" | cut -d " " -f1)
+MD5SUM_NEW=$(md5sum "$WORKDIR/$APPIMAGE_NAME.zsync" | cut -d " " -f1)
+
+if [ "$MD5SUM_OLD" = "$MD5SUM_NEW" ]; then
+	gtk_info "You already have the latest version of wine's AppImage."
+	clean_all
+	echo "End!"
+	exit 0
 fi
+
+# Geting the AppImage:
+gtk_download "https://github.com/ferion11/Wine_Appimage/releases/download/continuous/wine-i386_x86_64-archlinux.AppImage" "$WORKDIR"
+chmod +x "$WORKDIR/$APPIMAGE_NAME"
+
+make_dir "$APPDIR"
+
+rm -rf "$APPDIR/$APPIMAGE_NAME"
+mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
+
+rm -rf "$APPDIR/$APPIMAGE_NAME.zsync"
+mv "$WORKDIR/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close
 
 echo "End!"
 exit 0

@@ -161,66 +161,31 @@ fi
 echo "Starting Zenity GUI..."
 #==========================
 
-#======= Uninstall =============
-uninstall_appimage_scripts() {
-	rm -rf $HOME/Desktop/Logos.sh
-	rm -rf $APPDIR_BIN
-}
-
-uninstall_appimage() {
-	rm -rf $APPDIR
-}
-
-uninstall_wine32_bottle() {
-	rm -rf $HOME/.wine32
-}
-
-uninstall_wine32_app() {
-	wine uninstaller
-}
-#==========================
-
 #======= Main =============
 export PATH=$APPDIR_BIN:$PATH
 
-gtk_continue_question "This script will unistall the AppImage of wine and Logos Bible.\nYou can select just the Logos Bible.\nDo you wish to continue?"
+gtk_continue_question "This script will run Logos Bible Indexing.\nAnd will force Logos Bible to close first, then save your work first.\nDo you wish to continue?"
 
-resp=$(zenity --width=400 --height=250 \
-	--title="Uninstall Logos Bible" \
-	--text="Select what you want uninstalled.\nYou can select just the Logos Bible or the default \"Uninstall All\" option." \
-	--list --radiolist --column "S" --column "Descrition" \
-	TRUE "1- Uninstall All." \
-	FALSE "2- Logos Bible or other Windows Application." \
-	FALSE "3- AppImage Links and Desktop script" \
-	FALSE "4- Wine Bottle in ~/.wine32" \
-	FALSE "5- AppImage and directory ~/AppImage")
+# kill first
+ps -xopid,cmd | grep LogosIndexer.exe | grep -v grep | grep -v AppRun | cut -d " " -f2 | xargs kill -9
+sleep 7 | zenity --progress --title="Closing LogosIndexer.exe" --text="Closing LogosIndexer.exe..." --pulsate --auto-close
+ps -xopid,cmd | grep Logos.exe | grep -v grep | grep -v AppRun | cut -d " " -f2 | xargs kill -9
 
-if [[ $resp = 1* ]]; then
-	uninstall_appimage_scripts | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$HOME/Desktop/Logos.sh\n$APPDIR_BIN" --pulsate --auto-close
-	uninstall_appimage | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$APPDIR" --pulsate --auto-close
-	uninstall_wine32_bottle | zenity --progress --title="Uninstall" --text="Uninstaller is removing ~/.wine32..." --pulsate --auto-close
-	gtk_info "Operation complete!"
-else
-	if [[ $resp = 2* ]]; then
-		uninstall_wine32_app | zenity --progress --title="Uninstall" --text="Wine is running Uninstaller for ~/.wine32..." --pulsate --auto-close
-		gtk_info "Operation complete!"
-	else
-		if [[ $resp = 3* ]]; then
-			uninstall_appimage_scripts | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$HOME/Desktop/Logos.sh\n$APPDIR_BIN" --pulsate --auto-close
-			gtk_info "Operation complete!"
-		else
-			if [[ $resp = 4* ]]; then
-				uninstall_wine32_bottle | zenity --progress --title="Uninstall" --text="Uninstaller is removing ~/.wine32..." --pulsate --auto-close
-				gtk_info "Operation complete!"
-			else
-				if [[ $resp = 5* ]]; then
-					uninstall_appimage | zenity --progress --title="Uninstall" --text="Uninstaller is removing...:\n$APPDIR" --pulsate --auto-close
-					gtk_info "Operation complete!"
-				fi
-			fi
-		fi
-	fi
-fi
+make_dir "$WORKDIR"
+
+gtk_download "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" "$WORKDIR"
+chmod +x "$WORKDIR/winetricks"
+
+# TODO: rever
+env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks winxp | zenity --progress --title="Winetricks" --text="Winetricks setting winxp..." --pulsate --auto-close
+
+LOGOS_INDEXER_EXE=$(find $HOME/.wine32 -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
+
+LC_ALL=C wine $LOGOS_INDEXER_EXE | zenity --progress --title="Logos Bible Indexing..." --text="The Logos Bible is Indexing...\nThis can take a while." --pulsate --auto-close
+
+env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks win7 | zenity --progress --title="Winetricks" --text="Winetricks setting win7..." --pulsate --auto-close
+
+gtk_info "The Logos Bible Indexing is over. You can start Logos Bible at any time."
 
 echo "End!"
 exit 0
