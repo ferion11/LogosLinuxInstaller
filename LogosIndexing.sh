@@ -48,7 +48,7 @@ gtk_question() {
 }
 gtk_continue_question() {
 	if ! gtk_question "$@"; then
-		gtk_fatal_error "Uninstall process cancelled!"
+		gtk_fatal_error "Logos Bible Indexing process cancelled!"
 	fi
 }
 
@@ -175,23 +175,38 @@ then
 fi
 
 # kill first
-ps -xopid,cmd | grep LogosIndexer.exe | grep -v grep | grep -v AppRun | cut -d " " -f2 | xargs kill -9
-sleep 7 | zenity --progress --title="Closing LogosIndexer.exe" --text="Closing LogosIndexer.exe..." --pulsate --auto-close
-ps -xopid,cmd | grep Logos.exe | grep -v grep | grep -v AppRun | cut -d " " -f2 | xargs kill -9
+PIDS_TO_KILL=$(ps -xopid,cmd | grep LogosIndexer.exe | grep -v grep | grep -v AppRun | cut -d " " -f1 | xargs echo)
+if [ -n "$PIDS_TO_KILL" ]; then
+	kill -9 $PIDS_TO_KILL
+	sleep 7 | zenity --progress --title="Closing LogosIndexer.exe" --text="Closing LogosIndexer.exe..." --pulsate --auto-close
+fi
+
+PIDS_TO_KILL=$(ps -xopid,cmd | grep Logos.exe | grep -v grep | grep -v AppRun | cut -d " " -f1 | xargs echo)
+if [ -n "$PIDS_TO_KILL" ]; then
+	kill -9 $PIDS_TO_KILL
+fi
 
 make_dir "$WORKDIR"
 
 gtk_download "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" "$WORKDIR"
 chmod +x "$WORKDIR/winetricks"
 
-
+# winxp
 env WINEPREFIX=$WINE_BOTTLE sh $WORKDIR/winetricks winxp | zenity --progress --title="Winetricks" --text="Winetricks setting winxp..." --pulsate --auto-close
 
+#------- find and start indexing -------
+IFS_TMP=$IFS
+IFS=$'\n'
 LOGOS_INDEXER_EXE=$(find $WINE_BOTTLE -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
 
 LC_ALL=C wine $LOGOS_INDEXER_EXE | zenity --progress --title="Logos Bible Indexing..." --text="The Logos Bible is Indexing...\nThis can take a while." --pulsate --auto-close
+IFS=$IFS_TMP
+#------------------------------
 
+#win7
 env WINEPREFIX=$WINE_BOTTLE sh $WORKDIR/winetricks win7 | zenity --progress --title="Winetricks" --text="Winetricks setting win7..." --pulsate --auto-close
+
+clean_all
 
 gtk_info "The Logos Bible Indexing is over. You can start Logos Bible at any time."
 

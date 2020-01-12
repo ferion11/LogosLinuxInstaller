@@ -48,7 +48,7 @@ gtk_question() {
 }
 gtk_continue_question() {
 	if ! gtk_question "$@"; then
-		gtk_fatal_error "Uninstall process cancelled!"
+		gtk_fatal_error "Update process cancelled!"
 	fi
 }
 
