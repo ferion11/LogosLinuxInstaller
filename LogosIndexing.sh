@@ -163,8 +163,16 @@ echo "Starting Zenity GUI..."
 
 #======= Main =============
 export PATH=$APPDIR_BIN:$PATH
+WINE_BOTTLE="$WINEDIR"
 
 gtk_continue_question "This script will run Logos Bible Indexing.\nAnd will force Logos Bible to close first, then save your work first.\nDo you wish to continue?"
+
+if [[ ! -d "$WINE_BOTTLE" ]]
+then
+    gtk_continue_question "The $WINE_BOTTLE don't exists on your filesystem. Do you want to do LogosIndex in another installation?"
+    
+    WINE_BOTTLE=$(zenity --list --title "Wine bottle choose" --text="Choose wine bottle installation:" --column="Wine Installations" $(find $HOME -mindepth 1 -maxdepth 1 -type d | grep wine))
+fi
 
 # kill first
 ps -xopid,cmd | grep LogosIndexer.exe | grep -v grep | grep -v AppRun | cut -d " " -f2 | xargs kill -9
@@ -176,14 +184,14 @@ make_dir "$WORKDIR"
 gtk_download "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" "$WORKDIR"
 chmod +x "$WORKDIR/winetricks"
 
-# TODO: rever
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks winxp | zenity --progress --title="Winetricks" --text="Winetricks setting winxp..." --pulsate --auto-close
 
-LOGOS_INDEXER_EXE=$(find $HOME/.wine32 -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
+env WINEPREFIX=$WINE_BOTTLE sh $WORKDIR/winetricks winxp | zenity --progress --title="Winetricks" --text="Winetricks setting winxp..." --pulsate --auto-close
+
+LOGOS_INDEXER_EXE=$(find $WINE_BOTTLE -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
 
 LC_ALL=C wine $LOGOS_INDEXER_EXE | zenity --progress --title="Logos Bible Indexing..." --text="The Logos Bible is Indexing...\nThis can take a while." --pulsate --auto-close
 
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks win7 | zenity --progress --title="Winetricks" --text="Winetricks setting win7..." --pulsate --auto-close
+env WINEPREFIX=$WINE_BOTTLE sh $WORKDIR/winetricks win7 | zenity --progress --title="Winetricks" --text="Winetricks setting win7..." --pulsate --auto-close
 
 gtk_info "The Logos Bible Indexing is over. You can start Logos Bible at any time."
 

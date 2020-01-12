@@ -202,6 +202,9 @@ mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR" | zenity --progress --title="Moving..." -
 rm -rf "$APPDIR/$APPIMAGE_NAME.zsync"
 mv "$WORKDIR/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close
 
+wine wineboot | zenity --progress --title="Wineboot" --text="Wine is updating $WINEDIR..." --pulsate --auto-close
+gtk_info "Update complete!"
+
 echo "End!"
 exit 0
 #==========================
