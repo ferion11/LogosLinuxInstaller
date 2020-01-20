@@ -1,7 +1,7 @@
 #!/bin/bash
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 LOGOS_MVERSION="LBS8"
-LOGOS_VERSION="8.10.0.0032"
+LOGOS_VERSION="8.10.0.0034"
 WORKDIR="/tmp/workingLogosTemp"
 APPDIR="$HOME/AppImage"
 APPDIR_BIN="$APPDIR/bin"
@@ -241,7 +241,7 @@ env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks dotnet48 | zenity --progress --ti
 
 gtk_continue_question "Now the script will download and install Logos Bible in your $WINEDIR. You will need to interact with the installer. Do you wish to continue?"
 
-gtk_download "https://downloads.logoscdn.com/$LOGOS_MVERSION/$LOGOS_VERSION/Logos-x86.msi" "$WORKDIR"
+gtk_download "https://downloads.logoscdn.com/$LOGOS_MVERSION/Installer/$LOGOS_VERSION/Logos-x86.msi" "$WORKDIR"
 
 LC_ALL=C wine msiexec /i $WORKDIR/Logos-x86.msi | zenity --progress --title="Logos Bible Installer" --text="Starting the Logos Bible Installer...\nNOTE: Will need interaction" --pulsate --auto-close
 
