@@ -200,6 +200,9 @@ IFS=$'\n'
 LOGOS_INDEXER_EXE=$(find $WINE_BOTTLE -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
 
 if [ -z "$LOGOS_INDEXER_EXE" ]; then
+	#win7
+	env WINEPREFIX=$WINE_BOTTLE sh $WORKDIR/winetricks win7 | zenity --progress --title="Winetricks" --text="Winetricks setting win7..." --pulsate --auto-close
+	clean_all
 	gtk_fatal_error "LogosIndexer.exe can't be found in $WINE_BOTTLE !!!"
 fi
 
