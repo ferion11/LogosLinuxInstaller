@@ -199,6 +199,10 @@ IFS_TMP=$IFS
 IFS=$'\n'
 LOGOS_INDEXER_EXE=$(find $WINE_BOTTLE -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
 
+if [ -z "$LOGOS_INDEXER_EXE" ]; then
+	gtk_fatal_error "LogosIndexer.exe can't be found in $WINE_BOTTLE !!!"
+fi
+
 LC_ALL=C wine $LOGOS_INDEXER_EXE | zenity --progress --title="Logos Bible Indexing..." --text="The Logos Bible is Indexing...\nThis can take a while." --pulsate --auto-close
 IFS=$IFS_TMP
 #------------------------------
