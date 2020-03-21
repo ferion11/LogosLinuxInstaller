@@ -1,7 +1,7 @@
 #!/bin/bash
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 LOGOS_MVERSION="LBS8"
-LOGOS_VERSION="8.11.0.0017"
+LOGOS_VERSION="8.12.0.0017"
 WORKDIR="/tmp/workingLogosTemp"
 APPDIR="$HOME/AppImage"
 APPDIR_BIN="$APPDIR/bin"
