@@ -24,13 +24,13 @@ clean_all() {
 
 #zenity------
 gtk_info() {
-	zenity --info --width=300 --height=200 --text="$@" --title='Information'
+	zenity --info --width=300 --height=200 --text="$*" --title='Information'
 }
 gtk_warn() {
-	zenity --warning --width=300 --height=200 --text="$@" --title='Warning!'
+	zenity --warning --width=300 --height=200 --text="$*" --title='Warning!'
 }
 gtk_error() {
-	zenity --error --width=300 --height=200 --text="$@" --title='Error!'
+	zenity --error --width=300 --height=200 --text="$*" --title='Error!'
 }
 gtk_fatal_error() {
 	gtk_error "$@"
