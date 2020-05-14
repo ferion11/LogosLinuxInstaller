@@ -196,7 +196,7 @@ chmod +x "$WORKDIR/$APPIMAGE_NAME"
 
 make_dir "$APPDIR"
 
-rm -rf "$APPDIR/$APPIMAGE_NAME"
+rm -rf "${APPDIR:?}/${APPIMAGE_NAME}"
 mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
 
 rm -rf "$APPDIR/$APPIMAGE_NAME.zsync"
