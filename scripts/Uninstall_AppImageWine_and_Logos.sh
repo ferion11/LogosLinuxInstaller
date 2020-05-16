@@ -101,6 +101,7 @@ gtk_download() {
 		
 		# report
 		echo "$percent"
+		# shellcheck disable=SC2028
 		echo "#Downloading: $1\ninto: $2\n\n$current of $total_size ($percent%)\nSpeed : $speed/Sec\nEstimated time : $remain"
 		
 	done > $pipe &
