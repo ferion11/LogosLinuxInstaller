@@ -84,22 +84,22 @@ gtk_download() {
 	
 	# download with output to dialog progress bar
 	wget -c "$1" -O "$TARGET" 2>&1 | while read -r data; do
-		if [ "`echo "$data" | grep '^Length:'`" ]; then
-			total_size=`echo "$data" | grep "^Length:" | sed 's/.*\((.*)\).*/\1/' |  tr -d '()'`
+		if [ "$(echo "$data" | grep '^Length:')" ]; then
+			total_size=$(echo "$data" | grep "^Length:" | sed 's/.*\((.*)\).*/\1/' |  tr -d '()')
 			if [ ${#total_size} -ge 10 ]; then total_size="Getting..." ; fi
 		fi
-	
-		if [ "`echo "$data" | grep '[0-9]*%' `" ];then
-			percent=`echo "$data" | grep -o "[0-9]*%" | tr -d '%'`
+		
+		if [ "$(echo "$data" | grep '[0-9]*%' )" ];then
+			percent=$(echo "$data" | grep -o "[0-9]*%" | tr -d '%')
 			if [ ${#percent} -ge 3 ]; then percent="0" ; fi
 			
-			current=`echo "$data" | grep "[0-9]*%" | sed 's/\([0-9BKMG]\+\).*/\1/' `
+			current=$(echo "$data" | grep "[0-9]*%" | sed 's/\([0-9BKMG]\+\).*/\1/' )
 			if [ ${#current} -ge 10 ]; then current="Getting..." ; fi
 			
-			speed=`echo "$data" | grep "[0-9]*%" | sed 's/.*\(% [0-9BKMG.]\+\).*/\1/' | tr -d ' %'`
+			speed=$(echo "$data" | grep "[0-9]*%" | sed 's/.*\(% [0-9BKMG.]\+\).*/\1/' | tr -d ' %')
 			if [ ${#speed} -ge 10 ]; then speed="Getting..." ; fi
 			
-			remain=`echo "$data" | grep -o "[0-9A-Za-z]*$" `
+			remain=$(echo "$data" | grep -o "[0-9A-Za-z]*$" )
 			if [ ${#remain} -ge 10 ]; then remain="Getting..." ; fi
 		fi
 		
