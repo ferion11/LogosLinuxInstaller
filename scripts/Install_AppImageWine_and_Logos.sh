@@ -83,7 +83,7 @@ gtk_download() {
 	mkfifo $pipe
 	
 	# download with output to dialog progress bar
-	wget -c "$1" -O "$TARGET" 2>&1 | while read data; do
+	wget -c "$1" -O "$TARGET" 2>&1 | while read -r data; do
 		if [ "`echo $data | grep '^Length:'`" ]; then
 			total_size=`echo $data | grep "^Length:" | sed 's/.*\((.*)\).*/\1/' |  tr -d '()'`
 			if [ ${#total_size} -ge 10 ]; then total_size="Getting..." ; fi
