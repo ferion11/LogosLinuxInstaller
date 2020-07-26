@@ -259,7 +259,7 @@ gtk_continue_question "Now the script will download and install Logos Bible in y
 
 gtk_download "https://downloads.logoscdn.com/$LOGOS_MVERSION/Installer/$LOGOS_VERSION/Logos-x86.msi" "$WORKDIR"
 
-LC_ALL=C wine msiexec /i $WORKDIR/Logos-x86.msi | zenity --progress --title="Logos Bible Installer" --text="Starting the Logos Bible Installer...\nNOTE: Will need interaction" --pulsate --auto-close
+wine msiexec /i $WORKDIR/Logos-x86.msi | zenity --progress --title="Logos Bible Installer" --text="Starting the Logos Bible Installer...\nNOTE: Will need interaction" --pulsate --auto-close
 
 #------- making the start script -------
 IFS_TMP=$IFS
@@ -274,7 +274,7 @@ export PATH=$APPDIR_BIN:\$PATH
 IFS_TMP=\$IFS
 IFS=$'\n'
 
-LC_ALL=C wine "$LOGOS_EXE"
+wine "$LOGOS_EXE"
 
 # restore IFS
 IFS=\$IFS_TMP
