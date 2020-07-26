@@ -201,11 +201,26 @@ export PATH=$APPDIR_BIN:$PATH
 wine wineboot | zenity --progress --title="Wineboot" --text="Wine is updating $WINEDIR..." --pulsate --auto-close
 
 cat > $WORKDIR/disable-winemenubuilder.reg << EOF
+REGEDIT4
+
 [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
 "winemenubuilder.exe"=""
+
+
+EOF
+
+cat > $WORKDIR/renderer_gdi.reg << EOF
+REGEDIT4
+
+[HKEY_CURRENT_USER\Software\Wine\Direct3D]
+"DirectDrawRenderer"="gdi"
+"renderer"="gdi"
+
+
 EOF
 
 wine regedit.exe $WORKDIR/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEDIR:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
+wine regedit.exe $WORKDIR/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer keys" --pulsate --auto-close
 
 gtk_continue_question "Now the script will install the winetricks packages in your $WINEDIR. You will need to interact with some of these installers. Do you wish to continue?"
 
