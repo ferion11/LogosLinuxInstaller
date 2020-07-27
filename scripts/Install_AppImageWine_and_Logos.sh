@@ -1,14 +1,14 @@
 #!/bin/bash
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
-LOGOS_MVERSION=$(echo $LOGOS_URL | cut -d/ -f4)
+#LOGOS_MVERSION=$(echo $LOGOS_URL | cut -d/ -f4)
 LOGOS_VERSION=$(echo $LOGOS_URL | cut -d/ -f6)
 WORKDIR="/tmp/workingLogosTemp"
 APPDIR="$HOME/AppImage"
 APPDIR_BIN="$APPDIR/bin"
 APPIMAGE_NAME="wine-i386_x86_64-archlinux.AppImage"
-#WINEDIR=~/.wine32
-WINEDIR="$HOME/.wine32"
+
+export WINEPREFIX="$HOME/.wine32"
 
 #======= Aux =============
 die() { echo >&2 "$*"; exit 1; };
@@ -209,10 +209,10 @@ if ! [ -d "$APPDIR_BIN" ] ; then
 	ln -s "$FILE" "$APPDIR_BIN/wineserver"
 fi
 
-gtk_continue_question "Now the script will create, if you don't have, one Wine Bottle in $WINEDIR. You can cancel the instalation of Mono, because we will install the MS DotNet. Do you wish to continue?"
+gtk_continue_question "Now the script will create, if you don't have, one Wine Bottle in $WINEPREFIX. You can cancel the instalation of Mono, because we will install the MS DotNet. Do you wish to continue?"
 
 export PATH=$APPDIR_BIN:$PATH
-wine wineboot | zenity --progress --title="Wineboot" --text="Wine is updating $WINEDIR..." --pulsate --auto-close
+wine wineboot | zenity --progress --title="Wineboot" --text="Wine is updating $WINEPREFIX..." --pulsate --auto-close
 
 cat > $WORKDIR/disable-winemenubuilder.reg << EOF
 REGEDIT4
@@ -233,43 +233,43 @@ REGEDIT4
 
 EOF
 
-wine regedit.exe $WORKDIR/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEDIR:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
+wine regedit.exe $WORKDIR/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
 wine regedit.exe $WORKDIR/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer keys" --pulsate --auto-close
 
-gtk_continue_question "Now the script will install the winetricks packages in your $WINEDIR. You will need to interact with some of these installers. Do you wish to continue?"
+gtk_continue_question "Now the script will install the winetricks packages in your $WINEPREFIX. You will need to interact with some of these installers. Do you wish to continue?"
 
 gtk_download "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" "$WORKDIR"
 chmod +x "$WORKDIR/winetricks"
 
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks ddr=gdi | zenity --progress --title="Winetricks" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks settings fontsmooth=rgb | zenity --progress --title="Winetricks" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
+$WORKDIR/winetricks ddr=gdi | zenity --progress --title="Winetricks" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
+$WORKDIR/winetricks settings fontsmooth=rgb | zenity --progress --title="Winetricks" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
 
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks andale | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (01/21) andale" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks arial | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (02/21) arial" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks calibri | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (03/21) calibri" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks cambria | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (04/21) cambria" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks candara | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (05/21) candara" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks comicsans | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (06/21) comicsans" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks consolas | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (07/21) consolas" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks constantia | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (08/21) constantia" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks corbel | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (09/21) corbel" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks courier | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (10/21) courier" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks georgia | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (11/21) georgia" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks impact | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (12/21) impact" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks times | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (13/21) times" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks trebuchet | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (14/21) trebuchet" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks verdana | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (15/21) verdana" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks webdings | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (16/21) webdings" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks corefonts | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (17/21) corefonts" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks eufonts | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (18/21) eufonts" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks lucida | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (19/21) lucida" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks meiryo | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (20/21) meiryo" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks tahoma | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (21/21) tahoma" --pulsate --auto-close
+$WORKDIR/winetricks andale | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (01/21) andale" --pulsate --auto-close
+$WORKDIR/winetricks arial | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (02/21) arial" --pulsate --auto-close
+$WORKDIR/winetricks calibri | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (03/21) calibri" --pulsate --auto-close
+$WORKDIR/winetricks cambria | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (04/21) cambria" --pulsate --auto-close
+$WORKDIR/winetricks candara | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (05/21) candara" --pulsate --auto-close
+$WORKDIR/winetricks comicsans | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (06/21) comicsans" --pulsate --auto-close
+$WORKDIR/winetricks consolas | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (07/21) consolas" --pulsate --auto-close
+$WORKDIR/winetricks constantia | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (08/21) constantia" --pulsate --auto-close
+$WORKDIR/winetricks corbel | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (09/21) corbel" --pulsate --auto-close
+$WORKDIR/winetricks courier | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (10/21) courier" --pulsate --auto-close
+$WORKDIR/winetricks georgia | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (11/21) georgia" --pulsate --auto-close
+$WORKDIR/winetricks impact | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (12/21) impact" --pulsate --auto-close
+$WORKDIR/winetricks times | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (13/21) times" --pulsate --auto-close
+$WORKDIR/winetricks trebuchet | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (14/21) trebuchet" --pulsate --auto-close
+$WORKDIR/winetricks verdana | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (15/21) verdana" --pulsate --auto-close
+$WORKDIR/winetricks webdings | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (16/21) webdings" --pulsate --auto-close
+$WORKDIR/winetricks corefonts | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (17/21) corefonts" --pulsate --auto-close
+$WORKDIR/winetricks eufonts | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (18/21) eufonts" --pulsate --auto-close
+$WORKDIR/winetricks lucida | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (19/21) lucida" --pulsate --auto-close
+$WORKDIR/winetricks meiryo | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (20/21) meiryo" --pulsate --auto-close
+$WORKDIR/winetricks tahoma | zenity --progress --title="Winetricks" --text="Winetricks installing fonts... (21/21) tahoma" --pulsate --auto-close
 
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks dotnet40 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.0...\nNOTE: Will need interaction" --pulsate --auto-close
-env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.8 update...\nNOTE: Will need interaction" --pulsate --auto-close
+$WORKDIR/winetricks dotnet40 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.0...\nNOTE: Will need interaction" --pulsate --auto-close
+$WORKDIR/winetricks dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.8 update...\nNOTE: Will need interaction" --pulsate --auto-close
 
-gtk_continue_question "Now the script will download and install Logos Bible in your $WINEDIR. You will need to interact with the installer. Do you wish to continue?"
+gtk_continue_question "Now the script will download and install Logos Bible in your $WINEPREFIX. You will need to interact with the installer. Do you wish to continue?"
 
 gtk_download "${LOGOS_URL}" "$WORKDIR"
 
@@ -301,7 +301,7 @@ IFS=$IFS_TMP
 mkdir -p "$HOME/Desktop"
 mv $WORKDIR/Logos.sh $HOME/Desktop
 
-#env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks winxp
+#$WORKDIR/winetricks winxp
 
 if gtk_question "Do you want to clean the temp files?"; then
 	clean_all
