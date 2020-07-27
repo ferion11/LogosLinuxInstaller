@@ -137,6 +137,10 @@ gtk_download() {
 #======= Basic Deps =============
 echo 'Searching for dependencies:'
 
+if [ "$(id -u)" = 0 ]; then
+	echo "* Running Wine/winetricks as root is highly discouraged. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+fi
+
 if [ -z "$DISPLAY" ]; then
 	echo "* You want to run without X, but it don't work."
 	exit 1
