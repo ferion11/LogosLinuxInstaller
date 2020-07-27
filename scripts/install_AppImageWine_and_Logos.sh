@@ -311,17 +311,16 @@ EOF
 wine regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
 wine regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close
 
-gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. You will need to interact with some of these installers. Do you wish to continue?"
+gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
 
 gtk_download "${WINETRICKS_URL}" "$WORKDIR"
 chmod +x "$WORKDIR/winetricks"
 
-$WORKDIR/winetricks corefonts | zenity --progress --title="Winetricks" --text="Winetricks installing corefonts" --pulsate --auto-close
-#$WORKDIR/winetricks ddr=gdi | zenity --progress --title="Winetricks" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
-$WORKDIR/winetricks settings fontsmooth=rgb | zenity --progress --title="Winetricks" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
+$WORKDIR/winetricks -q corefonts | zenity --progress --title="Winetricks" --text="Winetricks installing corefonts" --pulsate --auto-close
+#$WORKDIR/winetricks -q ddr=gdi | zenity --progress --title="Winetricks" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
+$WORKDIR/winetricks -q settings fontsmooth=rgb | zenity --progress --title="Winetricks" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
 
-$WORKDIR/winetricks dotnet40 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.0...\nNOTE: Will need interaction" --pulsate --auto-close
-$WORKDIR/winetricks dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet 4.8 update...\nNOTE: Will need interaction" --pulsate --auto-close
+$WORKDIR/winetricks -q dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
