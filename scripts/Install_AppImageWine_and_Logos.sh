@@ -1,5 +1,6 @@
 #!/bin/bash
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
+LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
 LOGOS_MVERSION="LBS8"
 LOGOS_VERSION="8.15.0.0004"
 WORKDIR="/tmp/workingLogosTemp"
@@ -60,10 +61,11 @@ gtk_download() {
 	# $1	what to download
 	# $2	where into
 	# NOTE: here must be limitation to handle it easily. $2 can be dir, if it already exists or if it ends with '/'
-	
+
 	URI="$1"
-	FILENAME="${URI##*/}"                   # extract last field of URI as filename
-	
+	# extract last field of URI as filename:
+	FILENAME="${URI##*/}"
+
 	if [ "$2" != "${2%/}" ]; then
 		# it has '/' at the end or it is existing directory
 		TARGET="$2/${1##*/}"
@@ -77,47 +79,59 @@ gtk_download() {
 		# ensure that directory, where the target file will be exists
 		[ -d "${2%/*}" ] || mkdir -p "${2%/*}" || gtk_fatal_error "Cannot create directory ${2%/*}"
 	fi
-	
+
+	echo "* Downloading:"
+	echo "$1"
+	echo "into:"
+	echo "$2"
+
 	pipe="/tmp/.pipe__gtk_download__function"
 	rm -rf $pipe
 	mkfifo $pipe
-	
+
 	# download with output to dialog progress bar
+	total_size="Starting..."
+	percent="0"
+	current="Starting..."
+	speed="Starting..."
+	remain="Starting..."
 	wget -c "$1" -O "$TARGET" 2>&1 | while read -r data; do
-		if [ "$(echo "$data" | grep '^Length:')" ]; then
-			total_size=$(echo "$data" | grep "^Length:" | sed 's/.*\((.*)\).*/\1/' |  tr -d '()')
-			if [ ${#total_size} -ge 10 ]; then total_size="Getting..." ; fi
+		#if [ "$(echo "$data" | grep '^Length:')" ]; then
+		if echo "$data" | grep -q '^Length:' ; then
+			result=$(echo "$data" | grep "^Length:" | sed 's/.*\((.*)\).*/\1/' |  tr -d '()')
+			if [ ${#result} -le 10 ]; then total_size=${result} ; fi
 		fi
-		
-		if [ "$(echo "$data" | grep '[0-9]*%' )" ];then
-			percent=$(echo "$data" | grep -o "[0-9]*%" | tr -d '%')
-			if [ ${#percent} -ge 3 ]; then percent="0" ; fi
-			
-			current=$(echo "$data" | grep "[0-9]*%" | sed 's/\([0-9BKMG]\+\).*/\1/' )
-			if [ ${#current} -ge 10 ]; then current="Getting..." ; fi
-			
-			speed=$(echo "$data" | grep "[0-9]*%" | sed 's/.*\(% [0-9BKMG.]\+\).*/\1/' | tr -d ' %')
-			if [ ${#speed} -ge 10 ]; then speed="Getting..." ; fi
-			
-			remain=$(echo "$data" | grep -o "[0-9A-Za-z]*$" )
-			if [ ${#remain} -ge 10 ]; then remain="Getting..." ; fi
+
+		#if [ "$(echo "$data" | grep '[0-9]*%' )" ];then
+		if echo "$data" | grep -q '[0-9]*%' ;then
+			result=$(echo "$data" | grep -o "[0-9]*%" | tr -d '%')
+			if [ ${#result} -le 3 ]; then percent=${result} ; fi
+
+			result=$(echo "$data" | grep "[0-9]*%" | sed 's/\([0-9BKMG]\+\).*/\1/' )
+			if [ ${#result} -le 10 ]; then current=${result} ; fi
+
+			result=$(echo "$data" | grep "[0-9]*%" | sed 's/.*\(% [0-9BKMG.]\+\).*/\1/' | tr -d ' %')
+			if [ ${#result} -le 10 ]; then speed=${result} ; fi
+
+			result=$(echo "$data" | grep -o "[0-9A-Za-z]*$" )
+			if [ ${#result} -le 10 ]; then remain=${result} ; fi
 		fi
-		
+
 		# report
 		echo "$percent"
 		# shellcheck disable=SC2028
-		echo "#Downloading: $1\ninto: $2\n\n$current of $total_size ($percent%)\nSpeed : $speed/Sec\nEstimated time : $remain"
-		
+		echo "#Downloading: $FILENAME\ninto: $2\n\n$current of $total_size ($percent%)\nSpeed : $speed/Sec\nEstimated time : $remain"
 	done > $pipe &
-	
-	zenity --progress --title "Downloading $FILENAME..." --text="Downloading: $1\ninto: $2\n" --percentage=0 --auto-close --auto-kill < $pipe
-	
+
+	zenity --progress --title "Downloading $FILENAME..." --text="Downloading: $FILENAME\ninto: $2\n" --percentage=0 --auto-close --auto-kill < $pipe
+
 	if [ "$?" = -1 ] ; then
-		pkill -9 wget
+		#pkill -15 wget
+		killall -15 wget
 		rm -rf $pipe
 		gtk_fatal_error "The installation is cancelled!"
 	fi
-	
+
 	rm -rf $pipe
 }
 
