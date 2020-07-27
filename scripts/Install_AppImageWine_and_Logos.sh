@@ -17,10 +17,6 @@ have_dep() {
 	command -v "$1" >/dev/null 2>&1
 }
 
-make_dir() {
-	[ ! -d "$1" ] && mkdir "$1"
-}
-
 clean_all() {
 	echo "Cleaning all temp files..."
 	rm -rf "$WORKDIR"
@@ -184,7 +180,7 @@ echo "Starting Zenity GUI..."
 
 gtk_continue_question "This script will download and install the AppImage of wine, configure, and install Logos Bible v$LOGOS_VERSION. Do you wish to continue?"
 
-make_dir "$WORKDIR"
+mkdir -p "$WORKDIR"
 
 # Geting the AppImage:
 FILE="$APPDIR/$APPIMAGE_NAME"
@@ -195,7 +191,7 @@ else
 	gtk_download "https://github.com/ferion11/Wine_Appimage/releases/download/continuous/wine-i386_x86_64-archlinux.AppImage" "$WORKDIR"
 	chmod +x "$WORKDIR/$APPIMAGE_NAME"
 	
-	make_dir "$APPDIR"
+	mkdir -p "$APPDIR"
 	mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
 	
 	gtk_download "https://github.com/ferion11/Wine_Appimage/releases/download/continuous/wine-i386_x86_64-archlinux.AppImage.zsync" "$WORKDIR"
@@ -204,7 +200,7 @@ fi
 
 # Making the links (and dir)
 if ! [ -d "$APPDIR_BIN" ] ; then
-	make_dir "$APPDIR_BIN"
+	mkdir -p "$APPDIR_BIN"
 	ln -s "$FILE" "$APPDIR_BIN/wine"
 	ln -s "$FILE" "$APPDIR_BIN/wineserver"
 fi
@@ -298,7 +294,7 @@ chmod +x $WORKDIR/Logos.sh
 IFS=$IFS_TMP
 #------------------------------
 
-make_dir "$HOME/Desktop"
+mkdir -p "$HOME/Desktop"
 mv $WORKDIR/Logos.sh $HOME/Desktop
 
 #env WINEPREFIX=$WINEDIR sh $WORKDIR/winetricks winxp
