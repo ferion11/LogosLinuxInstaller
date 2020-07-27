@@ -214,7 +214,7 @@ gtk_continue_question "Now the script will create, if you don't have, one Wine B
 export PATH=$APPDIR_BIN:$PATH
 wine wineboot | zenity --progress --title="Wineboot" --text="Wine is updating $WINEPREFIX..." --pulsate --auto-close
 
-cat > $WORKDIR/disable-winemenubuilder.reg << EOF
+cat > "${WORKDIR}"/disable-winemenubuilder.reg << EOF
 REGEDIT4
 
 [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
@@ -223,7 +223,7 @@ REGEDIT4
 
 EOF
 
-cat > $WORKDIR/renderer_gdi.reg << EOF
+cat > "${WORKDIR}"/renderer_gdi.reg << EOF
 REGEDIT4
 
 [HKEY_CURRENT_USER\Software\Wine\Direct3D]
@@ -233,8 +233,8 @@ REGEDIT4
 
 EOF
 
-wine regedit.exe $WORKDIR/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
-wine regedit.exe $WORKDIR/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer keys" --pulsate --auto-close
+wine regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
+wine regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer keys" --pulsate --auto-close
 
 gtk_continue_question "Now the script will install the winetricks packages in your $WINEPREFIX. You will need to interact with some of these installers. Do you wish to continue?"
 
@@ -273,15 +273,15 @@ gtk_continue_question "Now the script will download and install Logos Bible in y
 
 gtk_download "${LOGOS_URL}" "$WORKDIR"
 
-wine msiexec /i $WORKDIR/Logos-x86.msi | zenity --progress --title="Logos Bible Installer" --text="Starting the Logos Bible Installer...\nNOTE: Will need interaction" --pulsate --auto-close
+wine msiexec /i "${WORKDIR}"/Logos-x86.msi | zenity --progress --title="Logos Bible Installer" --text="Starting the Logos Bible Installer...\nNOTE: Will need interaction" --pulsate --auto-close
 
 #------- making the start script -------
 IFS_TMP=$IFS
 IFS=$'\n'
-LOGOS_EXE=$(find $HOME/.wine32 -name Logos.exe |  grep "Logos\/Logos.exe")
-rm -rf $WORKDIR/Logos.sh
+LOGOS_EXE=$(find "${HOME}"/.wine32 -name Logos.exe |  grep "Logos\/Logos.exe")
+rm -rf "${WORKDIR}"/Logos.sh
 
-cat > $WORKDIR/Logos.sh << EOF
+cat > "${WORKDIR}"/Logos.sh << EOF
 #!/bin/bash
 export PATH=$APPDIR_BIN:\$PATH
 # Save IFS
@@ -294,12 +294,12 @@ wine "$LOGOS_EXE"
 IFS=\$IFS_TMP
 EOF
 
-chmod +x $WORKDIR/Logos.sh
+chmod +x "${WORKDIR}"/Logos.sh
 IFS=$IFS_TMP
 #------------------------------
 
-mkdir -p "$HOME/Desktop"
-mv $WORKDIR/Logos.sh $HOME/Desktop
+mkdir -p "${HOME}"/Desktop
+mv "${WORKDIR}"/Logos.sh "${HOME}"/Desktop
 
 #$WORKDIR/winetricks winxp
 
@@ -308,7 +308,7 @@ if gtk_question "Do you want to clean the temp files?"; then
 fi
 
 if gtk_question "Logos Bible Installed!\nYou can run it from the script Logos.sh on your Desktop.\nDo you want to run it now?\nNOTE: Just close the error on the first execution."; then
-	$HOME/Desktop/Logos.sh
+	"${HOME}"/Desktop/Logos.sh
 fi
 
 echo "End!"
