@@ -553,6 +553,7 @@ case "$WINEARCH" in
 		echo "Installing LogosBible 32bits..."
 		if [ -f "${DOWNLOADED_RESOURCES}/${LOGOS_MSI}" ]; then
 			echo "${LOGOS_MSI} exist. Using it..."
+			cp "${DOWNLOADED_RESOURCES}/${LOGOS_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS_MSI}\ninto: $WORKDIR" --pulsate --auto-close
 		else
 			echo "${LOGOS_MSI} does not exist. Downloading..."
 			gtk_download "${LOGOS_URL}" "$WORKDIR"
@@ -564,6 +565,7 @@ case "$WINEARCH" in
 		echo "Installing LogosBible 64bits..."
 		if [ -f "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" ]; then
 			echo "${LOGOS64_MSI} exist. Using it..."
+			cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: $WORKDIR" --pulsate --auto-close
 		else
 			echo "${LOGOS64_MSI} does not exist. Downloading..."
 			gtk_download "${LOGOS64_URL}" "$WORKDIR"
