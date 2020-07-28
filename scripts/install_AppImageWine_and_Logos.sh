@@ -264,7 +264,7 @@ if [ -z "$NO_APPIMAGE" ]; then
 	if [ -f "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" ]; then
 		echo "${APPIMAGE_NAME} exist. Using it..."
 		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
-		cp "$WORKDIR/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close
+		cp "${DOWNLOADED_RESOURCES}/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close
 	else
 		echo "${APPIMAGE_NAME} does not exist. Downloading..."
 		gtk_download "${WINE_APPIMAGE_URL}" "$WORKDIR"
