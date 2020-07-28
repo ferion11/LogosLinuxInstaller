@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.0-rc1"
+export THIS_SCRIPT_VERSION="v2.0-rc2"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -518,7 +518,7 @@ if [ -z "$NO_APPIMAGE" ]; then
 fi
 
 gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
-wine wineboot | zenity --progress --title="Wineboot" --text="Wine is updating ${WINEPREFIX}..." --pulsate --auto-close
+wine wineboot
 
 cat > "${WORKDIR}"/disable-winemenubuilder.reg << EOF
 REGEDIT4
@@ -566,7 +566,7 @@ case "$WINEARCH" in
 			echo "${LOGOS_MSI} does not exist. Downloading..."
 			gtk_download "${LOGOS_URL}" "$WORKDIR"
 		fi
-		wine msiexec /i "${WORKDIR}"/"${LOGOS_MSI}" | zenity --progress --title="Logos Bible Installer" --text="Starting the Logos Bible Installer...\nNOTE: Will need interaction" --pulsate --auto-close
+		wine msiexec /i "${WORKDIR}"/"${LOGOS_MSI}"
 		create_starting_scripts_32
 		;;
 	win64)
@@ -578,7 +578,7 @@ case "$WINEARCH" in
 			echo "${LOGOS64_MSI} does not exist. Downloading..."
 			gtk_download "${LOGOS64_URL}" "$WORKDIR"
 		fi
-		wine msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}" | zenity --progress --title="Logos Bible Installer" --text="Starting the Logos Bible Installer...\nNOTE: Will need interaction" --pulsate --auto-close
+		wine msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
 		create_starting_scripts_64
 		;;
 	*)
