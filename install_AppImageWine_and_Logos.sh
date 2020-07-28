@@ -547,11 +547,11 @@ gtk_continue_question "Now the script will install the winetricks packages on ${
 gtk_download "${WINETRICKS_URL}" "$WORKDIR"
 chmod +x "$WORKDIR/winetricks"
 
-$WORKDIR/winetricks -q corefonts | zenity --progress --title="Winetricks" --text="Winetricks installing corefonts" --pulsate --auto-close
-#$WORKDIR/winetricks -q ddr=gdi | zenity --progress --title="Winetricks" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
-$WORKDIR/winetricks -q settings fontsmooth=rgb | zenity --progress --title="Winetricks" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
+$WORKDIR/winetricks -q corefonts | zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close
+#$WORKDIR/winetricks -q ddr=gdi | zenity --progress --title="Winetricks ddr" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
+$WORKDIR/winetricks -q settings fontsmooth=rgb | zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
 
-$WORKDIR/winetricks -q dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close
+$WORKDIR/winetricks -q dotnet48 | zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
