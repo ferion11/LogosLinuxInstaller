@@ -253,7 +253,7 @@ case "${installationChoice}" in
 esac
 
 # Making the setup:
-mkdir_critical "$WORKDIR"
+mkdir -p "$WORKDIR"
 mkdir -p "$INSTALLDIR"
 mkdir_critical "$APPDIR"
 
