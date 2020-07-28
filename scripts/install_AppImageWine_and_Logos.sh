@@ -154,177 +154,6 @@ gtk_download() {
 #--------------
 #==========================
 
-
-#======= Basic Deps =============
-echo 'Searching for dependencies:'
-
-if [ "$(id -u)" = 0 ]; then
-	echo "* Running Wine/winetricks as root is highly discouraged. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-fi
-
-if [ -z "$DISPLAY" ]; then
-	echo "* You want to run without X, but it don't work."
-	exit 1
-fi
-
-if have_dep zenity; then
-	echo '* Zenity is installed!'
-else
-	echo '* Your system does not have Zenity. Please install Zenity package.'
-	exit 1
-fi
-
-if have_dep wget; then
-	echo '* wget is installed!'
-else
-	gtk_fatal_error "Your system does not have wget. Please install wget package."
-fi
-
-if have_dep find; then
-	echo '* command find is installed!'
-else
-	gtk_fatal_error "Your system does not have command find. Please install command find package."
-fi
-
-if have_dep sed; then
-	echo '* command sed is installed!'
-else
-	gtk_fatal_error "Your system does not have command sed. Please install command sed package."
-fi
-
-if have_dep grep; then
-	echo '* command grep is installed!'
-else
-	gtk_fatal_error "Your system does not have command grep. Please install command grep package."
-fi
-
-echo "Starting Zenity GUI..."
-#==========================
-
-
-#======= Main =============
-
-if [ -d "$INSTALLDIR" ]; then
-	gtk_fatal_error "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
-fi
-
-installationChoice="$(zenity --width=400 --height=250 \
-	--title="Question: Install Logos Bible" \
-	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v$LOGOS_VERSION independent of others installations.\nPlease, select the type of installation:" \
-	--list --radiolist --column "S" --column "Descrition" \
-	TRUE "1- Install LogosBible32 using Wine AppImage (default)." \
-	FALSE "2- Install LogosBible32 using the native Wine." \
-	FALSE "3- Install LogosBible64 using the native Wine64 (unstable)." )"
-
-case "${installationChoice}" in
-	1*)
-		echo "Installing LogosBible 32bits using Wine AppImage..."
-		export WINEARCH=win32
-		export WINEPREFIX="$APPDIR/wine32_bottle"
-		;;
-	2*)
-		echo "Installing LogosBible 32bits using the native Wine..."
-		export NO_APPIMAGE="1"
-		export WINEARCH=win32
-		export WINEPREFIX="$APPDIR/wine32_bottle"
-
-		# check for wine installation
-		WINE_VERSION_CHECK="$(wine --version)"
-		if [ -z "${WINE_VERSION_CHECK}" ]; then
-			gtk_fatal_error "Wine not found! Please install native Wine first."
-		fi
-		echo "Using: ${WINE_VERSION_CHECK}"
-		;;
-	3*)
-		echo "Installing LogosBible 64bits using the native Wine..."
-		export NO_APPIMAGE="1"
-		export WINEARCH=win64
-		export WINEPREFIX="$APPDIR/wine64_bottle"
-
-		# check for wine installation
-		WINE_VERSION_CHECK="$(wine64 --version)"
-		if [ -z "${WINE_VERSION_CHECK}" ]; then
-			gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
-		fi
-		echo "Using: ${WINE_VERSION_CHECK}"
-		;;
-	*)
-		gtk_fatal_error "Installation canceled!"
-esac
-
-# Making the setup:
-mkdir -p "$WORKDIR"
-mkdir -p "$INSTALLDIR"
-mkdir_critical "$APPDIR"
-
-if [ -z "$NO_APPIMAGE" ]; then
-	echo "Using AppImage..."
-	#-------------------------
-	# Geting the AppImage:
-	if [ -f "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" ]; then
-		echo "${APPIMAGE_NAME} exist. Using it..."
-		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
-		cp "${DOWNLOADED_RESOURCES}/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close
-	else
-		echo "${APPIMAGE_NAME} does not exist. Downloading..."
-		gtk_download "${WINE_APPIMAGE_URL}" "$WORKDIR"
-
-		mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
-
-		gtk_download "${WINE_APPIMAGE_URL}.zsync" "$WORKDIR"
-		mv "$WORKDIR/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close
-	fi
-	FILE="$APPDIR/$APPIMAGE_NAME"
-	chmod +x "${FILE}"
-
-	# Making the links (and dir)
-	mkdir_critical "${APPDIR_BIN}"
-	ln -s "$FILE" "${APPDIR_BIN}/wine"
-	ln -s "$FILE" "${APPDIR_BIN}/wineserver"
-
-	export PATH="${APPDIR_BIN}":$PATH
-	#-------------------------
-fi
-
-gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
-wine wineboot | zenity --progress --title="Wineboot" --text="Wine is updating ${WINEPREFIX}..." --pulsate --auto-close
-
-cat > "${WORKDIR}"/disable-winemenubuilder.reg << EOF
-REGEDIT4
-
-[HKEY_CURRENT_USER\Software\Wine\DllOverrides]
-"winemenubuilder.exe"=""
-
-
-EOF
-
-cat > "${WORKDIR}"/renderer_gdi.reg << EOF
-REGEDIT4
-
-[HKEY_CURRENT_USER\Software\Wine\Direct3D]
-"DirectDrawRenderer"="gdi"
-"renderer"="gdi"
-
-
-EOF
-
-wine regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
-wine regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close
-
-gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
-
-gtk_download "${WINETRICKS_URL}" "$WORKDIR"
-chmod +x "$WORKDIR/winetricks"
-
-$WORKDIR/winetricks -q corefonts | zenity --progress --title="Winetricks" --text="Winetricks installing corefonts" --pulsate --auto-close
-#$WORKDIR/winetricks -q ddr=gdi | zenity --progress --title="Winetricks" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
-$WORKDIR/winetricks -q settings fontsmooth=rgb | zenity --progress --title="Winetricks" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
-
-$WORKDIR/winetricks -q dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close
-
-gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
-
-
 #======= making the starting scripts ==============
 create_starting_scripts_32() {
 	echo "Creating starting scripts for LogosBible 32bits..."
@@ -545,6 +374,174 @@ EOF
 }
 #==================================================
 
+#======= Basic Deps =============
+echo 'Searching for dependencies:'
+
+if [ "$(id -u)" = 0 ]; then
+	echo "* Running Wine/winetricks as root is highly discouraged. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+fi
+
+if [ -z "$DISPLAY" ]; then
+	echo "* You want to run without X, but it don't work."
+	exit 1
+fi
+
+if have_dep zenity; then
+	echo '* Zenity is installed!'
+else
+	echo '* Your system does not have Zenity. Please install Zenity package.'
+	exit 1
+fi
+
+if have_dep wget; then
+	echo '* wget is installed!'
+else
+	gtk_fatal_error "Your system does not have wget. Please install wget package."
+fi
+
+if have_dep find; then
+	echo '* command find is installed!'
+else
+	gtk_fatal_error "Your system does not have command find. Please install command find package."
+fi
+
+if have_dep sed; then
+	echo '* command sed is installed!'
+else
+	gtk_fatal_error "Your system does not have command sed. Please install command sed package."
+fi
+
+if have_dep grep; then
+	echo '* command grep is installed!'
+else
+	gtk_fatal_error "Your system does not have command grep. Please install command grep package."
+fi
+
+echo "Starting Zenity GUI..."
+#==========================
+
+
+#======= Main =============
+
+if [ -d "$INSTALLDIR" ]; then
+	gtk_fatal_error "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
+fi
+
+installationChoice="$(zenity --width=400 --height=250 \
+	--title="Question: Install Logos Bible" \
+	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v$LOGOS_VERSION independent of others installations.\nPlease, select the type of installation:" \
+	--list --radiolist --column "S" --column "Descrition" \
+	TRUE "1- Install LogosBible32 using Wine AppImage (default)." \
+	FALSE "2- Install LogosBible32 using the native Wine." \
+	FALSE "3- Install LogosBible64 using the native Wine64 (unstable)." )"
+
+case "${installationChoice}" in
+	1*)
+		echo "Installing LogosBible 32bits using Wine AppImage..."
+		export WINEARCH=win32
+		export WINEPREFIX="$APPDIR/wine32_bottle"
+		;;
+	2*)
+		echo "Installing LogosBible 32bits using the native Wine..."
+		export NO_APPIMAGE="1"
+		export WINEARCH=win32
+		export WINEPREFIX="$APPDIR/wine32_bottle"
+
+		# check for wine installation
+		WINE_VERSION_CHECK="$(wine --version)"
+		if [ -z "${WINE_VERSION_CHECK}" ]; then
+			gtk_fatal_error "Wine not found! Please install native Wine first."
+		fi
+		echo "Using: ${WINE_VERSION_CHECK}"
+		;;
+	3*)
+		echo "Installing LogosBible 64bits using the native Wine..."
+		export NO_APPIMAGE="1"
+		export WINEARCH=win64
+		export WINEPREFIX="$APPDIR/wine64_bottle"
+
+		# check for wine installation
+		WINE_VERSION_CHECK="$(wine64 --version)"
+		if [ -z "${WINE_VERSION_CHECK}" ]; then
+			gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
+		fi
+		echo "Using: ${WINE_VERSION_CHECK}"
+		;;
+	*)
+		gtk_fatal_error "Installation canceled!"
+esac
+
+# Making the setup:
+mkdir -p "$WORKDIR"
+mkdir -p "$INSTALLDIR"
+mkdir_critical "$APPDIR"
+
+if [ -z "$NO_APPIMAGE" ]; then
+	echo "Using AppImage..."
+	#-------------------------
+	# Geting the AppImage:
+	if [ -f "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" ]; then
+		echo "${APPIMAGE_NAME} exist. Using it..."
+		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
+		cp "${DOWNLOADED_RESOURCES}/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close
+	else
+		echo "${APPIMAGE_NAME} does not exist. Downloading..."
+		gtk_download "${WINE_APPIMAGE_URL}" "$WORKDIR"
+
+		mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
+
+		gtk_download "${WINE_APPIMAGE_URL}.zsync" "$WORKDIR"
+		mv "$WORKDIR/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close
+	fi
+	FILE="$APPDIR/$APPIMAGE_NAME"
+	chmod +x "${FILE}"
+
+	# Making the links (and dir)
+	mkdir_critical "${APPDIR_BIN}"
+	ln -s "$FILE" "${APPDIR_BIN}/wine"
+	ln -s "$FILE" "${APPDIR_BIN}/wineserver"
+
+	export PATH="${APPDIR_BIN}":$PATH
+	#-------------------------
+fi
+
+gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
+wine wineboot | zenity --progress --title="Wineboot" --text="Wine is updating ${WINEPREFIX}..." --pulsate --auto-close
+
+cat > "${WORKDIR}"/disable-winemenubuilder.reg << EOF
+REGEDIT4
+
+[HKEY_CURRENT_USER\Software\Wine\DllOverrides]
+"winemenubuilder.exe"=""
+
+
+EOF
+
+cat > "${WORKDIR}"/renderer_gdi.reg << EOF
+REGEDIT4
+
+[HKEY_CURRENT_USER\Software\Wine\Direct3D]
+"DirectDrawRenderer"="gdi"
+"renderer"="gdi"
+
+
+EOF
+
+wine regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
+wine regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close
+
+gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
+
+gtk_download "${WINETRICKS_URL}" "$WORKDIR"
+chmod +x "$WORKDIR/winetricks"
+
+$WORKDIR/winetricks -q corefonts | zenity --progress --title="Winetricks" --text="Winetricks installing corefonts" --pulsate --auto-close
+#$WORKDIR/winetricks -q ddr=gdi | zenity --progress --title="Winetricks" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
+$WORKDIR/winetricks -q settings fontsmooth=rgb | zenity --progress --title="Winetricks" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
+
+$WORKDIR/winetricks -q dotnet48 | zenity --progress --title="Winetricks" --text="Winetricks installing DotNet v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close
+
+gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
 # Geting and install the LogosBible:
 case "$WINEARCH" in
