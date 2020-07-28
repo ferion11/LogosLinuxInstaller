@@ -180,6 +180,7 @@ if [ "\$1" = "wine" ] ; then
 	echo "======= Running wine only: ======="
 	shift
 	wine "\$@"
+	wineserver -w
 	echo "======= wine run done! ======="
 	exit 0
 fi
@@ -205,6 +206,7 @@ if [ -z "\$LOGOS_EXE" ] ; then
 fi
 
 wine "\${LOGOS_EXE}"
+wineserver -w
 
 #------------- Ending block ----------------
 # restore IFS
@@ -238,6 +240,7 @@ if [ "\$1" = "wine" ] ; then
 	echo "======= Running wine only: ======="
 	shift
 	wine "\$@"
+	wineserver -w
 	echo "======= wine run done! ======="
 	exit 0
 fi
@@ -255,6 +258,7 @@ if [ "\$1" = "winetricks" ] ; then
 fi
 
 wine control
+wineserver -w
 
 #------------- Ending block ----------------
 # restore IFS
@@ -291,6 +295,7 @@ if [ "\$1" = "wine" ] ; then
 	echo "======= Running wine only: ======="
 	shift
 	wine "\$@"
+	wineserver -w
 	echo "======= wine run done! ======="
 	exit 0
 fi
@@ -316,6 +321,7 @@ if [ -z "\$LOGOS_EXE" ] ; then
 fi
 
 wine "\${LOGOS_EXE}"
+wineserver -w
 
 #------------- Ending block ----------------
 # restore IFS
@@ -349,6 +355,7 @@ if [ "\$1" = "wine" ] ; then
 	echo "======= Running wine only: ======="
 	shift
 	wine "\$@"
+	wineserver -w
 	echo "======= wine run done! ======="
 	exit 0
 fi
@@ -366,6 +373,7 @@ if [ "\$1" = "winetricks" ] ; then
 fi
 
 wine control
+wineserver -w
 
 #------------- Ending block ----------------
 # restore IFS
