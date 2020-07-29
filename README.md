@@ -101,7 +101,7 @@ I like to choose Custom and change the path to `c:\Logos\` (because it's easy to
 
 ![Step19](/img/step_19.png)
 
-It's the travis again, using one fake graphical system, so don't worry.
+It's the travis again, using one fake graphical system, so don't worry. But if it still bothers you, know that by holding the `Alt` key you can move any window by clicking anywhere on it, so if something similar happens to you, it will be easy to move the window down just by holding `Alt` key on the keyboard while dragging the window using the mouse.
 
 #### 20- You now have a `LogosBible_Linux_P` folder in your User Home:
 
