@@ -185,6 +185,15 @@ if [ "\$1" = "wine" ] ; then
 	exit 0
 fi
 
+# wineserver Run:
+if [ "\$1" = "wineserver" ] ; then
+	echo "======= Running wineserver only: ======="
+	shift
+	wineserver "\$@"
+	echo "======= wineserver run done! ======="
+	exit 0
+fi
+
 # winetricks Run:
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
@@ -245,6 +254,15 @@ if [ "\$1" = "wine" ] ; then
 	exit 0
 fi
 
+# wineserver Run:
+if [ "\$1" = "wineserver" ] ; then
+	echo "======= Running wineserver only: ======="
+	shift
+	wineserver "\$@"
+	echo "======= wineserver run done! ======="
+	exit 0
+fi
+
 # winetricks Run:
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
@@ -297,6 +315,15 @@ if [ "\$1" = "wine" ] ; then
 	wine64 "\$@"
 	wineserver -w
 	echo "======= wine64 run done! ======="
+	exit 0
+fi
+
+# wineserver Run:
+if [ "\$1" = "wineserver" ] ; then
+	echo "======= Running wineserver only: ======="
+	shift
+	wineserver "\$@"
+	echo "======= wineserver run done! ======="
 	exit 0
 fi
 
@@ -357,6 +384,15 @@ if [ "\$1" = "wine" ] ; then
 	wine64 "\$@"
 	wineserver -w
 	echo "======= wine64 run done! ======="
+	exit 0
+fi
+
+# wineserver Run:
+if [ "\$1" = "wineserver" ] ; then
+	echo "======= Running wineserver only: ======="
+	shift
+	wineserver "\$@"
+	echo "======= wineserver run done! ======="
 	exit 0
 fi
 
