@@ -483,6 +483,21 @@ echo "Starting Zenity GUI..."
 
 #======= Main =============
 
+if [ "$1" = "scripts" ]; then
+	mkdir "$WORKDIR"
+
+	mkdir /tmp/scripts32 || die "can't create the directory /tmp/scripts32"
+	export INSTALLDIR="/tmp/scripts32"
+	create_starting_scripts_32
+
+	mkdir /tmp/scripts64 || die "can't create the directory /tmp/scripts64"
+	export INSTALLDIR="/tmp/scripts64"
+	create_starting_scripts_64
+
+	rm -rf "$WORKDIR"
+	exit 0
+fi
+
 if [ -d "$INSTALLDIR" ]; then
 	gtk_fatal_error "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
 fi
