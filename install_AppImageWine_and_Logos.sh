@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.2"
+export THIS_SCRIPT_VERSION="v2.3-rc0"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -206,6 +206,23 @@ if [ "\$1" = "winetricks" ] ; then
 	exit 0
 fi
 
+# Indexing Run:
+if [ "\$1" = "indexing" ] ; then
+	echo "======= Running indexing on the Logos inside this installation only: ======="
+	LOGOS_INDEXER_EXE=\$(find \${WINEPREFIX} -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
+	if [ -z "\${LOGOS_INDEXER_EXE}" ] ; then
+		echo "* ERROR: the LogosIndexer.exe can't be found!!!"
+		exit 1
+	fi
+	echo "* Closing anything running in this wine bottle:"
+	wineserver -k
+	echo "* Running the indexer:"
+	wine "\${LOGOS_INDEXER_EXE}"
+	wineserver -w
+	echo "======= indexing of LogosBible run done! ======="
+	exit 0
+fi
+
 LOGOS_EXE=\$(find \${WINEPREFIX} -name Logos.exe | grep "Logos\/Logos.exe")
 if [ -z "\$LOGOS_EXE" ] ; then
 	echo "======= Running control: ======="
@@ -336,6 +353,23 @@ if [ "\$1" = "winetricks" ] ; then
 	/tmp/winetricks "\$@"
 	rm -rf /tmp/winetricks
 	echo "======= winetricks run done! ======="
+	exit 0
+fi
+
+# Indexing Run:
+if [ "\$1" = "indexing" ] ; then
+	echo "======= Running indexing on the Logos inside this installation only: ======="
+	LOGOS_INDEXER_EXE=\$(find \${WINEPREFIX} -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
+	if [ -z "\${LOGOS_INDEXER_EXE}" ] ; then
+		echo "* ERROR: the LogosIndexer.exe can't be found!!!"
+		exit 1
+	fi
+	echo "* Closing anything running in this wine bottle:"
+	wineserver -k
+	echo "* Running the indexer:"
+	wine64 "\${LOGOS_INDEXER_EXE}"
+	wineserver -w
+	echo "======= indexing of LogosBible run done! ======="
 	exit 0
 fi
 
