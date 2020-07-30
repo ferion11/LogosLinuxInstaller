@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.0"
+export THIS_SCRIPT_VERSION="v2.1"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -290,13 +290,13 @@ export WINEARCH=win64
 export WINEPREFIX="\${HERE}/data/wine64_bottle"
 #-------------------------------------------
 
-# wine Run:
+# wine64 Run:
 if [ "\$1" = "wine" ] ; then
-	echo "======= Running wine only: ======="
+	echo "======= Running wine64 only: ======="
 	shift
-	wine "\$@"
+	wine64 "\$@"
 	wineserver -w
-	echo "======= wine run done! ======="
+	echo "======= wine64 run done! ======="
 	exit 0
 fi
 
@@ -320,7 +320,7 @@ if [ -z "\$LOGOS_EXE" ] ; then
 	exit 0
 fi
 
-wine "\${LOGOS_EXE}"
+wine64 "\${LOGOS_EXE}"
 wineserver -w
 
 #------------- Ending block ----------------
@@ -350,13 +350,13 @@ export WINEARCH=win64
 export WINEPREFIX="\${HERE}/data/wine64_bottle"
 #-------------------------------------------
 
-# wine Run:
+# wine64 Run:
 if [ "\$1" = "wine" ] ; then
-	echo "======= Running wine only: ======="
+	echo "======= Running wine64 only: ======="
 	shift
-	wine "\$@"
+	wine64 "\$@"
 	wineserver -w
-	echo "======= wine run done! ======="
+	echo "======= wine64 run done! ======="
 	exit 0
 fi
 
@@ -372,7 +372,7 @@ if [ "\$1" = "winetricks" ] ; then
 	exit 0
 fi
 
-wine control
+wine64 control
 wineserver -w
 
 #------------- Ending block ----------------
@@ -452,12 +452,14 @@ case "${installationChoice}" in
 		echo "Installing LogosBible 32bits using Wine AppImage..."
 		export WINEARCH=win32
 		export WINEPREFIX="$APPDIR/wine32_bottle"
+		export WINE_EXE="wine"
 		;;
 	2*)
 		echo "Installing LogosBible 32bits using the native Wine..."
 		export NO_APPIMAGE="1"
 		export WINEARCH=win32
 		export WINEPREFIX="$APPDIR/wine32_bottle"
+		export WINE_EXE="wine"
 
 		# check for wine installation
 		WINE_VERSION_CHECK="$(wine --version)"
@@ -471,6 +473,7 @@ case "${installationChoice}" in
 		export NO_APPIMAGE="1"
 		export WINEARCH=win64
 		export WINEPREFIX="$APPDIR/wine64_bottle"
+		export WINE_EXE="wine64"
 
 		# check for wine installation
 		WINE_VERSION_CHECK="$(wine64 --version)"
@@ -518,7 +521,7 @@ if [ -z "$NO_APPIMAGE" ]; then
 fi
 
 gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
-wine wineboot
+${WINE_EXE} wineboot
 
 cat > "${WORKDIR}"/disable-winemenubuilder.reg << EOF
 REGEDIT4
@@ -539,8 +542,8 @@ REGEDIT4
 
 EOF
 
-wine regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
-wine regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close
+${WINE_EXE} regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
+${WINE_EXE} regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close
 
 gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
 
@@ -566,7 +569,7 @@ case "$WINEARCH" in
 			echo "${LOGOS_MSI} does not exist. Downloading..."
 			gtk_download "${LOGOS_URL}" "$WORKDIR"
 		fi
-		wine msiexec /i "${WORKDIR}"/"${LOGOS_MSI}"
+		${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS_MSI}"
 		create_starting_scripts_32
 		;;
 	win64)
@@ -578,7 +581,7 @@ case "$WINEARCH" in
 			echo "${LOGOS64_MSI} does not exist. Downloading..."
 			gtk_download "${LOGOS64_URL}" "$WORKDIR"
 		fi
-		wine msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
+		${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
 		create_starting_scripts_64
 		;;
 	*)
