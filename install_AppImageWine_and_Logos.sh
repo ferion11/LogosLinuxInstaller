@@ -429,6 +429,18 @@ else
 	gtk_fatal_error "Your system does not have command grep. Please install command grep package."
 fi
 
+if have_dep cabextract; then
+	echo '* command cabextract is installed!'
+else
+	gtk_fatal_error "Your system does not have command cabextract. Please install command cabextract package."
+fi
+
+if have_dep ntlm_auth; then
+	echo '* command ntlm_auth is installed!'
+else
+	gtk_fatal_error "Your system does not have command ntlm_auth. Please install command ntlm_auth package (Usually winbind or samba)."
+fi
+
 echo "Starting Zenity GUI..."
 #==========================
 
