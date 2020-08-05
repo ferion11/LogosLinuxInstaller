@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.3-rc0"
+export THIS_SCRIPT_VERSION="v2.3"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -610,8 +610,10 @@ if [ -z "$NO_APPIMAGE" ]; then
 
 	# Making the links (and dir)
 	mkdir_critical "${APPDIR_BIN}"
-	ln -s "$FILE" "${APPDIR_BIN}/wine"
-	ln -s "$FILE" "${APPDIR_BIN}/wineserver"
+	cd "${APPDIR_BIN}"
+	ln -s "../${APPIMAGE_NAME}" wine
+	ln -s "../${APPIMAGE_NAME}" wineserver
+	cd ..
 
 	export PATH="${APPDIR_BIN}":$PATH
 	#-------------------------
