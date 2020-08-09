@@ -139,16 +139,13 @@ gtk_download() {
 		echo "#Downloading: $FILENAME\ninto: $2\n\n$current of $total_size ($percent%)\nSpeed : $speed/Sec\nEstimated time : $remain"
 	done > $pipe &
 
-	zenity --progress --title "Downloading $FILENAME..." --text="Downloading: $FILENAME\ninto: $2\n" --percentage=0 --auto-close --auto-kill < $pipe
+	zenity --progress --title "Downloading $FILENAME..." --text="Downloading: $FILENAME\ninto: $2\n" --percentage=0 --auto-close < $pipe
+	RETURN_ZENITY="$?"
+	rm -rf $pipe
 
-	if [ "$?" = -1 ] ; then
-		#pkill -15 wget
-		killall -15 wget
-		rm -rf $pipe
+	if [ "${RETURN_ZENITY}" != "0" ] ; then
 		gtk_fatal_error "The installation is cancelled!"
 	fi
-
-	rm -rf $pipe
 }
 
 #--------------
