@@ -101,6 +101,7 @@ gtk_download() {
 	echo "into:"
 	echo "$2"
 
+	percent_file="$(mktemp)"
 	pipe="$(mktemp)"
 	rm -rf "${pipe}"
 	mkfifo "${pipe}"
@@ -135,6 +136,7 @@ gtk_download() {
 
 		# report
 		echo "$percent"
+		echo "$percent" > "${percent_file}"
 		# shellcheck disable=SC2028
 		echo "#Downloading: $FILENAME\ninto: $2\n\n$current of $total_size ($percent%)\nSpeed : $speed/Sec\nEstimated time : $remain"
 	done > "${pipe}" &
@@ -143,11 +145,18 @@ gtk_download() {
 	RETURN_ZENITY="${?}"
 	rm -rf "${pipe}"
 
-	if [ "${RETURN_ZENITY}" != "0" ] ; then
-		gtk_fatal_error "The installation is cancelled!"
+	percent="$(cat ${percent_file})"
+	rm -rf "${percent_file}"
+	if [ "${RETURN_ZENITY}" == "0" ] ; then
+		if [ "${percent}" != "100" ] ; then
+			gtk_fatal_error "The installation is cancelled because of incomplete downloaded file!\n * ${FILENAME}\n  - percent: ${percent}"
+		fi
+	else
+		kill -15 ${WGET_PID}
+		gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 	fi
+	echo "${FILENAME} download finished!"
 }
-
 #--------------
 #==========================
 
