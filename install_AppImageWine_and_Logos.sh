@@ -591,6 +591,13 @@ esac
 mkdir -p "$WORKDIR"
 mkdir -p "$INSTALLDIR"
 mkdir_critical "$APPDIR"
+# Making the links (and dir)
+mkdir_critical "${APPDIR_BIN}"
+cd "${APPDIR_BIN}"
+ln -s "../${APPIMAGE_NAME}" wine
+ln -s "../${APPIMAGE_NAME}" wineserver
+cd -
+export PATH="${APPDIR_BIN}":$PATH
 
 if [ -z "$NO_APPIMAGE" ]; then
 	echo "Using AppImage..."
@@ -611,15 +618,6 @@ if [ -z "$NO_APPIMAGE" ]; then
 	fi
 	FILE="$APPDIR/$APPIMAGE_NAME"
 	chmod +x "${FILE}"
-
-	# Making the links (and dir)
-	mkdir_critical "${APPDIR_BIN}"
-	cd "${APPDIR_BIN}"
-	ln -s "../${APPIMAGE_NAME}" wine
-	ln -s "../${APPIMAGE_NAME}" wineserver
-	cd ..
-
-	export PATH="${APPDIR_BIN}":$PATH
 	#-------------------------
 fi
 
