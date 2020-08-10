@@ -102,8 +102,8 @@ gtk_download() {
 	echo "$2"
 
 	pipe="$(mktemp)"
-	rm -rf $pipe
-	mkfifo $pipe
+	rm -rf "${pipe}"
+	mkfifo "${pipe}"
 
 	# download with output to dialog progress bar
 	total_size="Starting..."
@@ -137,11 +137,11 @@ gtk_download() {
 		echo "$percent"
 		# shellcheck disable=SC2028
 		echo "#Downloading: $FILENAME\ninto: $2\n\n$current of $total_size ($percent%)\nSpeed : $speed/Sec\nEstimated time : $remain"
-	done > $pipe &
+	done > "${pipe}" &
 
-	zenity --progress --title "Downloading $FILENAME..." --text="Downloading: $FILENAME\ninto: $2\n" --percentage=0 --auto-close < $pipe
-	RETURN_ZENITY="$?"
-	rm -rf $pipe
+	zenity --progress --title "Downloading $FILENAME..." --text="Downloading: $FILENAME\ninto: $2\n" --percentage=0 --auto-close < "${pipe}"
+	RETURN_ZENITY="${?}"
+	rm -rf "${pipe}"
 
 	if [ "${RETURN_ZENITY}" != "0" ] ; then
 		gtk_fatal_error "The installation is cancelled!"
@@ -594,10 +594,10 @@ mkdir -p "$INSTALLDIR"
 mkdir_critical "$APPDIR"
 # Making the links (and dir)
 mkdir_critical "${APPDIR_BIN}"
-cd "${APPDIR_BIN}"
+cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
 ln -s "../${APPIMAGE_NAME}" wine
 ln -s "../${APPIMAGE_NAME}" wineserver
-cd -
+cd - || die "ERROR: Can't go back to preview dir!"
 export PATH="${APPDIR_BIN}":$PATH
 echo "Setup ok!"
 
