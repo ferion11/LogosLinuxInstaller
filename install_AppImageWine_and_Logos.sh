@@ -605,16 +605,16 @@ if [ -z "$NO_APPIMAGE" ]; then
 	# Geting the AppImage:
 	if [ -f "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" ]; then
 		echo "${APPIMAGE_NAME} exist. Using it..."
-		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
-		cp "${DOWNLOADED_RESOURCES}/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close
+		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close --no-cancel
+		cp "${DOWNLOADED_RESOURCES}/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close --no-cancel
 	else
 		echo "${APPIMAGE_NAME} does not exist. Downloading..."
 		gtk_download "${WINE_APPIMAGE_URL}" "$WORKDIR"
 
-		mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close
+		mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close --no-cancel
 
 		gtk_download "${WINE_APPIMAGE_URL}.zsync" "$WORKDIR"
-		mv "$WORKDIR/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close
+		mv "$WORKDIR/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close --no-cancel
 	fi
 	FILE="$APPDIR/$APPIMAGE_NAME"
 	chmod +x "${FILE}"
@@ -643,19 +643,21 @@ REGEDIT4
 
 EOF
 
-${WINE_EXE} regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close
-${WINE_EXE} regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close
+${WINE_EXE} regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close --no-cancel
+${WINE_EXE} regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close --no-cancel
 
 gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
 
 gtk_download "${WINETRICKS_URL}" "$WORKDIR"
 chmod +x "$WORKDIR/winetricks"
 
+#-------------------------------------------------
 $WORKDIR/winetricks -q corefonts | zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close
-#$WORKDIR/winetricks -q ddr=gdi | zenity --progress --title="Winetricks ddr" --text="Winetricks setting ddr=gdi..." --pulsate --auto-close
+#-------------------------------------------------
 $WORKDIR/winetricks -q settings fontsmooth=rgb | zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
-
+#-------------------------------------------------
 $WORKDIR/winetricks -q dotnet48 | zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close
+#-------------------------------------------------
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
@@ -665,7 +667,7 @@ case "$WINEARCH" in
 		echo "Installing LogosBible 32bits..."
 		if [ -f "${DOWNLOADED_RESOURCES}/${LOGOS_MSI}" ]; then
 			echo "${LOGOS_MSI} exist. Using it..."
-			cp "${DOWNLOADED_RESOURCES}/${LOGOS_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS_MSI}\ninto: $WORKDIR" --pulsate --auto-close
+			cp "${DOWNLOADED_RESOURCES}/${LOGOS_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS_MSI}\ninto: $WORKDIR" --pulsate --auto-close --no-cancel
 		else
 			echo "${LOGOS_MSI} does not exist. Downloading..."
 			gtk_download "${LOGOS_URL}" "$WORKDIR"
@@ -677,7 +679,7 @@ case "$WINEARCH" in
 		echo "Installing LogosBible 64bits..."
 		if [ -f "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" ]; then
 			echo "${LOGOS64_MSI} exist. Using it..."
-			cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: $WORKDIR" --pulsate --auto-close
+			cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: $WORKDIR" --pulsate --auto-close --no-cancel
 		else
 			echo "${LOGOS64_MSI} does not exist. Downloading..."
 			gtk_download "${LOGOS64_URL}" "$WORKDIR"
