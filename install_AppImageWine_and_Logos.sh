@@ -51,7 +51,7 @@ gtk_error() {
 }
 gtk_fatal_error() {
 	gtk_error "$@"
-	echo "End!"
+	echo "End in failure!"
 	exit 1
 }
 
@@ -101,7 +101,7 @@ gtk_download() {
 	echo "into:"
 	echo "$2"
 
-	pipe="/tmp/.pipe__gtk_download__function"
+	pipe="$(mktemp)"
 	rm -rf $pipe
 	mkfifo $pipe
 
