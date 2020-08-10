@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.4-rc2"
+export THIS_SCRIPT_VERSION="v2.4-rc3"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -16,7 +16,7 @@ export LOGOS_VERSION
 export LOGOS_MSI
 export LOGOS64_MSI
 
-if [ -z "$WORKDIR" ]; then export WORKDIR="/tmp/workingLogosTemp" ; fi
+if [ -z "$WORKDIR" ]; then export WORKDIR="$(mktemp -d)" ; fi
 if [ -z "$INSTALLDIR" ]; then export INSTALLDIR="$HOME/LogosBible_Linux_P" ; fi
 
 export APPDIR="${INSTALLDIR}/data"
@@ -202,11 +202,12 @@ fi
 # winetricks Run:
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
-	wget -c -P /tmp https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-	chmod +x /tmp/winetricks
+	WORKDIR="\$(mktemp -d)"
+	wget -c -P \${WORKDIR} https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	chmod +x \${WORKDIR}/winetricks
 	shift
-	/tmp/winetricks "\$@"
-	rm -rf /tmp/winetricks
+	\${WORKDIR}/winetricks "\$@"
+	rm -rf \${WORKDIR}
 	echo "======= winetricks run done! ======="
 	exit 0
 fi
@@ -288,11 +289,12 @@ fi
 # winetricks Run:
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
-	wget -c -P /tmp https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-	chmod +x /tmp/winetricks
+	WORKDIR="\$(mktemp -d)"
+	wget -c -P \${WORKDIR} https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	chmod +x \${WORKDIR}/winetricks
 	shift
-	/tmp/winetricks "\$@"
-	rm -rf /tmp/winetricks
+	\${WORKDIR}/winetricks "\$@"
+	rm -rf \${WORKDIR}
 	echo "======= winetricks run done! ======="
 	exit 0
 fi
@@ -352,11 +354,12 @@ fi
 # winetricks Run:
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
-	wget -c -P /tmp https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-	chmod +x /tmp/winetricks
+	WORKDIR="\$(mktemp -d)"
+	wget -c -P \${WORKDIR} https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	chmod +x \${WORKDIR}/winetricks
 	shift
-	/tmp/winetricks "\$@"
-	rm -rf /tmp/winetricks
+	\${WORKDIR}/winetricks "\$@"
+	rm -rf \${WORKDIR}
 	echo "======= winetricks run done! ======="
 	exit 0
 fi
@@ -438,11 +441,12 @@ fi
 # winetricks Run:
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
-	wget -c -P /tmp https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-	chmod +x /tmp/winetricks
+	WORKDIR="\$(mktemp -d)"
+	wget -c -P \${WORKDIR} https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	chmod +x \${WORKDIR}/winetricks
 	shift
-	/tmp/winetricks "\$@"
-	rm -rf /tmp/winetricks
+	\${WORKDIR}/winetricks "\$@"
+	rm -rf \${WORKDIR}
 	echo "======= winetricks run done! ======="
 	exit 0
 fi
