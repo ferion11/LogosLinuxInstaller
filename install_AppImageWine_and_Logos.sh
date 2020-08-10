@@ -465,6 +465,13 @@ if [ -z "$DISPLAY" ]; then
 	exit 1
 fi
 
+if have_dep mktemp; then
+	echo '* mktemp is installed!'
+else
+	echo '* Your system does not have mktemp. Please install mktemp package.'
+	exit 1
+fi
+
 if have_dep zenity; then
 	echo '* Zenity is installed!'
 else
