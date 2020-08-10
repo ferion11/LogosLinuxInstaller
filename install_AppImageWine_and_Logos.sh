@@ -588,6 +588,7 @@ case "${installationChoice}" in
 esac
 
 # Making the setup:
+echo "Setup making..."
 mkdir -p "$WORKDIR"
 mkdir -p "$INSTALLDIR"
 mkdir_critical "$APPDIR"
@@ -598,6 +599,7 @@ ln -s "../${APPIMAGE_NAME}" wine
 ln -s "../${APPIMAGE_NAME}" wineserver
 cd -
 export PATH="${APPDIR_BIN}":$PATH
+echo "Setup ok!"
 
 if [ -z "$NO_APPIMAGE" ]; then
 	echo "Using AppImage..."
@@ -643,8 +645,12 @@ REGEDIT4
 
 EOF
 
+echo "${WINE_EXE} regedit.exe disable-winemenubuilder.reg"
 ${WINE_EXE} regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close --no-cancel
+echo "${WINE_EXE} regedit.exe disable-winemenubuilder.reg DONE!"
+echo "${WINE_EXE} regedit.exe renderer_gdi.reg"
 ${WINE_EXE} regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close --no-cancel
+echo "${WINE_EXE} regedit.exe renderer_gdi.reg DONE!"
 
 gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
 
@@ -652,11 +658,82 @@ gtk_download "${WINETRICKS_URL}" "$WORKDIR"
 chmod +x "$WORKDIR/winetricks"
 
 #-------------------------------------------------
-$WORKDIR/winetricks -q corefonts | zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close
+echo "winetricks -q corefonts"
+pipe="$(mktemp)"
+rm -rf "${pipe}"
+mkfifo "${pipe}"
+
+$WORKDIR/winetricks -q corefonts > "${pipe}" &
+JOB_PID="${!}"
+
+zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close < "${pipe}"
+RETURN_ZENITY="${?}"
+rm -rf "${pipe}"
+
+if [ "${RETURN_ZENITY}" == "0" ] ; then
+	wait "${JOB_PID}"
+	JOB_STATUS="${?}"
+
+	if [ "${JOB_STATUS}" != "0" ] ; then
+		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q corefonts\n  - JOB_STATUS: ${JOB_STATUS}"
+	fi
+else
+	kill -15 ${JOB_PID}
+	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
+fi
+echo "winetricks -q corefonts DONE!"
 #-------------------------------------------------
-$WORKDIR/winetricks -q settings fontsmooth=rgb | zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close
 #-------------------------------------------------
-$WORKDIR/winetricks -q dotnet48 | zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close
+echo "winetricks -q settings fontsmooth=rgb"
+pipe="$(mktemp)"
+rm -rf "${pipe}"
+mkfifo "${pipe}"
+
+$WORKDIR/winetricks -q settings fontsmooth=rgb > "${pipe}" &
+JOB_PID="${!}"
+
+zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close < "${pipe}"
+RETURN_ZENITY="${?}"
+rm -rf "${pipe}"
+
+if [ "${RETURN_ZENITY}" == "0" ] ; then
+	wait "${JOB_PID}"
+	JOB_STATUS="${?}"
+
+	if [ "${JOB_STATUS}" != "0" ] ; then
+		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q settings fontsmooth=rgb\n  - JOB_STATUS: ${JOB_STATUS}"
+	fi
+else
+	kill -15 ${JOB_PID}
+	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
+fi
+echo "winetricks -q settings fontsmooth=rgb DONE!"
+#-------------------------------------------------
+#-------------------------------------------------
+echo "winetricks -q dotnet48"
+pipe="$(mktemp)"
+rm -rf "${pipe}"
+mkfifo "${pipe}"
+
+$WORKDIR/winetricks -q dotnet48 > "${pipe}" &
+JOB_PID="${!}"
+
+zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close < "${pipe}"
+RETURN_ZENITY="${?}"
+rm -rf "${pipe}"
+
+if [ "${RETURN_ZENITY}" == "0" ] ; then
+	wait "${JOB_PID}"
+	JOB_STATUS="${?}"
+
+	if [ "${JOB_STATUS}" != "0" ] ; then
+		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q dotnet48\n  - JOB_STATUS: ${JOB_STATUS}"
+	fi
+else
+	kill -15 ${JOB_PID}
+	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
+fi
+echo "winetricks -q dotnet48 DONE!"
 #-------------------------------------------------
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
