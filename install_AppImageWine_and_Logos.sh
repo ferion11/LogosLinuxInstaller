@@ -722,6 +722,7 @@ fi
 echo "winetricks -q settings fontsmooth=rgb DONE!"
 #-------------------------------------------------
 #-------------------------------------------------
+# --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
 echo "winetricks --force -q dotnet48"
 pipe="$(mktemp)"
 rm -rf "${pipe}"
