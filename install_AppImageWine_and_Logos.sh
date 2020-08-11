@@ -722,12 +722,12 @@ fi
 echo "winetricks -q settings fontsmooth=rgb DONE!"
 #-------------------------------------------------
 #-------------------------------------------------
-echo "winetricks -q dotnet48"
+echo "winetricks --force -q dotnet48"
 pipe="$(mktemp)"
 rm -rf "${pipe}"
 mkfifo "${pipe}"
 
-$WORKDIR/winetricks -q dotnet48 > "${pipe}" &
+$WORKDIR/winetricks --force -q dotnet48 > "${pipe}" &
 JOB_PID="${!}"
 
 zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close < "${pipe}"
