@@ -541,21 +541,48 @@ echo "Starting Zenity GUI..."
 
 
 #======= Main =============
+case "${1}" in
+	"skel32")
+		echo "* Making skel32 inside ${INSTALLDIR}"
+		mkdir -p "${WORKDIR}"
+		mkdir -p "${INSTALLDIR}"
+		mkdir "${APPDIR}" || die "can't make dir: ${APPDIR}"
 
-if [ "$1" = "scripts" ]; then
-	mkdir "$WORKDIR"
+		# Making the links (and dir)
+		mkdir "${APPDIR_BIN}" || die "can't make dir: ${APPDIR_BIN}"
+		cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
+		ln -s "../${APPIMAGE_NAME}" wine
+		ln -s "../${APPIMAGE_NAME}" wineserver
+		cd - || die "ERROR: Can't go back to preview dir!"
 
-	mkdir /tmp/scripts32 || die "can't create the directory /tmp/scripts32"
-	export INSTALLDIR="/tmp/scripts32"
-	create_starting_scripts_32
+		mkdir "$APPDIR/wine32_bottle"
+		create_starting_scripts_32
 
-	mkdir /tmp/scripts64 || die "can't create the directory /tmp/scripts64"
-	export INSTALLDIR="/tmp/scripts64"
-	create_starting_scripts_64
+		rm -rf "$WORKDIR"
+		echo "skel32 done!"
+		exit 0
+		;;
+	"skel64")
+		echo "* Making skel64 inside ${INSTALLDIR}"
+		mkdir -p "${WORKDIR}"
+		mkdir -p "${INSTALLDIR}"
+		mkdir "${APPDIR}" || die "can't make dir: ${APPDIR}"
 
-	rm -rf "$WORKDIR"
-	exit 0
-fi
+		## Making the links (and dir)
+		#mkdir "${APPDIR_BIN}" || die "can't make dir: ${APPDIR_BIN}"
+		#cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
+		#ln -s "../${APPIMAGE_NAME}" wine
+		#ln -s "../${APPIMAGE_NAME}" wineserver
+		#cd - || die "ERROR: Can't go back to preview dir!"
+
+		mkdir "$APPDIR/wine64_bottle"
+		create_starting_scripts_64
+
+		rm -rf "$WORKDIR"
+		echo "skel64 done!"
+		exit 0
+		;;
+esac
 
 if [ -d "$INSTALLDIR" ]; then
 	echo "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
