@@ -7,11 +7,11 @@ export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logo
 export LOGOS64_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x64.msi"
 export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/continuous/wine-i386_x86_64-archlinux.AppImage"
 export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
-#LOGOS_MVERSION=$(echo $LOGOS_URL | cut -d/ -f4)
+#LOGOS_MVERSION=$(echo "${LOGOS_URL}" | cut -d/ -f4)
 #export LOGOS_MVERSION
-LOGOS_VERSION="$(echo ${LOGOS_URL} | cut -d/ -f6)"
-LOGOS_MSI="$(echo ${LOGOS_URL} | cut -d/ -f7)"
-LOGOS64_MSI="$(echo ${LOGOS64_URL} | cut -d/ -f7)"
+LOGOS_VERSION="$(echo "${LOGOS_URL}" | cut -d/ -f6)"
+LOGOS_MSI="$(echo "${LOGOS_URL}" | cut -d/ -f7)"
+LOGOS64_MSI="$(echo "${LOGOS64_URL}" | cut -d/ -f7)"
 export LOGOS_VERSION
 export LOGOS_MSI
 export LOGOS64_MSI
@@ -20,12 +20,12 @@ if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
 if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible_Linux_P" ; fi
 
 export APPDIR="${INSTALLDIR}/data"
-export APPDIR_BIN="$APPDIR/bin"
+export APPDIR_BIN="${APPDIR}/bin"
 export APPIMAGE_NAME="wine-i386_x86_64-archlinux.AppImage"
 
 # --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
 if [ -z "${WINETRICKS_EXTRA_OPTION}" ]; then export WINETRICKS_EXTRA_OPTION="--force" ; fi
-#DOWNLOADED_RESOURCES=""
+if [ -z "${DOWNLOADED_RESOURCES}" ]; then export DOWNLOADED_RESOURCES="/tmp" ; fi
 
 
 #======= Aux =============
@@ -37,7 +37,7 @@ have_dep() {
 
 clean_all() {
 	echo "Cleaning all temp files..."
-	rm -rf "$WORKDIR"
+	rm -rf "${WORKDIR}"
 	echo "done"
 }
 
@@ -114,36 +114,34 @@ gtk_download() {
 	current="Starting..."
 	speed="Starting..."
 	remain="Starting..."
-	wget -c "$1" -O "$TARGET" 2>&1 | while read -r data; do
-		#if [ "$(echo "$data" | grep '^Length:')" ]; then
-		if echo "$data" | grep -q '^Length:' ; then
-			result=$(echo "$data" | grep "^Length:" | sed 's/.*\((.*)\).*/\1/' |  tr -d '()')
+	wget -c "$1" -O "${TARGET}" 2>&1 | while read -r data; do
+		if echo "${data}" | grep -q '^Length:' ; then
+			result="$(echo "${data}" | grep "^Length:" | sed 's/.*\((.*)\).*/\1/' |  tr -d '()')"
 			if [ ${#result} -le 10 ]; then total_size=${result} ; fi
 		fi
 
-		#if [ "$(echo "$data" | grep '[0-9]*%' )" ];then
-		if echo "$data" | grep -q '[0-9]*%' ;then
-			result=$(echo "$data" | grep -o "[0-9]*%" | tr -d '%')
+		if echo "${data}" | grep -q '[0-9]*%' ;then
+			result="$(echo "${data}" | grep -o "[0-9]*%" | tr -d '%')"
 			if [ ${#result} -le 3 ]; then percent=${result} ; fi
 
-			result=$(echo "$data" | grep "[0-9]*%" | sed 's/\([0-9BKMG]\+\).*/\1/' )
+			result="$(echo "${data}" | grep "[0-9]*%" | sed 's/\([0-9BKMG]\+\).*/\1/' )"
 			if [ ${#result} -le 10 ]; then current=${result} ; fi
 
-			result=$(echo "$data" | grep "[0-9]*%" | sed 's/.*\(% [0-9BKMG.]\+\).*/\1/' | tr -d ' %')
+			result="$(echo "${data}" | grep "[0-9]*%" | sed 's/.*\(% [0-9BKMG.]\+\).*/\1/' | tr -d ' %')"
 			if [ ${#result} -le 10 ]; then speed=${result} ; fi
 
-			result=$(echo "$data" | grep -o "[0-9A-Za-z]*$" )
+			result="$(echo "${data}" | grep -o "[0-9A-Za-z]*$" )"
 			if [ ${#result} -le 10 ]; then remain=${result} ; fi
 		fi
 
 		# report
-		echo "$percent"
-		echo "$percent" > "${percent_file}"
+		echo "${percent}"
+		echo "${percent}" > "${percent_file}"
 		# shellcheck disable=SC2028
-		echo "#Downloading: $FILENAME\ninto: $2\n\n$current of $total_size ($percent%)\nSpeed : $speed/Sec\nEstimated time : $remain"
+		echo "#Downloading: ${FILENAME}\ninto: $2\n\n${current} of ${total_size} \(${percent}%\)\nSpeed : ${speed}/Sec\nEstimated time : ${remain}"
 	done > "${pipe}" &
 
-	zenity --progress --title "Downloading $FILENAME..." --text="Downloading: $FILENAME\ninto: $2\n" --percentage=0 --auto-close < "${pipe}"
+	zenity --progress --title "Downloading ${FILENAME}..." --text="Downloading: ${FILENAME}\ninto: ${2}\n" --percentage=0 --auto-close < "${pipe}"
 	RETURN_ZENITY="${?}"
 	rm -rf "${pipe}"
 
@@ -475,7 +473,7 @@ if [ "$(id -u)" = 0 ]; then
 	echo "* Running Wine/winetricks as root is highly discouraged. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
 fi
 
-if [ -z "$DISPLAY" ]; then
+if [ -z "${DISPLAY}" ]; then
 	echo "* You want to run without X, but it don't work."
 	exit 1
 fi
@@ -555,10 +553,10 @@ case "${1}" in
 		ln -s "../${APPIMAGE_NAME}" wineserver
 		cd - || die "ERROR: Can't go back to preview dir!"
 
-		mkdir "$APPDIR/wine32_bottle"
+		mkdir "${APPDIR}/wine32_bottle"
 		create_starting_scripts_32
 
-		rm -rf "$WORKDIR"
+		rm -rf "${WORKDIR}"
 		echo "skel32 done!"
 		exit 0
 		;;
@@ -575,23 +573,25 @@ case "${1}" in
 		#ln -s "../${APPIMAGE_NAME}" wineserver
 		#cd - || die "ERROR: Can't go back to preview dir!"
 
-		mkdir "$APPDIR/wine64_bottle"
+		mkdir "${APPDIR}/wine64_bottle"
 		create_starting_scripts_64
 
-		rm -rf "$WORKDIR"
+		rm -rf "${WORKDIR}"
 		echo "skel64 done!"
 		exit 0
 		;;
+	*)
+		echo "No arguments parsed."
 esac
 
-if [ -d "$INSTALLDIR" ]; then
+if [ -d "${INSTALLDIR}" ]; then
 	echo "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
 	gtk_fatal_error "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
 fi
 
 installationChoice="$(zenity --width=400 --height=250 \
 	--title="Question: Install Logos Bible" \
-	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v$LOGOS_VERSION independent of others installations.\nPlease, select the type of installation:" \
+	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v${LOGOS_VERSION} independent of others installations.\nPlease, select the type of installation:" \
 	--list --radiolist --column "S" --column "Descrition" \
 	TRUE "1- Install LogosBible32 using Wine AppImage (default)." \
 	FALSE "2- Install LogosBible32 using the native Wine." \
@@ -601,14 +601,14 @@ case "${installationChoice}" in
 	1*)
 		echo "Installing LogosBible 32bits using Wine AppImage..."
 		export WINEARCH=win32
-		export WINEPREFIX="$APPDIR/wine32_bottle"
+		export WINEPREFIX="${APPDIR}/wine32_bottle"
 		export WINE_EXE="wine"
 		;;
 	2*)
 		echo "Installing LogosBible 32bits using the native Wine..."
 		export NO_APPIMAGE="1"
 		export WINEARCH=win32
-		export WINEPREFIX="$APPDIR/wine32_bottle"
+		export WINEPREFIX="${APPDIR}/wine32_bottle"
 		export WINE_EXE="wine"
 
 		# check for wine installation
@@ -622,7 +622,7 @@ case "${installationChoice}" in
 		echo "Installing LogosBible 64bits using the native Wine..."
 		export NO_APPIMAGE="1"
 		export WINEARCH=win64
-		export WINEPREFIX="$APPDIR/wine64_bottle"
+		export WINEPREFIX="${APPDIR}/wine64_bottle"
 		export WINE_EXE="wine64"
 
 		# check for wine installation
@@ -638,36 +638,36 @@ esac
 
 # Making the setup:
 echo "Setup making..."
-mkdir -p "$WORKDIR"
-mkdir -p "$INSTALLDIR"
-mkdir_critical "$APPDIR"
+mkdir -p "${WORKDIR}"
+mkdir -p "${INSTALLDIR}"
+mkdir_critical "${APPDIR}"
 # Making the links (and dir)
 mkdir_critical "${APPDIR_BIN}"
 cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
 ln -s "../${APPIMAGE_NAME}" wine
 ln -s "../${APPIMAGE_NAME}" wineserver
 cd - || die "ERROR: Can't go back to preview dir!"
-export PATH="${APPDIR_BIN}":$PATH
+export PATH="${APPDIR_BIN}":${PATH}
 echo "Setup ok!"
 
-if [ -z "$NO_APPIMAGE" ]; then
+if [ -z "${NO_APPIMAGE}" ]; then
 	echo "Using AppImage..."
 	#-------------------------
 	# Geting the AppImage:
 	if [ -f "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" ]; then
 		echo "${APPIMAGE_NAME} exist. Using it..."
-		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close --no-cancel
-		cp "${DOWNLOADED_RESOURCES}/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Copying..." --text="Copying: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close --no-cancel
+		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${APPIMAGE_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}.zsync" "${APPDIR}" | zenity --progress --title="Copying..." --text="Copying: ${APPIMAGE_NAME}.zsync\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	else
 		echo "${APPIMAGE_NAME} does not exist. Downloading..."
-		gtk_download "${WINE_APPIMAGE_URL}" "$WORKDIR"
+		gtk_download "${WINE_APPIMAGE_URL}" "${WORKDIR}"
 
-		mv "$WORKDIR/$APPIMAGE_NAME" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME\ninto: $APPDIR" --pulsate --auto-close --no-cancel
+		mv "${WORKDIR}/${APPIMAGE_NAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 
-		gtk_download "${WINE_APPIMAGE_URL}.zsync" "$WORKDIR"
-		mv "$WORKDIR/$APPIMAGE_NAME.zsync" "$APPDIR" | zenity --progress --title="Moving..." --text="Moving: $APPIMAGE_NAME.zsync\ninto: $APPDIR" --pulsate --auto-close --no-cancel
+		gtk_download "${WINE_APPIMAGE_URL}.zsync" "${WORKDIR}"
+		mv "${WORKDIR}/${APPIMAGE_NAME}.zsync" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_NAME}.zsync\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	fi
-	FILE="$APPDIR/$APPIMAGE_NAME"
+	FILE="${APPDIR}/${APPIMAGE_NAME}"
 	chmod +x "${FILE}"
 	#-------------------------
 fi
@@ -695,7 +695,7 @@ REGEDIT4
 EOF
 
 echo "${WINE_EXE} regedit.exe disable-winemenubuilder.reg"
-${WINE_EXE} regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in $WINEPREFIX:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close --no-cancel
+${WINE_EXE} regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in ${WINEPREFIX}:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close --no-cancel
 echo "${WINE_EXE} regedit.exe disable-winemenubuilder.reg DONE!"
 echo "${WINE_EXE} regedit.exe renderer_gdi.reg"
 ${WINE_EXE} regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close --no-cancel
@@ -703,8 +703,8 @@ echo "${WINE_EXE} regedit.exe renderer_gdi.reg DONE!"
 
 gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
 
-gtk_download "${WINETRICKS_URL}" "$WORKDIR"
-chmod +x "$WORKDIR/winetricks"
+gtk_download "${WINETRICKS_URL}" "${WORKDIR}"
+chmod +x "${WORKDIR}/winetricks"
 
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} -q corefonts"
@@ -728,7 +728,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q corefonts\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
-	kill -15 ${JOB_PID}
+	kill -15 "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
 echo "winetricks -q corefonts DONE!"
@@ -755,7 +755,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q settings fontsmooth=rgb\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
-	kill -15 ${JOB_PID}
+	kill -15 "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
 echo "winetricks -q settings fontsmooth=rgb DONE!"
@@ -782,7 +782,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q dotnet48\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
-	kill -15 ${JOB_PID}
+	kill -15 "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
 echo "winetricks -q dotnet48 DONE!"
@@ -791,15 +791,15 @@ echo "winetricks -q dotnet48 DONE!"
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
 # Geting and install the LogosBible:
-case "$WINEARCH" in
+case "${WINEARCH}" in
 	win32)
 		echo "Installing LogosBible 32bits..."
 		if [ -f "${DOWNLOADED_RESOURCES}/${LOGOS_MSI}" ]; then
 			echo "${LOGOS_MSI} exist. Using it..."
-			cp "${DOWNLOADED_RESOURCES}/${LOGOS_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS_MSI}\ninto: $WORKDIR" --pulsate --auto-close --no-cancel
+			cp "${DOWNLOADED_RESOURCES}/${LOGOS_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 		else
 			echo "${LOGOS_MSI} does not exist. Downloading..."
-			gtk_download "${LOGOS_URL}" "$WORKDIR"
+			gtk_download "${LOGOS_URL}" "${WORKDIR}"
 		fi
 		${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS_MSI}"
 		create_starting_scripts_32
@@ -808,10 +808,10 @@ case "$WINEARCH" in
 		echo "Installing LogosBible 64bits..."
 		if [ -f "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" ]; then
 			echo "${LOGOS64_MSI} exist. Using it..."
-			cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: $WORKDIR" --pulsate --auto-close --no-cancel
+			cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 		else
 			echo "${LOGOS64_MSI} does not exist. Downloading..."
-			gtk_download "${LOGOS64_URL}" "$WORKDIR"
+			gtk_download "${LOGOS64_URL}" "${WORKDIR}"
 		fi
 		${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
 		create_starting_scripts_64
