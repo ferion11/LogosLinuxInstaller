@@ -151,6 +151,7 @@ gtk_download() {
 	rm -rf "${percent_file}"
 	if [ "${RETURN_ZENITY}" == "0" ] ; then
 		if [ "${percent}" != "100" ] ; then
+			echo "ERROR: incomplete downloaded file! ${FILENAME}  - percent: ${percent}"
 			gtk_fatal_error "The installation is cancelled because of incomplete downloaded file!\n * ${FILENAME}\n  - percent: ${percent}"
 		fi
 	else
@@ -496,36 +497,42 @@ fi
 if have_dep wget; then
 	echo '* wget is installed!'
 else
+	echo '* Your system does not have wget. Please install wget package.'
 	gtk_fatal_error "Your system does not have wget. Please install wget package."
 fi
 
 if have_dep find; then
 	echo '* command find is installed!'
 else
+	echo '* Your system does not have find. Please install find package.'
 	gtk_fatal_error "Your system does not have command find. Please install command find package."
 fi
 
 if have_dep sed; then
 	echo '* command sed is installed!'
 else
+	echo '* Your system does not have sed. Please install sed package.'
 	gtk_fatal_error "Your system does not have command sed. Please install command sed package."
 fi
 
 if have_dep grep; then
 	echo '* command grep is installed!'
 else
+	echo '* Your system does not have grep. Please install grep package.'
 	gtk_fatal_error "Your system does not have command grep. Please install command grep package."
 fi
 
 if have_dep cabextract; then
 	echo '* command cabextract is installed!'
 else
+	echo '* Your system does not have cabextract. Please install cabextract package.'
 	gtk_fatal_error "Your system does not have command cabextract. Please install command cabextract package."
 fi
 
 if have_dep ntlm_auth; then
 	echo '* command ntlm_auth is installed!'
 else
+	echo '* Your system does not have ntlm_auth. Please install ntlm_auth package.'
 	gtk_fatal_error "Your system does not have command ntlm_auth. Please install command ntlm_auth package (Usually winbind or samba)."
 fi
 
