@@ -9,15 +9,15 @@ export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/dow
 export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
 #LOGOS_MVERSION=$(echo $LOGOS_URL | cut -d/ -f4)
 #export LOGOS_MVERSION
-LOGOS_VERSION=$(echo $LOGOS_URL | cut -d/ -f6)
-LOGOS_MSI=$(echo $LOGOS_URL | cut -d/ -f7)
-LOGOS64_MSI=$(echo $LOGOS64_URL | cut -d/ -f7)
+LOGOS_VERSION="$(echo ${LOGOS_URL} | cut -d/ -f6)"
+LOGOS_MSI="$(echo ${LOGOS_URL} | cut -d/ -f7)"
+LOGOS64_MSI="$(echo ${LOGOS64_URL} | cut -d/ -f7)"
 export LOGOS_VERSION
 export LOGOS_MSI
 export LOGOS64_MSI
 
-if [ -z "$WORKDIR" ]; then export WORKDIR="$(mktemp -d)" ; fi
-if [ -z "$INSTALLDIR" ]; then export INSTALLDIR="$HOME/LogosBible_Linux_P" ; fi
+if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
+if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible_Linux_P" ; fi
 
 export APPDIR="${INSTALLDIR}/data"
 export APPDIR_BIN="$APPDIR/bin"
@@ -712,7 +712,7 @@ pipe="$(mktemp)"
 rm -rf "${pipe}"
 mkfifo "${pipe}"
 
-$WORKDIR/winetricks "${WINETRICKS_EXTRA_OPTION}" -q corefonts > "${pipe}" &
+"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" -q corefonts > "${pipe}" &
 JOB_PID="${!}"
 
 zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close < "${pipe}"
@@ -739,7 +739,7 @@ pipe="$(mktemp)"
 rm -rf "${pipe}"
 mkfifo "${pipe}"
 
-$WORKDIR/winetricks "${WINETRICKS_EXTRA_OPTION}" -q settings fontsmooth=rgb > "${pipe}" &
+"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" -q settings fontsmooth=rgb > "${pipe}" &
 JOB_PID="${!}"
 
 zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close < "${pipe}"
@@ -766,7 +766,7 @@ pipe="$(mktemp)"
 rm -rf "${pipe}"
 mkfifo "${pipe}"
 
-$WORKDIR/winetricks "${WINETRICKS_EXTRA_OPTION}" -q dotnet48 > "${pipe}" &
+"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" -q dotnet48 > "${pipe}" &
 JOB_PID="${!}"
 
 zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close < "${pipe}"
