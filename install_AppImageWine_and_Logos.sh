@@ -24,7 +24,7 @@ export APPDIR_BIN="$APPDIR/bin"
 export APPIMAGE_NAME="wine-i386_x86_64-archlinux.AppImage"
 
 # --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
-WINETRICKS_EXTRA_OPTION="--force"
+if [ -z "${WINETRICKS_EXTRA_OPTION}" ]; then export WINETRICKS_EXTRA_OPTION="--force" ; fi
 #DOWNLOADED_RESOURCES=""
 
 
