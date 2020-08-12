@@ -23,6 +23,8 @@ export APPDIR="${INSTALLDIR}/data"
 export APPDIR_BIN="$APPDIR/bin"
 export APPIMAGE_NAME="wine-i386_x86_64-archlinux.AppImage"
 
+# --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
+WINETRICKS_EXTRA_OPTION="--force"
 #DOWNLOADED_RESOURCES=""
 
 
@@ -670,12 +672,12 @@ gtk_download "${WINETRICKS_URL}" "$WORKDIR"
 chmod +x "$WORKDIR/winetricks"
 
 #-------------------------------------------------
-echo "winetricks -q corefonts"
+echo "winetricks ${WINETRICKS_EXTRA_OPTION} -q corefonts"
 pipe="$(mktemp)"
 rm -rf "${pipe}"
 mkfifo "${pipe}"
 
-$WORKDIR/winetricks -q corefonts > "${pipe}" &
+$WORKDIR/winetricks "${WINETRICKS_EXTRA_OPTION}" -q corefonts > "${pipe}" &
 JOB_PID="${!}"
 
 zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close < "${pipe}"
@@ -687,6 +689,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 	JOB_STATUS="${?}"
 
 	if [ "${JOB_STATUS}" != "0" ] ; then
+		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} -q corefonts; JOB_STATUS: ${JOB_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q corefonts\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
@@ -696,12 +699,12 @@ fi
 echo "winetricks -q corefonts DONE!"
 #-------------------------------------------------
 #-------------------------------------------------
-echo "winetricks -q settings fontsmooth=rgb"
+echo "winetricks ${WINETRICKS_EXTRA_OPTION} -q settings fontsmooth=rgb"
 pipe="$(mktemp)"
 rm -rf "${pipe}"
 mkfifo "${pipe}"
 
-$WORKDIR/winetricks -q settings fontsmooth=rgb > "${pipe}" &
+$WORKDIR/winetricks "${WINETRICKS_EXTRA_OPTION}" -q settings fontsmooth=rgb > "${pipe}" &
 JOB_PID="${!}"
 
 zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close < "${pipe}"
@@ -713,6 +716,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 	JOB_STATUS="${?}"
 
 	if [ "${JOB_STATUS}" != "0" ] ; then
+		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} -q settings fontsmooth=rgb; JOB_STATUS: ${JOB_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q settings fontsmooth=rgb\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
@@ -722,13 +726,12 @@ fi
 echo "winetricks -q settings fontsmooth=rgb DONE!"
 #-------------------------------------------------
 #-------------------------------------------------
-# --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
-echo "winetricks --force -q dotnet48"
+echo "winetricks ${WINETRICKS_EXTRA_OPTION} -q dotnet48"
 pipe="$(mktemp)"
 rm -rf "${pipe}"
 mkfifo "${pipe}"
 
-$WORKDIR/winetricks --force -q dotnet48 > "${pipe}" &
+$WORKDIR/winetricks "${WINETRICKS_EXTRA_OPTION}" -q dotnet48 > "${pipe}" &
 JOB_PID="${!}"
 
 zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close < "${pipe}"
@@ -740,6 +743,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 	JOB_STATUS="${?}"
 
 	if [ "${JOB_STATUS}" != "0" ] ; then
+		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} -q dotnet48; JOB_STATUS: ${JOB_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q dotnet48\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
