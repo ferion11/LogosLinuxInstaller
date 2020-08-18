@@ -21,7 +21,7 @@ You can download the last release [[HERE]](https://github.com/ferion11/LogosLinu
 
 * The default is using the 32bit AppImage, that provide better isolation. But you can choose do it using your native wine 32bits (that I recommend do using the 32bits, but you will need multilib wine installed in your 64bits system) or 64bit (is very unstable, work only on few cases, and need one wine 64bits made with WoW64 compatibility layer with 32bits, because dotnet need the 32bits wine working to install it on the 64bit profile). Regardless of your choice, the installation will be done in isolation from the others.
 
-* Who is travis? Travis-ci is the automated system that test and generates the images, [[HERE]](https://github.com/ferion11/LogosLinuxInstallTests/releases "[HERE]")
+* Who is travis? Travis-ci is the automated system that test and generates the images, [[HERE]](https://github.com/ferion11/LogosLinuxInstallTests "[HERE]")
 
 #### 02- It will download the AppImage, if needed:
 
