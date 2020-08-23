@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.5-rc1"
+export THIS_SCRIPT_VERSION="v2.5-rc2"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -208,11 +208,11 @@ fi
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
 	WORKDIR="\$(mktemp -d)"
-	wget -c -P \${WORKDIR} https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-	chmod +x \${WORKDIR}/winetricks
+	wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	chmod +x "\${WORKDIR}"/winetricks
 	shift
-	\${WORKDIR}/winetricks "\$@"
-	rm -rf \${WORKDIR}
+	"\${WORKDIR}"/winetricks "\$@"
+	rm -rf "\${WORKDIR}"
 	echo "======= winetricks run done! ======="
 	exit 0
 fi
@@ -220,7 +220,7 @@ fi
 # Indexing Run:
 if [ "\$1" = "indexing" ] ; then
 	echo "======= Running indexing on the Logos inside this installation only: ======="
-	LOGOS_INDEXER_EXE=\$(find \${WINEPREFIX} -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
+	LOGOS_INDEXER_EXE=\$(find "\${WINEPREFIX}" -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
 	if [ -z "\${LOGOS_INDEXER_EXE}" ] ; then
 		echo "* ERROR: the LogosIndexer.exe can't be found!!!"
 		exit 1
@@ -234,7 +234,7 @@ if [ "\$1" = "indexing" ] ; then
 	exit 0
 fi
 
-LOGOS_EXE=\$(find \${WINEPREFIX} -name Logos.exe | grep "Logos\/Logos.exe")
+LOGOS_EXE=\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")
 if [ -z "\$LOGOS_EXE" ] ; then
 	echo "======= Running control: ======="
 	"\${HERE}/controlPanel.sh"
@@ -295,11 +295,11 @@ fi
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
 	WORKDIR="\$(mktemp -d)"
-	wget -c -P \${WORKDIR} https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-	chmod +x \${WORKDIR}/winetricks
+	wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	chmod +x "\${WORKDIR}"/winetricks
 	shift
-	\${WORKDIR}/winetricks "\$@"
-	rm -rf \${WORKDIR}
+	"\${WORKDIR}"/winetricks "\$@"
+	rm -rf "\${WORKDIR}"
 	echo "======= winetricks run done! ======="
 	exit 0
 fi
@@ -360,11 +360,11 @@ fi
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
 	WORKDIR="\$(mktemp -d)"
-	wget -c -P \${WORKDIR} https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-	chmod +x \${WORKDIR}/winetricks
+	wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	chmod +x "\${WORKDIR}"/winetricks
 	shift
-	\${WORKDIR}/winetricks "\$@"
-	rm -rf \${WORKDIR}
+	"\${WORKDIR}"/winetricks "\$@"
+	rm -rf "\${WORKDIR}"
 	echo "======= winetricks run done! ======="
 	exit 0
 fi
@@ -372,7 +372,7 @@ fi
 # Indexing Run:
 if [ "\$1" = "indexing" ] ; then
 	echo "======= Running indexing on the Logos inside this installation only: ======="
-	LOGOS_INDEXER_EXE=\$(find \${WINEPREFIX} -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
+	LOGOS_INDEXER_EXE=\$(find "\${WINEPREFIX}" -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
 	if [ -z "\${LOGOS_INDEXER_EXE}" ] ; then
 		echo "* ERROR: the LogosIndexer.exe can't be found!!!"
 		exit 1
@@ -386,7 +386,7 @@ if [ "\$1" = "indexing" ] ; then
 	exit 0
 fi
 
-LOGOS_EXE=\$(find \${WINEPREFIX} -name Logos.exe | grep "Logos\/Logos.exe")
+LOGOS_EXE=\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")
 if [ -z "\$LOGOS_EXE" ] ; then
 	echo "======= Running control: ======="
 	"\${HERE}/controlPanel.sh"
@@ -447,11 +447,11 @@ fi
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
 	WORKDIR="\$(mktemp -d)"
-	wget -c -P \${WORKDIR} https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-	chmod +x \${WORKDIR}/winetricks
+	wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	chmod +x "\${WORKDIR}"/winetricks
 	shift
-	\${WORKDIR}/winetricks "\$@"
-	rm -rf \${WORKDIR}
+	"\${WORKDIR}"/winetricks "\$@"
+	rm -rf "\${WORKDIR}"
 	echo "======= winetricks run done! ======="
 	exit 0
 fi
