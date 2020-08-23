@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.6-rc2"
+export THIS_SCRIPT_VERSION="v2.6-rc3"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -736,7 +736,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 	wait "${JOB_PID}"
 	JOB_STATUS="${?}"
 
-	if [ "${JOB_STATUS}" != "0" ] && [ "${JOB_STATUS}" != "141" ] ; then
+	if [ "${JOB_STATUS}" != "0" ] ; then
 		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} corefonts; JOB_STATUS: ${JOB_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q corefonts\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
@@ -764,7 +764,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 	wait "${JOB_PID}"
 	JOB_STATUS="${?}"
 
-	if [ "${JOB_STATUS}" != "0" ] && [ "${JOB_STATUS}" != "141" ] ; then
+	if [ "${JOB_STATUS}" != "0" ] ; then
 		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb; JOB_STATUS: ${JOB_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q settings fontsmooth=rgb\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
@@ -792,7 +792,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 	wait "${JOB_PID}"
 	JOB_STATUS="${?}"
 
-	if [ "${JOB_STATUS}" != "0" ] && [ "${JOB_STATUS}" != "141" ] ; then
+	if [ "${JOB_STATUS}" != "0" ] ; then
 		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48; JOB_STATUS: ${JOB_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q dotnet48\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
