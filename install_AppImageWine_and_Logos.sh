@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.4"
+export THIS_SCRIPT_VERSION="v2.5-rc0"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -23,8 +23,8 @@ export APPDIR="${INSTALLDIR}/data"
 export APPDIR_BIN="${APPDIR}/bin"
 export APPIMAGE_NAME="wine-i386_x86_64-archlinux.AppImage"
 
-# --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
-if [ -z "${WINETRICKS_EXTRA_OPTION}" ]; then export WINETRICKS_EXTRA_OPTION="--force" ; fi
+## --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
+#if [ -z "${WINETRICKS_EXTRA_OPTION}" ]; then export WINETRICKS_EXTRA_OPTION="--force" ; fi
 if [ -z "${DOWNLOADED_RESOURCES}" ]; then export DOWNLOADED_RESOURCES="/tmp" ; fi
 
 
@@ -731,7 +731,7 @@ else
 	kill -15 "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
-echo "winetricks -q corefonts DONE!"
+echo "winetricks ${WINETRICKS_EXTRA_OPTION} -q corefonts DONE!"
 #-------------------------------------------------
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} -q settings fontsmooth=rgb"
@@ -758,7 +758,7 @@ else
 	kill -15 "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
-echo "winetricks -q settings fontsmooth=rgb DONE!"
+echo "winetricks ${WINETRICKS_EXTRA_OPTION} -q settings fontsmooth=rgb DONE!"
 #-------------------------------------------------
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} -q dotnet48"
@@ -785,7 +785,7 @@ else
 	kill -15 "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
-echo "winetricks -q dotnet48 DONE!"
+echo "winetricks ${WINETRICKS_EXTRA_OPTION} -q dotnet48 DONE!"
 #-------------------------------------------------
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
