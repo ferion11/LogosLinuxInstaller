@@ -747,7 +747,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q corefonts\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
-	kill -15 "${JOB_PID}"
+	kill -SIGTERM "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} corefonts DONE!"
@@ -778,7 +778,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q settings fontsmooth=rgb\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
-	kill -15 "${JOB_PID}"
+	kill -SIGTERM "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb DONE!"
@@ -809,7 +809,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q dotnet48\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
-	kill -15 "${JOB_PID}"
+	kill -SIGTERM "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48 DONE!"
