@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.6-rc1"
+export THIS_SCRIPT_VERSION="v2.6-rc2"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -147,6 +147,7 @@ gtk_download() {
 
 	zenity --progress --title "Downloading ${FILENAME}..." --text="Downloading: ${FILENAME}\ninto: ${2}\n" --percentage=0 --auto-close < "${pipe}"
 	RETURN_ZENITY="${?}"
+	#fuser -TERM -k -w "${pipe}"
 	rm -rf "${pipe}"
 
 	percent="$(cat "${percent_file}")"
@@ -489,6 +490,13 @@ else
 	exit 1
 fi
 
+if have_dep fuser; then
+	echo '* fuser is installed!'
+else
+	echo '* Your system does not have fuser. Please install fuser package (Usually psmisc).'
+	exit 1
+fi
+
 if have_dep zenity; then
 	echo '* Zenity is installed!'
 else
@@ -721,13 +729,14 @@ JOB_PID="${!}"
 
 zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close < "${pipe}"
 RETURN_ZENITY="${?}"
+#fuser -TERM -k -w "${pipe}"
 rm -rf "${pipe}"
 
 if [ "${RETURN_ZENITY}" == "0" ] ; then
 	wait "${JOB_PID}"
 	JOB_STATUS="${?}"
 
-	if [ "${JOB_STATUS}" != "0" ] ; then
+	if [ "${JOB_STATUS}" != "0" ] && [ "${JOB_STATUS}" != "141" ] ; then
 		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} corefonts; JOB_STATUS: ${JOB_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q corefonts\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
@@ -748,13 +757,14 @@ JOB_PID="${!}"
 
 zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close < "${pipe}"
 RETURN_ZENITY="${?}"
+#fuser -TERM -k -w "${pipe}"
 rm -rf "${pipe}"
 
 if [ "${RETURN_ZENITY}" == "0" ] ; then
 	wait "${JOB_PID}"
 	JOB_STATUS="${?}"
 
-	if [ "${JOB_STATUS}" != "0" ] ; then
+	if [ "${JOB_STATUS}" != "0" ] && [ "${JOB_STATUS}" != "141" ] ; then
 		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb; JOB_STATUS: ${JOB_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q settings fontsmooth=rgb\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
@@ -775,13 +785,14 @@ JOB_PID="${!}"
 
 zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close < "${pipe}"
 RETURN_ZENITY="${?}"
+#fuser -TERM -k -w "${pipe}"
 rm -rf "${pipe}"
 
 if [ "${RETURN_ZENITY}" == "0" ] ; then
 	wait "${JOB_PID}"
 	JOB_STATUS="${?}"
 
-	if [ "${JOB_STATUS}" != "0" ] ; then
+	if [ "${JOB_STATUS}" != "0" ] && [ "${JOB_STATUS}" != "141" ] ; then
 		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48; JOB_STATUS: ${JOB_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q dotnet48\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
