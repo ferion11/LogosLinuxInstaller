@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.6-rc4"
+export THIS_SCRIPT_VERSION="v2.6-rc5"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -58,6 +58,7 @@ gtk_error() {
 gtk_fatal_error() {
 	gtk_error "$@"
 	echo "End in failure!"
+	kill -SIGKILL "-$(($(ps -o pgid= -p "${$}")))"
 	exit 1
 }
 
@@ -147,6 +148,7 @@ gtk_download() {
 
 	# workaround to keep the pipe open until the end of download
 	tail -f < "${pipe}" > /dev/null &
+	TAIL_PID="${!}"
 
 	zenity --progress --title "Downloading ${FILENAME}..." --text="Downloading: ${FILENAME}\ninto: ${2}\n" --percentage=0 --auto-close < "${pipe}"
 	RETURN_ZENITY="${?}"
@@ -161,6 +163,7 @@ gtk_download() {
 			gtk_fatal_error "The installation is cancelled because of incomplete downloaded file!\n * ${FILENAME}\n  - percent: ${percent}"
 		fi
 	else
+		kill -SIGTERM "${TAIL_PID}"
 		gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 	fi
 	echo "${FILENAME} download finished!"
@@ -732,6 +735,7 @@ JOB_PID="${!}"
 
 # workaround to keep the pipe open until the end of winetricks
 tail -f < "${pipe}" > /dev/null &
+TAIL_PID="${!}"
 
 zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close < "${pipe}"
 RETURN_ZENITY="${?}"
@@ -747,6 +751,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q corefonts\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
+	kill -SIGTERM "${TAIL_PID}"
 	kill -SIGTERM "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
@@ -763,6 +768,7 @@ JOB_PID="${!}"
 
 # workaround to keep the pipe open until the end of winetricks
 tail -f < "${pipe}" > /dev/null &
+TAIL_PID="${!}"
 
 zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close < "${pipe}"
 RETURN_ZENITY="${?}"
@@ -778,6 +784,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q settings fontsmooth=rgb\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
+	kill -SIGTERM "${TAIL_PID}"
 	kill -SIGTERM "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
@@ -794,6 +801,7 @@ JOB_PID="${!}"
 
 # workaround to keep the pipe open until the end of winetricks
 tail -f < "${pipe}" > /dev/null &
+TAIL_PID="${!}"
 
 zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close < "${pipe}"
 RETURN_ZENITY="${?}"
@@ -809,6 +817,7 @@ if [ "${RETURN_ZENITY}" == "0" ] ; then
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q dotnet48\n  - JOB_STATUS: ${JOB_STATUS}"
 	fi
 else
+	kill -SIGTERM "${TAIL_PID}"
 	kill -SIGTERM "${JOB_PID}"
 	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
 fi
