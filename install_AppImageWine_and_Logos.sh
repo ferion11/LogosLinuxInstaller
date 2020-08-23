@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.6-rc3"
+export THIS_SCRIPT_VERSION="v2.6-rc4"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -144,6 +144,9 @@ gtk_download() {
 		# shellcheck disable=SC2028
 		echo "#Downloading: ${FILENAME}\ninto: $2\n\n${current} of ${total_size} \(${percent}%\)\nSpeed : ${speed}/Sec\nEstimated time : ${remain}"
 	done > "${pipe}" &
+
+	# workaround to keep the pipe open until the end of download
+	tail -f < "${pipe}" > /dev/null &
 
 	zenity --progress --title "Downloading ${FILENAME}..." --text="Downloading: ${FILENAME}\ninto: ${2}\n" --percentage=0 --auto-close < "${pipe}"
 	RETURN_ZENITY="${?}"
@@ -727,6 +730,9 @@ mkfifo "${pipe}"
 "${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" corefonts > "${pipe}" &
 JOB_PID="${!}"
 
+# workaround to keep the pipe open until the end of winetricks
+tail -f < "${pipe}" > /dev/null &
+
 zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close < "${pipe}"
 RETURN_ZENITY="${?}"
 #fuser -TERM -k -w "${pipe}"
@@ -755,6 +761,9 @@ mkfifo "${pipe}"
 "${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" settings fontsmooth=rgb > "${pipe}" &
 JOB_PID="${!}"
 
+# workaround to keep the pipe open until the end of winetricks
+tail -f < "${pipe}" > /dev/null &
+
 zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close < "${pipe}"
 RETURN_ZENITY="${?}"
 #fuser -TERM -k -w "${pipe}"
@@ -782,6 +791,9 @@ mkfifo "${pipe}"
 
 "${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" dotnet48 > "${pipe}" &
 JOB_PID="${!}"
+
+# workaround to keep the pipe open until the end of winetricks
+tail -f < "${pipe}" > /dev/null &
 
 zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close < "${pipe}"
 RETURN_ZENITY="${?}"
