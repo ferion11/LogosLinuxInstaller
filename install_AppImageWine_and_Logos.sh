@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.8-rc0"
+export THIS_SCRIPT_VERSION="v2.8-rc1"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -187,7 +187,7 @@ IFS_TMP=\$IFS
 IFS=$'\n'
 
 #-------------------------------------------
-export PATH="\${HERE}/data/bin:\${PATH}"
+[[ -f "\${HERE}/data/bin/wine" ]] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win32
 export WINEPREFIX="\${HERE}/data/wine32_bottle"
 #-------------------------------------------
@@ -274,7 +274,7 @@ IFS_TMP=\$IFS
 IFS=$'\n'
 
 #-------------------------------------------
-export PATH="\${HERE}/data/bin:\${PATH}"
+[[ -f "\${HERE}/data/bin/wine" ]] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win32
 export WINEPREFIX="\${HERE}/data/wine32_bottle"
 #-------------------------------------------
@@ -339,7 +339,7 @@ IFS_TMP=\$IFS
 IFS=$'\n'
 
 #-------------------------------------------
-export PATH="\${HERE}/data/bin:\${PATH}"
+[[ -f "\${HERE}/data/bin/wine64" ]] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win64
 export WINEPREFIX="\${HERE}/data/wine64_bottle"
 #-------------------------------------------
@@ -426,7 +426,7 @@ IFS_TMP=\$IFS
 IFS=$'\n'
 
 #-------------------------------------------
-export PATH="\${HERE}/data/bin:\${PATH}"
+[[ -f "\${HERE}/data/bin/wine64" ]] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win64
 export WINEPREFIX="\${HERE}/data/wine64_bottle"
 #-------------------------------------------
@@ -665,7 +665,7 @@ cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
 ln -s "../${APPIMAGE_NAME}" wine
 ln -s "../${APPIMAGE_NAME}" wineserver
 cd - || die "ERROR: Can't go back to preview dir!"
-export PATH="${APPDIR_BIN}":${PATH}
+[[ -z "${NO_APPIMAGE}" ]] && export PATH="${APPDIR_BIN}":${PATH}
 echo "Setup ok!"
 
 if [ -z "${NO_APPIMAGE}" ]; then
