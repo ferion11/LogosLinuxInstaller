@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.9-rc0"
+export THIS_SCRIPT_VERSION="v2.9-rc1"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -9,6 +9,7 @@ export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/dow
 #export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
 # back to Jul 23, 2020 release of winetricks, not more of the last git random broken fun:
 export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks"
+export WINETRICKS_DOWNLOADER="wget"
 #LOGOS_MVERSION=$(echo "${LOGOS_URL}" | cut -d/ -f4)
 #export LOGOS_MVERSION
 LOGOS_VERSION="$(echo "${LOGOS_URL}" | cut -d/ -f6)"
