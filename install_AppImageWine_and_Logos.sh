@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.8"
+export THIS_SCRIPT_VERSION="v2.9-rc0"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -721,7 +721,13 @@ echo "${WINE_EXE} regedit.exe renderer_gdi.reg DONE!"
 
 gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
 
-gtk_download "${WINETRICKS_URL}" "${WORKDIR}"
+if [ -f "${DOWNLOADED_RESOURCES}/winetricks" ]; then
+	echo "winetricks exist. Using it..."
+	cp "${DOWNLOADED_RESOURCES}/winetricks" "${WORKDIR}"
+else
+	echo "winetricks does not exist. Downloading..."
+	gtk_download "${WINETRICKS_URL}" "${WORKDIR}"
+fi
 chmod +x "${WORKDIR}/winetricks"
 
 #-------------------------------------------------
