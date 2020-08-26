@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.9-rc2"
+export THIS_SCRIPT_VERSION="v2.9-rc3"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -863,9 +863,7 @@ case "${WINEARCH}" in
 		gtk_fatal_error "Installation failed!"
 esac
 
-if gtk_question "Do you want to clean the temp files?"; then
-	clean_all
-fi
+clean_all
 
 if gtk_question "Logos Bible Installed!\nYou can run it using the script Logos.sh inside ${INSTALLDIR}.\nDo you want to run it now?\nNOTE: Just close the error on the first execution."; then
 	"${INSTALLDIR}"/Logos.sh
