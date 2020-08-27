@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.9"
+export THIS_SCRIPT_VERSION="v2.10-rc0"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -854,6 +854,7 @@ if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
 	FILE="${APPDIR}/${APPIMAGE_NAME}"
 	chmod +x "${FILE}"
 	echo "Using: $(wine --version)"
+	${WINE_EXE} wineboot
 fi
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
