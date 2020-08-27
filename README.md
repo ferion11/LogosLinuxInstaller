@@ -116,6 +116,8 @@ If the windows does leave the screen then just holding the `Alt` key you can mov
  - `$ ./Logos.sh wine regedit.exe`
  - `$ ./Logos.sh winetricks calibri`
 
+* If, after the installation, you want to use a different version of winetricks, just copy it to the same directory that the `Logos.sh` and `controlPanel.sh`, then the 2 scripts will use it, instead of download the last git version.
+
 * You can run the standalone Logos Bible indexing on the console with:
  - `$ ./Logos.sh indexing`
 
