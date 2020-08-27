@@ -109,16 +109,16 @@ If the windows does leave the screen then just holding the `Alt` key you can mov
 * It can be renamed and moved which should maintain functionality (with only a few limitations like changing the name of the linux user).
 
 * Inside it there are two scripts:
- - `Logos.sh` : used to run the LogosBible installed in this directory.
- - `controlPanel.sh` : used to call the Windows Control Panel of this installation, so that you can easily remove and install new versions manually without having to resort to complicated procedures.
+  - `Logos.sh` : used to run the LogosBible installed in this directory.
+  - `controlPanel.sh` : used to call the Windows Control Panel of this installation, so that you can easily remove and install new versions manually without having to resort to complicated procedures.
 
 * You can also use the `Logos.sh` or `controlPanel.sh` to execute Wine or winetricks commands on that installation, like:
- - `$ ./Logos.sh wine regedit.exe`
- - `$ ./Logos.sh winetricks calibri`
+  - `$ ./Logos.sh wine regedit.exe`
+  - `$ ./Logos.sh winetricks calibri`
 
 * If, after the installation, you want to use a different version of winetricks, just copy it to the same directory that the `Logos.sh` and `controlPanel.sh`, then the 2 scripts will use it, instead of download the last git version.
 
 * You can run the standalone Logos Bible indexing on the console with:
- - `$ ./Logos.sh indexing`
+  - `$ ./Logos.sh indexing`
 
 * The `data` directory contains the Wine Bottle and possibly the AppImage, for this installation.
