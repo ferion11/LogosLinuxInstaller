@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.10-rc1"
+export THIS_SCRIPT_VERSION="v2.10-rc2"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -178,8 +178,9 @@ gtk_download() {
 	fuser -TERM -k -w "${pipe_wget}"
 	rm -rf "${pipe_wget}"
 
-	if [ "${ZENITY_RETURN}" == "0" ] ; then
-		if [ "${WGET_RETURN}" != "0" ] ; then
+	# NOTE: sometimes the process finish before the wait command, giving the error code 127
+	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
+		if [ "${WGET_RETURN}" != "0" ] && [ "${WGET_RETURN}" != "127" ] ; then
 			echo "ERROR: error downloading the file! WGET_RETURN: ${WGET_RETURN}"
 			gtk_fatal_error "The installation is cancelled because of error downloading the file!\n * ${FILENAME}\n  - WGET_RETURN: ${WGET_RETURN}"
 		fi
@@ -765,107 +766,98 @@ chmod +x "${WORKDIR}/winetricks"
 
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} corefonts"
-pipe="$(mktemp)"
-rm -rf "${pipe}"
-mkfifo "${pipe}"
+pipe_winetricks="$(mktemp)"
+rm -rf "${pipe_winetricks}"
+mkfifo "${pipe_winetricks}"
 
-"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" corefonts > "${pipe}" &
-JOB_PID="${!}"
+# zenity GUI feedback
+zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close < "${pipe_winetricks}" &
+ZENITY_PID="${!}"
 
-# workaround to keep the pipe open until the end of winetricks
-tail -f < "${pipe}" > /dev/null &
-TAIL_PID="${!}"
+"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" corefonts > "${pipe_winetricks}"
+WINETRICKS_STATUS="${?}"
 
-zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close < "${pipe}"
-RETURN_ZENITY="${?}"
-#fuser -TERM -k -w "${pipe}"
-rm -rf "${pipe}"
+wait "${ZENITY_PID}"
+ZENITY_RETURN="${?}"
 
-if [ "${RETURN_ZENITY}" == "0" ] ; then
-	wait "${JOB_PID}"
-	JOB_STATUS="${?}"
+#fuser -TERM -k -w "${pipe_winetricks}"
+rm -rf "${pipe_winetricks}"
 
-	if [ "${JOB_STATUS}" != "0" ] ; then
-		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} corefonts; JOB_STATUS: ${JOB_STATUS}"
-		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q corefonts\n  - JOB_STATUS: ${JOB_STATUS}"
+# NOTE: sometimes the process finish before the wait command, giving the error code 127
+if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
+	if [ "${WINETRICKS_STATUS}" != "0" ] ; then
+		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} corefonts; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
+		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks ${WINETRICKS_EXTRA_OPTION} corefonts\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 	fi
 else
-	kill -SIGTERM "${TAIL_PID}"
-	kill -SIGTERM "${JOB_PID}"
-	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
+	gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} corefonts DONE!"
 #-------------------------------------------------
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb"
-pipe="$(mktemp)"
-rm -rf "${pipe}"
-mkfifo "${pipe}"
+pipe_winetricks="$(mktemp)"
+rm -rf "${pipe_winetricks}"
+mkfifo "${pipe_winetricks}"
 
-"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" settings fontsmooth=rgb > "${pipe}" &
-JOB_PID="${!}"
+# zenity GUI feedback
+zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close < "${pipe_winetricks}" &
+ZENITY_PID="${!}"
 
-# workaround to keep the pipe open until the end of winetricks
-tail -f < "${pipe}" > /dev/null &
-TAIL_PID="${!}"
+"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" settings fontsmooth=rgb > "${pipe_winetricks}"
+WINETRICKS_STATUS="${?}"
 
-zenity --progress --title="Winetricks fontsmooth" --text="Winetricks setting fontsmooth=rgb..." --pulsate --auto-close < "${pipe}"
-RETURN_ZENITY="${?}"
-#fuser -TERM -k -w "${pipe}"
-rm -rf "${pipe}"
+wait "${ZENITY_PID}"
+ZENITY_RETURN="${?}"
 
-if [ "${RETURN_ZENITY}" == "0" ] ; then
-	wait "${JOB_PID}"
-	JOB_STATUS="${?}"
+#fuser -TERM -k -w "${pipe_winetricks}"
+rm -rf "${pipe_winetricks}"
 
-	if [ "${JOB_STATUS}" != "0" ] ; then
-		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb; JOB_STATUS: ${JOB_STATUS}"
-		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q settings fontsmooth=rgb\n  - JOB_STATUS: ${JOB_STATUS}"
+# NOTE: sometimes the process finish before the wait command, giving the error code 127
+if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
+	if [ "${WINETRICKS_STATUS}" != "0" ] ; then
+		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
+		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 	fi
 else
-	kill -SIGTERM "${TAIL_PID}"
-	kill -SIGTERM "${JOB_PID}"
-	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
+	gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb DONE!"
 #-------------------------------------------------
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48"
-pipe="$(mktemp)"
-rm -rf "${pipe}"
-mkfifo "${pipe}"
+pipe_winetricks="$(mktemp)"
+rm -rf "${pipe_winetricks}"
+mkfifo "${pipe_winetricks}"
 
-"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" dotnet48 > "${pipe}" &
-JOB_PID="${!}"
+# zenity GUI feedback
+zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close < "${pipe_winetricks}" &
+ZENITY_PID="${!}"
 
-# workaround to keep the pipe open until the end of winetricks
-tail -f < "${pipe}" > /dev/null &
-TAIL_PID="${!}"
+"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" dotnet48 > "${pipe_winetricks}"
+WINETRICKS_STATUS="${?}"
 
-zenity --progress --title="Winetricks dotnet48" --text="Winetricks installing DotNet v2.0, v4.0 and v4.8 update (It might take a while)..." --pulsate --auto-close < "${pipe}"
-RETURN_ZENITY="${?}"
-#fuser -TERM -k -w "${pipe}"
-rm -rf "${pipe}"
+wait "${ZENITY_PID}"
+ZENITY_RETURN="${?}"
 
-if [ "${RETURN_ZENITY}" == "0" ] ; then
-	wait "${JOB_PID}"
-	JOB_STATUS="${?}"
+#fuser -TERM -k -w "${pipe_winetricks}"
+rm -rf "${pipe_winetricks}"
 
-	if [ "${JOB_STATUS}" != "0" ] ; then
-		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48; JOB_STATUS: ${JOB_STATUS}"
-		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks -q dotnet48\n  - JOB_STATUS: ${JOB_STATUS}"
+# NOTE: sometimes the process finish before the wait command, giving the error code 127
+if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
+	if [ "${WINETRICKS_STATUS}" != "0" ] ; then
+		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
+		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 	fi
 else
-	kill -SIGTERM "${TAIL_PID}"
-	kill -SIGTERM "${JOB_PID}"
-	gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
+	gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48 DONE!"
 #-------------------------------------------------
 
 if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
 	gtk_download "${WINE5_APPIMAGE_URL}" "${WORKDIR}"
-	rm -rf "${APPDIR}/${APPIMAGE_NAME}"
+	rm -rf "${APPDIR:?}/${APPIMAGE_NAME}"
 	mv "${WORKDIR}/${APPIMAGE_NAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	FILE="${APPDIR}/${APPIMAGE_NAME}"
 	chmod +x "${FILE}"
