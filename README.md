@@ -116,4 +116,7 @@ If the windows does leave the screen then just holding the `Alt` key you can mov
  - `$ ./Logos.sh wine regedit.exe`
  - `$ ./Logos.sh winetricks calibri`
 
+* You can run the standalone Logos Bible indexing on the console with:
+ - `$ ./Logos.sh indexing`
+
 * The `data` directory contains the Wine Bottle and possibly the AppImage, for this installation.
