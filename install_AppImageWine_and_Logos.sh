@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.10-rc4"
+export THIS_SCRIPT_VERSION="v2.10-rc5"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -204,7 +204,7 @@ create_starting_scripts_32() {
 HERE="\$(dirname "\$(readlink -f "\${0}")")"
 
 # Save IFS
-IFS_TMP=\$IFS
+IFS_TMP=\${IFS}
 IFS=$'\n'
 
 #-------------------------------------------
@@ -236,7 +236,9 @@ fi
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
 	WORKDIR="\$(mktemp -d)"
-	wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
+	else wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	fi
 	chmod +x "\${WORKDIR}"/winetricks
 	shift
 	"\${WORKDIR}"/winetricks "\$@"
@@ -263,9 +265,9 @@ if [ "\$1" = "indexing" ] ; then
 fi
 
 LOGOS_EXE=\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")
-if [ -z "\$LOGOS_EXE" ] ; then
+if [ -z "\${LOGOS_EXE}" ] ; then
 	echo "======= Running control: ======="
-	"\${HERE}/controlPanel.sh"
+	"\${HERE}/controlPanel.sh" "\$@"
 	echo "======= control run done! ======="
 	exit 0
 fi
@@ -275,7 +277,7 @@ wineserver -w
 
 #------------- Ending block ----------------
 # restore IFS
-IFS=\$IFS_TMP
+IFS=\${IFS_TMP}
 #-------------------------------------------
 EOF
 	#------------------------------
@@ -291,7 +293,7 @@ EOF
 HERE="\$(dirname "\$(readlink -f "\${0}")")"
 
 # Save IFS
-IFS_TMP=\$IFS
+IFS_TMP=\${IFS}
 IFS=$'\n'
 
 #-------------------------------------------
@@ -323,7 +325,9 @@ fi
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
 	WORKDIR="\$(mktemp -d)"
-	wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
+	else wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	fi
 	chmod +x "\${WORKDIR}"/winetricks
 	shift
 	"\${WORKDIR}"/winetricks "\$@"
@@ -337,7 +341,7 @@ wineserver -w
 
 #------------- Ending block ----------------
 # restore IFS
-IFS=\$IFS_TMP
+IFS=\${IFS_TMP}
 #-------------------------------------------
 EOF
 	#------------------------------
@@ -356,7 +360,7 @@ create_starting_scripts_64() {
 HERE="\$(dirname "\$(readlink -f "\${0}")")"
 
 # Save IFS
-IFS_TMP=\$IFS
+IFS_TMP=\${IFS}
 IFS=$'\n'
 
 #-------------------------------------------
@@ -388,7 +392,9 @@ fi
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
 	WORKDIR="\$(mktemp -d)"
-	wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
+	else wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	fi
 	chmod +x "\${WORKDIR}"/winetricks
 	shift
 	"\${WORKDIR}"/winetricks "\$@"
@@ -415,9 +421,9 @@ if [ "\$1" = "indexing" ] ; then
 fi
 
 LOGOS_EXE=\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")
-if [ -z "\$LOGOS_EXE" ] ; then
+if [ -z "\${LOGOS_EXE}" ] ; then
 	echo "======= Running control: ======="
-	"\${HERE}/controlPanel.sh"
+	"\${HERE}/controlPanel.sh" "\$@"
 	echo "======= control run done! ======="
 	exit 0
 fi
@@ -427,7 +433,7 @@ wineserver -w
 
 #------------- Ending block ----------------
 # restore IFS
-IFS=\$IFS_TMP
+IFS=\${IFS_TMP}
 #-------------------------------------------
 EOF
 	#------------------------------
@@ -443,7 +449,7 @@ EOF
 HERE="\$(dirname "\$(readlink -f "\${0}")")"
 
 # Save IFS
-IFS_TMP=\$IFS
+IFS_TMP=\${IFS}
 IFS=$'\n'
 
 #-------------------------------------------
@@ -475,7 +481,9 @@ fi
 if [ "\$1" = "winetricks" ] ; then
 	echo "======= Running winetricks only: ======="
 	WORKDIR="\$(mktemp -d)"
-	wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
+	else wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+	fi
 	chmod +x "\${WORKDIR}"/winetricks
 	shift
 	"\${WORKDIR}"/winetricks "\$@"
@@ -489,7 +497,7 @@ wineserver -w
 
 #------------- Ending block ----------------
 # restore IFS
-IFS=\$IFS_TMP
+IFS=\${IFS_TMP}
 #-------------------------------------------
 EOF
 	#------------------------------
