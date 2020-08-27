@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.10-rc0"
+export THIS_SCRIPT_VERSION="v2.10-rc1"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
@@ -84,6 +84,7 @@ gtk_continue_question() {
 	fi
 }
 
+# shellcheck disable=SC2028
 gtk_download() {
 	# $1	what to download
 	# $2	where into
@@ -112,18 +113,29 @@ gtk_download() {
 	echo "into:"
 	echo "$2"
 
-	percent_file="$(mktemp)"
-	pipe="$(mktemp)"
-	rm -rf "${pipe}"
-	mkfifo "${pipe}"
+	pipe_progress="$(mktemp)"
+	rm -rf "${pipe_progress}"
+	mkfifo "${pipe_progress}"
 
-	# download with output to dialog progress bar
+	pipe_wget="$(mktemp)"
+	rm -rf "${pipe_wget}"
+	mkfifo "${pipe_wget}"
+
+	# zenity GUI feedback
+	zenity --progress --title "Downloading ${FILENAME}..." --text="Downloading: ${FILENAME}\ninto: ${2}\n" --percentage=0 --auto-close < "${pipe_progress}" &
+	ZENITY_PID="${!}"
+
+	# download the file with wget:
+	wget -c "$1" -O "${TARGET}" > "${pipe_wget}" 2>&1 &
+	WGET_PID="${!}"
+
+	# process the dialog progress bar
 	total_size="Starting..."
 	percent="0"
 	current="Starting..."
 	speed="Starting..."
 	remain="Starting..."
-	wget -c "$1" -O "${TARGET}" 2>&1 | while read -r data; do
+	while read -r data; do
 		if echo "${data}" | grep -q '^Length:' ; then
 			result="$(echo "${data}" | grep "^Length:" | sed 's/.*\((.*)\).*/\1/' |  tr -d '()')"
 			if [ ${#result} -le 10 ]; then total_size=${result} ; fi
@@ -143,32 +155,36 @@ gtk_download() {
 			if [ ${#result} -le 10 ]; then remain=${result} ; fi
 		fi
 
+		if [ -z "$(pgrep -P "${$}" zenity)" ]; then
+			WGET_PID_CURRENT="$(pgrep -P "${$}" wget)"
+			[ -n "${WGET_PID_CURRENT}" ] && kill -SIGKILL "${WGET_PID_CURRENT}"
+		fi
+
+		[ "${percent}" == "100" ] && break
 		# report
 		echo "${percent}"
-		echo "${percent}" > "${percent_file}"
-		# shellcheck disable=SC2028
 		echo "#Downloading: ${FILENAME}\ninto: $2\n\n${current} of ${total_size} \(${percent}%\)\nSpeed : ${speed}/Sec\nEstimated time : ${remain}"
-	done > "${pipe}" &
+	done < "${pipe_wget}" > "${pipe_progress}"
 
-	# workaround to keep the pipe open until the end of download
-	tail -f < "${pipe}" > /dev/null &
-	TAIL_PID="${!}"
+	wait "${WGET_PID}"
+	WGET_RETURN="${?}"
 
-	zenity --progress --title "Downloading ${FILENAME}..." --text="Downloading: ${FILENAME}\ninto: ${2}\n" --percentage=0 --auto-close < "${pipe}"
-	RETURN_ZENITY="${?}"
-	#fuser -TERM -k -w "${pipe}"
-	rm -rf "${pipe}"
+	wait "${ZENITY_PID}"
+	ZENITY_RETURN="${?}"
 
-	percent="$(cat "${percent_file}")"
-	rm -rf "${percent_file}"
-	if [ "${RETURN_ZENITY}" == "0" ] ; then
-		if [ "${percent}" != "100" ] ; then
-			echo "ERROR: incomplete downloaded file! ${FILENAME}  - percent: ${percent}"
-			gtk_fatal_error "The installation is cancelled because of incomplete downloaded file!\n * ${FILENAME}\n  - percent: ${percent}"
+	fuser -TERM -k -w "${pipe_progress}"
+	rm -rf "${pipe_progress}"
+
+	fuser -TERM -k -w "${pipe_wget}"
+	rm -rf "${pipe_wget}"
+
+	if [ "${ZENITY_RETURN}" == "0" ] ; then
+		if [ "${WGET_RETURN}" != "0" ] ; then
+			echo "ERROR: error downloading the file! WGET_RETURN: ${WGET_RETURN}"
+			gtk_fatal_error "The installation is cancelled because of error downloading the file!\n * ${FILENAME}\n  - WGET_RETURN: ${WGET_RETURN}"
 		fi
 	else
-		kill -SIGTERM "${TAIL_PID}"
-		gtk_fatal_error "The installation is cancelled!\n * RETURN_ZENITY: ${RETURN_ZENITY}"
+		gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 	fi
 	echo "${FILENAME} download finished!"
 }
