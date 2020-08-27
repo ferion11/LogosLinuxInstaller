@@ -1,11 +1,14 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.9-rc3"
+export THIS_SCRIPT_VERSION="v2.9-rc4"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi"
 export LOGOS64_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x64.msi"
 export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/continuous-logos/wine-i386_x86_64-archlinux.AppImage"
+#export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/v4.21/wine-i386_x86_64-archlinux.AppImage"
+export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage_dev/releases/download/continuous-f11wine4/wine-i386_x86_64-archlinux.AppImage"
+export WINE5_APPIMAGE_URL="${WINE_APPIMAGE_URL}"
 #export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
 # back to Jul 23, 2020 release of winetricks, not more of the last git random broken fun:
 export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks"
@@ -614,7 +617,8 @@ installationChoice="$(zenity --width=400 --height=250 \
 	--list --radiolist --column "S" --column "Descrition" \
 	TRUE "1- Install LogosBible32 using Wine AppImage (default)." \
 	FALSE "2- Install LogosBible32 using the native Wine." \
-	FALSE "3- Install LogosBible64 using the native Wine64 (unstable)." )"
+	FALSE "3- Install LogosBible64 using the native Wine64 (unstable)." \
+	FALSE "4- Install using AppImage v4.21 up to dotnet48 and v5.x to LogosBible32." )"
 
 case "${installationChoice}" in
 	1*)
@@ -651,6 +655,13 @@ case "${installationChoice}" in
 		fi
 		echo "Using: ${WINE_VERSION_CHECK}"
 		;;
+	4*)
+		echo "Installing LogosBible 32bits using 2 Wine AppImage..."
+		export WINEARCH=win32
+		export WINEPREFIX="${APPDIR}/wine32_bottle"
+		export WINE_EXE="wine"
+		export INSTALL_USING_APPIMAGE_4="1"
+		;;
 	*)
 		gtk_fatal_error "Installation canceled!"
 esac
@@ -679,7 +690,11 @@ if [ -z "${NO_APPIMAGE}" ]; then
 		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}.zsync" "${APPDIR}" | zenity --progress --title="Copying..." --text="Copying: ${APPIMAGE_NAME}.zsync\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	else
 		echo "${APPIMAGE_NAME} does not exist. Downloading..."
-		gtk_download "${WINE_APPIMAGE_URL}" "${WORKDIR}"
+		if [ -z "${INSTALL_USING_APPIMAGE_4}" ]; then
+			gtk_download "${WINE_APPIMAGE_URL}" "${WORKDIR}"
+		else
+			gtk_download "${WINE4_APPIMAGE_URL}" "${WORKDIR}"
+		fi
 
 		mv "${WORKDIR}/${APPIMAGE_NAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 
@@ -688,6 +703,7 @@ if [ -z "${NO_APPIMAGE}" ]; then
 	fi
 	FILE="${APPDIR}/${APPIMAGE_NAME}"
 	chmod +x "${FILE}"
+	echo "Using: $(wine --version)"
 	#-------------------------
 fi
 
@@ -830,6 +846,15 @@ else
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48 DONE!"
 #-------------------------------------------------
+
+if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
+	gtk_download "${WINE5_APPIMAGE_URL}" "${WORKDIR}"
+	rm -rf "${APPDIR}/${APPIMAGE_NAME}"
+	mv "${WORKDIR}/${APPIMAGE_NAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+	FILE="${APPDIR}/${APPIMAGE_NAME}"
+	chmod +x "${FILE}"
+	echo "Using: $(wine --version)"
+fi
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
