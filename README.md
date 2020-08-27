@@ -10,11 +10,11 @@ You can download the last release [[HERE]](https://github.com/ferion11/LogosLinu
 - If you want to use some other option for `winetricks`, then just set the variable `WINETRICKS_EXTRA_OPTION` (the default is just `-q`), like:
 `$ export WINETRICKS_EXTRA_OPTION="-q --force"` to force the installation on unsupported versions of Wine.
 
-1.1- After that you need to give permission to execute (You can use some graphical method too, but it will depend on your linux distribution):
+0.1- After that you need to give permission to execute (You can use some graphical method too, but it will depend on your linux distribution):
 
 `$ chmod +x install_AppImageWine_and_Logos.sh`
 
-1.2- Then execute (you don't need sudo or root acess):
+0.2- Then execute (you don't need sudo or root acess):
 
 `$ ./install_AppImageWine_and_Logos.sh`
 
