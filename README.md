@@ -1,11 +1,14 @@
 # LogosLinuxInstaller
 > LogosLinuxInstaller is a bash script for installation of Logos Bible on Linux.
 
-##### * NOTE The v2.0 break backward compatibility with previous versions. It will work like the portable version, with variations that may or may not use AppImage, depending on the user's choice, but all installation alternatives will maintain some isolation from the rest of the system and other installations (the independent directory can be moved/renamed without losing functionality).
+##### * NOTE The v2.0 break backward compatibility with previous 1.x versions. It will work like the portable version, with variations that may or may not use AppImage, depending on the user's choice, but all installation alternatives will maintain some isolation from the rest of the system and other installations (the independent directory can be moved/renamed without losing functionality).
 
 ### v2.0 or higher  instructions:
 #### 00-  Download and execute:
 You can download the last release [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]").
+- If you have the file `Logos-x86.msi` or `Logos-x64.msi`, you can let one copy of it in `/tmp` (or set the variable DOWNLOADED_RESOURCES to the directory that have it) that the installer will use it. It can be useful to install others version without change the script (the same for the others `winetricks` or `wine-i386_x86_64-archlinux.AppImage` versions).
+- If you want to use some other option for `winetricks`, then just set the variable `WINETRICKS_EXTRA_OPTION` (the default is just `-q`), like:
+`$ export WINETRICKS_EXTRA_OPTION="-q --force"` to force the installation on unsupported versions of Wine.
 
 1.1- After that you need to give permission to execute (You can use some graphical method too, but it will depend on your linux distribution):
 
@@ -15,11 +18,13 @@ You can download the last release [[HERE]](https://github.com/ferion11/LogosLinu
 
 `$ ./install_AppImageWine_and_Logos.sh`
 
+- You can get the skel with the options `skel32` and `skel64`. It can be useful if you want just the scripts to update one of your local installations. And you can reuse the WineBottle from others installation too.
+
 #### 01- The installation start here:
 
 ![Step01](/img/step_01.png)
 
-* The default is using the 32bit AppImage, that provide better isolation. But you can choose do it using your native wine 32bits (that I recommend do using the 32bits, but you will need multilib wine installed in your 64bits system) or 64bit (is very unstable, work only on few cases, and need one wine 64bits made with WoW64 compatibility layer with 32bits, because dotnet need the 32bits wine working to install it on the 64bit profile). Regardless of your choice, the installation will be done in isolation from the others.
+* The default is using the 32bit AppImage, that provide better isolation. But you can choose do it using your native wine 32bits (that I recommend do using the 32bits, but you will need multilib wine installed in your 64bits system) or 64bit (is very unstable, work only on few cases, and need one wine 64bits made with WoW64 compatibility layer with 32bits, because dotnet need the 32bits wine working to install it on the 64bit profile). Option 4 is for better compatibility installation using AppImage (if you don't want AppImage, but like the installation option 4, then just remove the AppImage file from the `data` dir, and it will use your native wine). Regardless of your choice, the installation will be done in isolation from the others.
 
 * Who is travis? Travis-ci is the automated system that test and generates the images, [[HERE]](https://github.com/ferion11/LogosLinuxInstallTests "[HERE]")
 
@@ -89,21 +94,17 @@ I like to choose Custom and change the path to `c:\Logos\` (because it's easy to
 
 ![Step16](/img/step_16.png)
 
-#### 17- Then it will ask if you want to clean the temporary files, so Yes, or maybe No if you want to use it in another installation:
+#### 17- Congratulations! Installation is complete. You can run it for the first time by clicking Yes:
 
 ![Step17](/img/step_17.png)
 
-#### 18- Congratulations! Installation is complete. You can run it for the first time by clicking Yes:
+#### 18- Ok! If your window does not leave the screen, just login::
 
 ![Step18](/img/step_18.png)
 
-#### 19- Ok! If your window does not leave the screen like this one, just login::
+If the windows does leave the screen then just holding the `Alt` key you can move it by clicking any part and drag it, so if something similar happens to you, it will be easy to move the window down just by holding `Alt` key on the keyboard while dragging the window using the mouse.
 
-![Step19](/img/step_19.png)
-
-It's the travis again, using one fake graphical system, so don't worry. But if it still bothers you, know that by holding the `Alt` key you can move any window by clicking anywhere on it, so if something similar happens to you, it will be easy to move the window down just by holding `Alt` key on the keyboard while dragging the window using the mouse.
-
-#### 20- You now have a `LogosBible_Linux_P` folder in your User Home:
+#### 19- You now have a `LogosBible_Linux_P` folder in your User Home:
 
 * It can be renamed and moved which should maintain functionality (with only a few limitations like changing the name of the linux user).
 
