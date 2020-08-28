@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.11-rc0"
+export THIS_SCRIPT_VERSION="v2.11-rc1"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -734,6 +734,18 @@ if [ -z "${NO_APPIMAGE}" ]; then
 	#-------------------------
 fi
 
+# Creating the scripts before wineboot:
+case "${WINEARCH}" in
+	win32)
+		create_starting_scripts_32
+		;;
+	win64)
+		create_starting_scripts_64
+		;;
+	*)
+		gtk_fatal_error "Installation failed!"
+esac
+
 gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
 ${WINE_EXE} wineboot
 
@@ -889,7 +901,6 @@ case "${WINEARCH}" in
 			gtk_download "${LOGOS_URL}" "${WORKDIR}"
 		fi
 		${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS_MSI}"
-		create_starting_scripts_32
 		;;
 	win64)
 		echo "Installing LogosBible 64bits..."
@@ -901,7 +912,6 @@ case "${WINEARCH}" in
 			gtk_download "${LOGOS64_URL}" "${WORKDIR}"
 		fi
 		${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
-		create_starting_scripts_64
 		;;
 	*)
 		gtk_fatal_error "Installation failed!"
