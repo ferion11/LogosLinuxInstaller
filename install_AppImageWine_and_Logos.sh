@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.11-rc2"
+export THIS_SCRIPT_VERSION="v2.11-rc3"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -749,6 +749,9 @@ esac
 gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
 ${WINE_EXE} wineboot
 
+echo "* Waiting for ${WINE_EXE} to proper end..."
+wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+
 cat > "${WORKDIR}"/disable-winemenubuilder.reg << EOF
 REGEDIT4
 
@@ -770,9 +773,14 @@ EOF
 
 echo "${WINE_EXE} regedit.exe disable-winemenubuilder.reg"
 ${WINE_EXE} regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in ${WINEPREFIX}:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close --no-cancel
+echo "* Waiting for ${WINE_EXE} to proper end..."
+wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 echo "${WINE_EXE} regedit.exe disable-winemenubuilder.reg DONE!"
+
 echo "${WINE_EXE} regedit.exe renderer_gdi.reg"
 ${WINE_EXE} regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close --no-cancel
+echo "* Waiting for ${WINE_EXE} to proper end..."
+wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 echo "${WINE_EXE} regedit.exe renderer_gdi.reg DONE!"
 
 gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
@@ -816,6 +824,8 @@ else
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} corefonts DONE!"
 #-------------------------------------------------
+echo "* Waiting for ${WINE_EXE} to proper end..."
+wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb"
 pipe_winetricks="$(mktemp)"
@@ -846,6 +856,8 @@ else
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb DONE!"
 #-------------------------------------------------
+echo "* Waiting for ${WINE_EXE} to proper end..."
+wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48"
 pipe_winetricks="$(mktemp)"
@@ -877,8 +889,8 @@ fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48 DONE!"
 #-------------------------------------------------
 
-echo "* Winetricks can end before ${WINE_EXE}, so waiting for it to proper end..."
-wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Winetricks can end before ${WINE_EXE}, so waiting for it to proper end..." --pulsate --auto-close
+echo "* Waiting for ${WINE_EXE} to proper end..."
+wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 
 if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
 	gtk_download "${WINE5_APPIMAGE_URL}" "${WORKDIR}"
@@ -888,6 +900,9 @@ if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
 	chmod +x "${FILE}"
 	echo "Using: $(wine --version)"
 	${WINE_EXE} wineboot
+
+	echo "* Waiting for ${WINE_EXE} to proper end..."
+	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 fi
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
@@ -919,6 +934,9 @@ case "${WINEARCH}" in
 	*)
 		gtk_fatal_error "Installation failed!"
 esac
+
+echo "* Waiting for ${WINE_EXE} to proper end..."
+wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 
 clean_all
 
