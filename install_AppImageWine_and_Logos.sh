@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.11-rc3"
+export THIS_SCRIPT_VERSION="v2.11-rc4"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -11,9 +11,9 @@ if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://githu
 if [ -z "${WINE5_APPIMAGE_URL}" ]; then export WINE5_APPIMAGE_URL="${WINE_APPIMAGE_URL}" ; fi
 #if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" ; fi
 # back to Jul 23, 2020 release of winetricks, not more of the last git random broken fun:
-#if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks" ; fi
-# trying one customized version of winetricks:
-if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://github.com/ferion11/libsutil/releases/download/winetricks/winetricks" ; fi
+if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks" ; fi
+## trying one customized version of winetricks:
+##if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://github.com/ferion11/libsutil/releases/download/winetricks/winetricks" ; fi
 if [ -z "${WINETRICKS_DOWNLOADER}" ]; then export WINETRICKS_DOWNLOADER="wget" ; fi
 #LOGOS_MVERSION=$(echo "${LOGOS_URL}" | cut -d/ -f4)
 #export LOGOS_MVERSION
