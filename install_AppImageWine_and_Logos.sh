@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.11-rc1"
+export THIS_SCRIPT_VERSION="v2.11-rc2"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -876,6 +876,9 @@ else
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48 DONE!"
 #-------------------------------------------------
+
+echo "* Winetricks can end before ${WINE_EXE}, so waiting for it to proper end..."
+wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Winetricks can end before ${WINE_EXE}, so waiting for it to proper end..." --pulsate --auto-close
 
 if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
 	gtk_download "${WINE5_APPIMAGE_URL}" "${WORKDIR}"
