@@ -11,12 +11,14 @@ You can download the last release [[HERE]](https://github.com/ferion11/LogosLinu
 `$ export WINETRICKS_EXTRA_OPTION="-q --force"` to force the installation on unsupported versions of Wine.
 
 0.1- After that you need to give permission to execute (You can use some graphical method too, but it will depend on your linux distribution):
-
-`$ chmod +x install_AppImageWine_and_Logos.sh`
+```
+$ chmod +x install_AppImageWine_and_Logos.sh
+```
 
 0.2- Then execute (you don't need sudo or root acess):
-
-`$ ./install_AppImageWine_and_Logos.sh`
+```
+$ ./install_AppImageWine_and_Logos.sh
+```
 
 - You can get the skel with the options `skel32` and `skel64`. It can be useful if you want just the scripts to update one of your local installations. And you can reuse the WineBottle from others installation too.
 
@@ -119,6 +121,38 @@ If the windows does leave the screen then just holding the `Alt` key you can mov
 * If, after the installation, you want to use a different version of winetricks, just copy it to the same directory that the `Logos.sh` and `controlPanel.sh`, then the 2 scripts will use it, instead of download the last git version.
 
 * You can run the standalone Logos Bible indexing on the console with:
-  - `$ ./Logos.sh indexing`
+```
+$ ./Logos.sh indexing
+```
 
 * The `data` directory contains the Wine Bottle and possibly the AppImage, for this installation.
+
+#### 20- To uninstall:
+
+Just remove the installation directory, everything is contained in isolation from your system.
+
+#### 21- To update:
+
+You can use the skel option to easily update the script version:
+
+21.1.1 - Rename/move the old installation to use like one backup:
+```
+$ mv LogosBible_Linux_P LogosBible_Linux_P_old
+```
+
+21.1.2 - Download the last script [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]")
+
+21.1.3 - Make it executable and execute with the option `skel32` or `skel64`, like:
+```
+$ chmod +x install_AppImageWine_and_Logos.sh
+$ ./install_AppImageWine_and_Logos.sh skel32
+```
+
+21.1.4 - Copy the wineBottle and if you are using AppImage then copy it too:
+```
+$ rm -rf LogosBible_Linux_P/data/wine32_bottle
+$ cp -r LogosBible_Linux_P_old/data/wine32_bottle LogosBible_Linux_P/data/
+$ cp LogosBible_Linux_P_old/data/*.AppImage LogosBible_Linux_P/data/
+```
+
+21.1.5 - Test the new version, and if work then you can remove the old `LogosBible_Linux_P_old`
