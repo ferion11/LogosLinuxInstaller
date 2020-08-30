@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.11-rc8"
+export THIS_SCRIPT_VERSION="v2.11-rc9"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -271,6 +271,47 @@ case "\${1}" in
 		echo "======= indexing of LogosBible run done! ======="
 		exit 0
 		;;
+	"selectAppImage")
+		echo "======= Running AppImage Selection only: ======="
+		APPIMAGE_FILENAME="wine-i386_x86_64-archlinux.AppImage"
+		APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
+
+		APPIMAGE_FULLPATH="\$(zenity --file-selection --filename="\${HERE}"/data/*.AppImage --file-filter='AppImage files | *.AppImage *.Appimage *.appImage *.appimage' --file-filter='All files | *')"
+		if [ -z "\${APPIMAGE_FULLPATH}" ]; then
+			echo "No *.AppImage file selected! exiting..."
+			exit 1
+		fi
+
+		APPIMAGE_FILENAME="\${APPIMAGE_FULLPATH##*/}"
+		APPIMAGE_DIR="\${APPIMAGE_FULLPATH%\${APPIMAGE_FILENAME}}"
+		APPIMAGE_DIR="\${APPIMAGE_DIR%?}"
+		#-------
+
+		if [ "\${APPIMAGE_DIR}" != "\${HERE}/data" ]; then
+			if zenity --question --width=300 --height=200 --text="Warning: The AppImage isn't at \"./data/ directory\"\!\nDo you want to copy the AppImage to the \"./data/\" directory keeping portability?" --title='Warning!'; then
+				cp "\${APPIMAGE_FULLPATH}" "\${HERE}/data/"
+				APPIMAGE_FULLPATH="\${HERE}/data/\${APPIMAGE_FILENAME}"
+				APPIMAGE_DIR="\${APPIMAGE_FULLPATH%\${APPIMAGE_FILENAME}}"
+				APPIMAGE_DIR="\${APPIMAGE_DIR%?}"
+			else
+				echo "Warning: Linking \${APPIMAGE_FULLPATH} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+				chmod +x "\${APPIMAGE_FULLPATH}"
+				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
+				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
+				echo "======= AppImage Selection run done! ======="
+				exit 0
+			fi
+		fi
+
+		echo "Info: Linking ../\${APPIMAGE_FILENAME} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+		chmod +x "\${APPIMAGE_FULLPATH}"
+		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
+		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
+		echo "======= AppImage Selection run done! ======="
+		exit 0
+		;;
 	*)
 		echo "No arguments parsed."
 esac
@@ -346,6 +387,47 @@ case "\${1}" in
 		"\${WORKDIR}"/winetricks "\$@"
 		rm -rf "\${WORKDIR}"
 		echo "======= winetricks run done! ======="
+		exit 0
+		;;
+	"selectAppImage")
+		echo "======= Running AppImage Selection only: ======="
+		APPIMAGE_FILENAME="wine-i386_x86_64-archlinux.AppImage"
+		APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
+
+		APPIMAGE_FULLPATH="\$(zenity --file-selection --filename="\${HERE}"/data/*.AppImage --file-filter='AppImage files | *.AppImage *.Appimage *.appImage *.appimage' --file-filter='All files | *')"
+		if [ -z "\${APPIMAGE_FULLPATH}" ]; then
+			echo "No *.AppImage file selected! exiting..."
+			exit 1
+		fi
+
+		APPIMAGE_FILENAME="\${APPIMAGE_FULLPATH##*/}"
+		APPIMAGE_DIR="\${APPIMAGE_FULLPATH%\${APPIMAGE_FILENAME}}"
+		APPIMAGE_DIR="\${APPIMAGE_DIR%?}"
+		#-------
+
+		if [ "\${APPIMAGE_DIR}" != "\${HERE}/data" ]; then
+			if zenity --question --width=300 --height=200 --text="Warning: The AppImage isn't at \"./data/ directory\"\!\nDo you want to copy the AppImage to the \"./data/\" directory keeping portability?" --title='Warning!'; then
+				cp "\${APPIMAGE_FULLPATH}" "\${HERE}/data/"
+				APPIMAGE_FULLPATH="\${HERE}/data/\${APPIMAGE_FILENAME}"
+				APPIMAGE_DIR="\${APPIMAGE_FULLPATH%\${APPIMAGE_FILENAME}}"
+				APPIMAGE_DIR="\${APPIMAGE_DIR%?}"
+			else
+				echo "Warning: Linking \${APPIMAGE_FULLPATH} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+				chmod +x "\${APPIMAGE_FULLPATH}"
+				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
+				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
+				echo "======= AppImage Selection run done! ======="
+				exit 0
+			fi
+		fi
+
+		echo "Info: Linking ../\${APPIMAGE_FILENAME} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+		chmod +x "\${APPIMAGE_FULLPATH}"
+		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
+		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
+		echo "======= AppImage Selection run done! ======="
 		exit 0
 		;;
 	*)
