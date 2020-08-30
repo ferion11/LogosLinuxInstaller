@@ -470,12 +470,13 @@ case "${1}" in
 		mkdir -p "${INSTALLDIR}"
 		mkdir "${APPDIR}" || die "can't make dir: ${APPDIR}"
 
-		## Making the links (and dir)
-		#mkdir "${APPDIR_BIN}" || die "can't make dir: ${APPDIR_BIN}"
-		#cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
-		#ln -s "../${APPIMAGE_NAME}" wine
-		#ln -s "../${APPIMAGE_NAME}" wineserver
-		#cd - || die "ERROR: Can't go back to preview dir!"
+		# Making the links (and dir)
+		mkdir "${APPDIR_BIN}" || die "can't make dir: ${APPDIR_BIN}"
+		cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
+		ln -s "../${APPIMAGE_NAME}" wine
+		ln -s "../${APPIMAGE_NAME}" wine64
+		ln -s "../${APPIMAGE_NAME}" wineserver
+		cd - || die "ERROR: Can't go back to preview dir!"
 
 		mkdir "${APPDIR}/wine64_bottle"
 		create_starting_scripts "64" "wine64"
@@ -557,6 +558,7 @@ mkdir_critical "${APPDIR}"
 mkdir_critical "${APPDIR_BIN}"
 cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
 ln -s "../${APPIMAGE_NAME}" wine
+[ "${WINEARCH}" == "win64" ] && ln -s "../${APPIMAGE_NAME}" wine64
 ln -s "../${APPIMAGE_NAME}" wineserver
 cd - || die "ERROR: Can't go back to preview dir!"
 [[ -z "${NO_APPIMAGE}" ]] && export PATH="${APPDIR_BIN}":${PATH}
