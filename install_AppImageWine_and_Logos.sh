@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.11-rc6"
+export THIS_SCRIPT_VERSION="v2.11-rc7"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -362,6 +362,31 @@ EOF
 	chmod +x "${WORKDIR}"/controlPanel.sh
 	mv "${WORKDIR}"/controlPanel.sh "${INSTALLDIR}"/
 }
+
+make_skel() {
+# ${1} - WINE_BITS: 32 or 64
+# ${2} - WINE_EXE name: wine or wine64
+	WINE_BITS="${1}"
+	WINE_EXE="${2}"
+
+	echo "* Making skel${WINE_BITS} inside ${INSTALLDIR}"
+	mkdir -p "${INSTALLDIR}"
+	mkdir "${APPDIR}" || die "can't make dir: ${APPDIR}"
+
+	# Making the links (and dir)
+	mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
+	cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
+	ln -s "../${APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
+	ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
+	[ "${WINE_BITS}" == "64" ] && ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine64
+	ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wineserver
+	cd - || die "ERROR: Can't go back to preview dir!"
+
+	mkdir "${APPDIR}/wine${WINE_BITS}_bottle"
+	create_starting_scripts "${WINE_BITS}" "${WINE_EXE}"
+
+	echo "skel${WINE_BITS} done!"
+}
 #==================================================
 
 #======= Basic Deps =============
@@ -443,55 +468,25 @@ echo "Starting Zenity GUI..."
 #==========================
 
 
-#======= Main =============
+#======= Parsing =============
 case "${1}" in
 	"skel32")
-		echo "* Making skel32 inside ${INSTALLDIR}"
-		mkdir -p "${WORKDIR}"
-		mkdir -p "${INSTALLDIR}"
-		mkdir "${APPDIR}" || die "can't make dir: ${APPDIR}"
-
-		# Making the links (and dir)
-		mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
-		cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
-		ln -s "../${APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
-		ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
-		ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wineserver
-		cd - || die "ERROR: Can't go back to preview dir!"
-
-		mkdir "${APPDIR}/wine32_bottle"
-		create_starting_scripts "32" "wine"
-
+		WINE_EXE="wine"
+		make_skel "32" "${WINE_EXE}"
 		rm -rf "${WORKDIR}"
-		echo "skel32 done!"
 		exit 0
 		;;
 	"skel64")
-		echo "* Making skel64 inside ${INSTALLDIR}"
-		mkdir -p "${WORKDIR}"
-		mkdir -p "${INSTALLDIR}"
-		mkdir "${APPDIR}" || die "can't make dir: ${APPDIR}"
-
-		# Making the links (and dir)
-		mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
-		cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
-		ln -s "../${APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
-		ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
-		ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine64
-		ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wineserver
-		cd - || die "ERROR: Can't go back to preview dir!"
-
-		mkdir "${APPDIR}/wine64_bottle"
-		create_starting_scripts "64" "wine64"
-
+		WINE_EXE="wine64"
+		make_skel "64" "${WINE_EXE}"
 		rm -rf "${WORKDIR}"
-		echo "skel64 done!"
 		exit 0
 		;;
 	*)
 		echo "No arguments parsed."
 esac
 
+#======= Main =============
 if [ -d "${INSTALLDIR}" ]; then
 	echo "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
 	gtk_fatal_error "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
@@ -512,6 +507,8 @@ case "${installationChoice}" in
 		export WINEARCH=win32
 		export WINEPREFIX="${APPDIR}/wine32_bottle"
 		export WINE_EXE="wine"
+
+		make_skel "32" "${WINE_EXE}"
 		;;
 	2*)
 		echo "Installing LogosBible 32bits using the native Wine..."
@@ -526,6 +523,8 @@ case "${installationChoice}" in
 			gtk_fatal_error "Wine not found! Please install native Wine first."
 		fi
 		echo "Using: ${WINE_VERSION_CHECK}"
+
+		make_skel "32" "${WINE_EXE}"
 		;;
 	3*)
 		echo "Installing LogosBible 64bits using the native Wine..."
@@ -540,6 +539,8 @@ case "${installationChoice}" in
 			gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
 		fi
 		echo "Using: ${WINE_VERSION_CHECK}"
+
+		make_skel "64" "${WINE_EXE}"
 		;;
 	4*)
 		echo "Installing LogosBible 32bits using 2 Wine AppImage..."
@@ -547,26 +548,15 @@ case "${installationChoice}" in
 		export WINEPREFIX="${APPDIR}/wine32_bottle"
 		export WINE_EXE="wine"
 		export INSTALL_USING_APPIMAGE_4="1"
+
+		make_skel "32" "${WINE_EXE}"
 		;;
 	*)
 		gtk_fatal_error "Installation canceled!"
 esac
 
-# Making the setup:
-echo "Setup making..."
-mkdir -p "${WORKDIR}"
-mkdir -p "${INSTALLDIR}"
-mkdir_critical "${APPDIR}"
-# Making the links (and dir)
-mkdir_critical "${APPDIR_BINDIR}"
-cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
-ln -s "../${APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
-ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
-[ "${WINEARCH}" == "win64" ] && ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine64
-ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wineserver
-cd - || die "ERROR: Can't go back to preview dir!"
+# exporting PATH to internal use if using AppImage:
 [[ -z "${NO_APPIMAGE}" ]] && export PATH="${APPDIR_BINDIR}":${PATH}
-echo "Setup ok!"
 
 if [ -z "${NO_APPIMAGE}" ]; then
 	echo "Using AppImage..."
@@ -594,18 +584,6 @@ if [ -z "${NO_APPIMAGE}" ]; then
 	echo "Using: $(wine --version)"
 	#-------------------------
 fi
-
-# Creating the scripts before wineboot:
-case "${WINEARCH}" in
-	win32)
-		create_starting_scripts "32" "${WINE_EXE}"
-		;;
-	win64)
-		create_starting_scripts "64" "${WINE_EXE}"
-		;;
-	*)
-		gtk_fatal_error "Installation failed!"
-esac
 
 gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
 ${WINE_EXE} wineboot
