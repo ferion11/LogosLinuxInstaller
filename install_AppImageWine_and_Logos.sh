@@ -28,8 +28,8 @@ if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
 if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible_Linux_P" ; fi
 
 export APPDIR="${INSTALLDIR}/data"
-export APPDIR_BIN="${APPDIR}/bin"
-export APPIMAGE_NAME="wine-i386_x86_64-archlinux.AppImage"
+export APPDIR_BINDIR="${APPDIR}/bin"
+export APPIMAGE_FILENAME="wine-i386_x86_64-archlinux.AppImage"
 
 # --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
 # -f, --force           Don't check whether packages were already installed
@@ -451,10 +451,10 @@ case "${1}" in
 		mkdir "${APPDIR}" || die "can't make dir: ${APPDIR}"
 
 		# Making the links (and dir)
-		mkdir "${APPDIR_BIN}" || die "can't make dir: ${APPDIR_BIN}"
-		cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
-		ln -s "../${APPIMAGE_NAME}" wine
-		ln -s "../${APPIMAGE_NAME}" wineserver
+		mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
+		cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
+		ln -s "../${APPIMAGE_FILENAME}" wine
+		ln -s "../${APPIMAGE_FILENAME}" wineserver
 		cd - || die "ERROR: Can't go back to preview dir!"
 
 		mkdir "${APPDIR}/wine32_bottle"
@@ -471,11 +471,11 @@ case "${1}" in
 		mkdir "${APPDIR}" || die "can't make dir: ${APPDIR}"
 
 		# Making the links (and dir)
-		mkdir "${APPDIR_BIN}" || die "can't make dir: ${APPDIR_BIN}"
-		cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
-		ln -s "../${APPIMAGE_NAME}" wine
-		ln -s "../${APPIMAGE_NAME}" wine64
-		ln -s "../${APPIMAGE_NAME}" wineserver
+		mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
+		cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
+		ln -s "../${APPIMAGE_FILENAME}" wine
+		ln -s "../${APPIMAGE_FILENAME}" wine64
+		ln -s "../${APPIMAGE_FILENAME}" wineserver
 		cd - || die "ERROR: Can't go back to preview dir!"
 
 		mkdir "${APPDIR}/wine64_bottle"
@@ -555,37 +555,37 @@ mkdir -p "${WORKDIR}"
 mkdir -p "${INSTALLDIR}"
 mkdir_critical "${APPDIR}"
 # Making the links (and dir)
-mkdir_critical "${APPDIR_BIN}"
-cd "${APPDIR_BIN}" || die "ERROR: Can't enter on dir: ${APPDIR_BIN}"
-ln -s "../${APPIMAGE_NAME}" wine
-[ "${WINEARCH}" == "win64" ] && ln -s "../${APPIMAGE_NAME}" wine64
-ln -s "../${APPIMAGE_NAME}" wineserver
+mkdir_critical "${APPDIR_BINDIR}"
+cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
+ln -s "../${APPIMAGE_FILENAME}" wine
+[ "${WINEARCH}" == "win64" ] && ln -s "../${APPIMAGE_FILENAME}" wine64
+ln -s "../${APPIMAGE_FILENAME}" wineserver
 cd - || die "ERROR: Can't go back to preview dir!"
-[[ -z "${NO_APPIMAGE}" ]] && export PATH="${APPDIR_BIN}":${PATH}
+[[ -z "${NO_APPIMAGE}" ]] && export PATH="${APPDIR_BINDIR}":${PATH}
 echo "Setup ok!"
 
 if [ -z "${NO_APPIMAGE}" ]; then
 	echo "Using AppImage..."
 	#-------------------------
 	# Geting the AppImage:
-	if [ -f "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" ]; then
-		echo "${APPIMAGE_NAME} exist. Using it..."
-		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${APPIMAGE_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_NAME}.zsync" "${APPDIR}" | zenity --progress --title="Copying..." --text="Copying: ${APPIMAGE_NAME}.zsync\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+	if [ -f "${DOWNLOADED_RESOURCES}/${APPIMAGE_FILENAME}" ]; then
+		echo "${APPIMAGE_FILENAME} exist. Using it..."
+		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_FILENAME}.zsync" "${APPDIR}" | zenity --progress --title="Copying..." --text="Copying: ${APPIMAGE_FILENAME}.zsync\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	else
-		echo "${APPIMAGE_NAME} does not exist. Downloading..."
+		echo "${APPIMAGE_FILENAME} does not exist. Downloading..."
 		if [ -z "${INSTALL_USING_APPIMAGE_4}" ]; then
 			gtk_download "${WINE_APPIMAGE_URL}" "${WORKDIR}"
 		else
 			gtk_download "${WINE4_APPIMAGE_URL}" "${WORKDIR}"
 		fi
 
-		mv "${WORKDIR}/${APPIMAGE_NAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+		mv "${WORKDIR}/${APPIMAGE_FILENAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 
 		gtk_download "${WINE_APPIMAGE_URL}.zsync" "${WORKDIR}"
-		mv "${WORKDIR}/${APPIMAGE_NAME}.zsync" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_NAME}.zsync\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+		mv "${WORKDIR}/${APPIMAGE_FILENAME}.zsync" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_FILENAME}.zsync\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	fi
-	FILE="${APPDIR}/${APPIMAGE_NAME}"
+	FILE="${APPDIR}/${APPIMAGE_FILENAME}"
 	chmod +x "${FILE}"
 	echo "Using: $(wine --version)"
 	#-------------------------
@@ -751,9 +751,9 @@ wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --tex
 
 if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
 	gtk_download "${WINE5_APPIMAGE_URL}" "${WORKDIR}"
-	rm -rf "${APPDIR:?}/${APPIMAGE_NAME}"
-	mv "${WORKDIR}/${APPIMAGE_NAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-	FILE="${APPDIR}/${APPIMAGE_NAME}"
+	rm -rf "${APPDIR:?}/${APPIMAGE_FILENAME}"
+	mv "${WORKDIR}/${APPIMAGE_FILENAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+	FILE="${APPDIR}/${APPIMAGE_FILENAME}"
 	chmod +x "${FILE}"
 	echo "Using: $(wine --version)"
 	${WINE_EXE} wineboot
