@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.11-rc5"
+export THIS_SCRIPT_VERSION="v2.11-rc6"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -30,6 +30,7 @@ if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible_Linux_P" ;
 export APPDIR="${INSTALLDIR}/data"
 export APPDIR_BINDIR="${APPDIR}/bin"
 export APPIMAGE_FILENAME="wine-i386_x86_64-archlinux.AppImage"
+export APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
 
 # --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
 # -f, --force           Don't check whether packages were already installed
@@ -453,8 +454,9 @@ case "${1}" in
 		# Making the links (and dir)
 		mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
 		cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
-		ln -s "../${APPIMAGE_FILENAME}" wine
-		ln -s "../${APPIMAGE_FILENAME}" wineserver
+		ln -s "../${APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
+		ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
+		ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wineserver
 		cd - || die "ERROR: Can't go back to preview dir!"
 
 		mkdir "${APPDIR}/wine32_bottle"
@@ -473,9 +475,10 @@ case "${1}" in
 		# Making the links (and dir)
 		mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
 		cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
-		ln -s "../${APPIMAGE_FILENAME}" wine
-		ln -s "../${APPIMAGE_FILENAME}" wine64
-		ln -s "../${APPIMAGE_FILENAME}" wineserver
+		ln -s "../${APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
+		ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
+		ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine64
+		ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wineserver
 		cd - || die "ERROR: Can't go back to preview dir!"
 
 		mkdir "${APPDIR}/wine64_bottle"
@@ -557,9 +560,10 @@ mkdir_critical "${APPDIR}"
 # Making the links (and dir)
 mkdir_critical "${APPDIR_BINDIR}"
 cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
-ln -s "../${APPIMAGE_FILENAME}" wine
-[ "${WINEARCH}" == "win64" ] && ln -s "../${APPIMAGE_FILENAME}" wine64
-ln -s "../${APPIMAGE_FILENAME}" wineserver
+ln -s "../${APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
+ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
+[ "${WINEARCH}" == "win64" ] && ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine64
+ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wineserver
 cd - || die "ERROR: Can't go back to preview dir!"
 [[ -z "${NO_APPIMAGE}" ]] && export PATH="${APPDIR_BINDIR}":${PATH}
 echo "Setup ok!"
