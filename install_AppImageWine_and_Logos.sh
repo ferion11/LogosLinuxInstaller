@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.11-rc7"
+export THIS_SCRIPT_VERSION="v2.11-rc8"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -223,56 +223,57 @@ export WINEPREFIX="\${HERE}/data/wine${WINE_BITS}_bottle"
 #-------------------------------------------------
 
 #-------------------------------------------------
-# ${WINE_EXE} Run:
-if [ "\$1" = "${WINE_EXE}" ] ; then
-	echo "======= Running ${WINE_EXE} only: ======="
-	shift
-	${WINE_EXE} "\$@"
-	wineserver -w
-	echo "======= ${WINE_EXE} run done! ======="
-	exit 0
-fi
-
-# wineserver Run:
-if [ "\$1" = "wineserver" ] ; then
-	echo "======= Running wineserver only: ======="
-	shift
-	wineserver "\$@"
-	echo "======= wineserver run done! ======="
-	exit 0
-fi
-
-# winetricks Run:
-if [ "\$1" = "winetricks" ] ; then
-	echo "======= Running winetricks only: ======="
-	WORKDIR="\$(mktemp -d)"
-	if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
-	else wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-	fi
-	chmod +x "\${WORKDIR}"/winetricks
-	shift
-	"\${WORKDIR}"/winetricks "\$@"
-	rm -rf "\${WORKDIR}"
-	echo "======= winetricks run done! ======="
-	exit 0
-fi
-
-# Indexing Run:
-if [ "\$1" = "indexing" ] ; then
-	echo "======= Running indexing on the Logos inside this installation only: ======="
-	LOGOS_INDEXER_EXE=\$(find "\${WINEPREFIX}" -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
-	if [ -z "\${LOGOS_INDEXER_EXE}" ] ; then
-		echo "* ERROR: the LogosIndexer.exe can't be found!!!"
-		exit 1
-	fi
-	echo "* Closing anything running in this wine bottle:"
-	wineserver -k
-	echo "* Running the indexer:"
-	${WINE_EXE} "\${LOGOS_INDEXER_EXE}"
-	wineserver -w
-	echo "======= indexing of LogosBible run done! ======="
-	exit 0
-fi
+case "\${1}" in
+	"${WINE_EXE}")
+		# ${WINE_EXE} Run:
+		echo "======= Running ${WINE_EXE} only: ======="
+		shift
+		${WINE_EXE} "\$@"
+		wineserver -w
+		echo "======= ${WINE_EXE} run done! ======="
+		exit 0
+		;;
+	"wineserver")
+		# wineserver Run:
+		echo "======= Running wineserver only: ======="
+		shift
+		wineserver "\$@"
+		echo "======= wineserver run done! ======="
+		exit 0
+		;;
+	"winetricks")
+		# winetricks Run:
+		echo "======= Running winetricks only: ======="
+		WORKDIR="\$(mktemp -d)"
+		if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
+		else wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+		fi
+		chmod +x "\${WORKDIR}"/winetricks
+		shift
+		"\${WORKDIR}"/winetricks "\$@"
+		rm -rf "\${WORKDIR}"
+		echo "======= winetricks run done! ======="
+		exit 0
+		;;
+	"indexing")
+		# Indexing Run:
+		echo "======= Running indexing on the Logos inside this installation only: ======="
+		LOGOS_INDEXER_EXE=\$(find "\${WINEPREFIX}" -name LogosIndexer.exe |  grep "Logos\/System\/LogosIndexer.exe")
+		if [ -z "\${LOGOS_INDEXER_EXE}" ] ; then
+			echo "* ERROR: the LogosIndexer.exe can't be found!!!"
+			exit 1
+		fi
+		echo "* Closing anything running in this wine bottle:"
+		wineserver -k
+		echo "* Running the indexer:"
+		${WINE_EXE} "\${LOGOS_INDEXER_EXE}"
+		wineserver -w
+		echo "======= indexing of LogosBible run done! ======="
+		exit 0
+		;;
+	*)
+		echo "No arguments parsed."
+esac
 
 LOGOS_EXE=\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")
 if [ -z "\${LOGOS_EXE}" ] ; then
@@ -315,39 +316,41 @@ export WINEPREFIX="\${HERE}/data/wine${WINE_BITS}_bottle"
 #-------------------------------------------------
 
 #-------------------------------------------------
-# ${WINE_EXE} Run:
-if [ "\$1" = "wine" ] ; then
-	echo "======= Running ${WINE_EXE} only: ======="
-	shift
-	${WINE_EXE} "\$@"
-	wineserver -w
-	echo "======= ${WINE_EXE} run done! ======="
-	exit 0
-fi
-
-# wineserver Run:
-if [ "\$1" = "wineserver" ] ; then
-	echo "======= Running wineserver only: ======="
-	shift
-	wineserver "\$@"
-	echo "======= wineserver run done! ======="
-	exit 0
-fi
-
-# winetricks Run:
-if [ "\$1" = "winetricks" ] ; then
-	echo "======= Running winetricks only: ======="
-	WORKDIR="\$(mktemp -d)"
-	if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
-	else wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-	fi
-	chmod +x "\${WORKDIR}"/winetricks
-	shift
-	"\${WORKDIR}"/winetricks "\$@"
-	rm -rf "\${WORKDIR}"
-	echo "======= winetricks run done! ======="
-	exit 0
-fi
+case "\${1}" in
+	"${WINE_EXE}")
+		# ${WINE_EXE} Run:
+		echo "======= Running ${WINE_EXE} only: ======="
+		shift
+		${WINE_EXE} "\$@"
+		wineserver -w
+		echo "======= ${WINE_EXE} run done! ======="
+		exit 0
+		;;
+	"wineserver")
+		# wineserver Run:
+		echo "======= Running wineserver only: ======="
+		shift
+		wineserver "\$@"
+		echo "======= wineserver run done! ======="
+		exit 0
+		;;
+	"winetricks")
+		# winetricks Run:
+		echo "======= Running winetricks only: ======="
+		WORKDIR="\$(mktemp -d)"
+		if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
+		else wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+		fi
+		chmod +x "\${WORKDIR}"/winetricks
+		shift
+		"\${WORKDIR}"/winetricks "\$@"
+		rm -rf "\${WORKDIR}"
+		echo "======= winetricks run done! ======="
+		exit 0
+		;;
+	*)
+		echo "No arguments parsed."
+esac
 
 ${WINE_EXE} control
 wineserver -w
