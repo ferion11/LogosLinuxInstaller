@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.11-rc9"
+export THIS_SCRIPT_VERSION="v2.11-rc10"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -217,7 +217,7 @@ IFS=$'\n'
 #-------------------------------------------------
 
 #-------------------------------------------------
-[[ -f "\${HERE}/data/bin/${WINE_EXE}" ]] && export PATH="\${HERE}/data/bin:\${PATH}"
+[ -x "\${HERE}/data/bin/${WINE_EXE}" ] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win${WINE_BITS}
 export WINEPREFIX="\${HERE}/data/wine${WINE_BITS}_bottle"
 #-------------------------------------------------
@@ -289,17 +289,16 @@ case "\${1}" in
 
 		if [ "\${APPIMAGE_DIR}" != "\${HERE}/data" ]; then
 			if zenity --question --width=300 --height=200 --text="Warning: The AppImage isn't at \"./data/ directory\"\!\nDo you want to copy the AppImage to the \"./data/\" directory keeping portability?" --title='Warning!'; then
+				[ -f "\${HERE}/data/\${APPIMAGE_FILENAME}" ] && rm -rf "\${HERE}/data/\${APPIMAGE_FILENAME}"
 				cp "\${APPIMAGE_FULLPATH}" "\${HERE}/data/"
 				APPIMAGE_FULLPATH="\${HERE}/data/\${APPIMAGE_FILENAME}"
-				APPIMAGE_DIR="\${APPIMAGE_FULLPATH%\${APPIMAGE_FILENAME}}"
-				APPIMAGE_DIR="\${APPIMAGE_DIR%?}"
 			else
 				echo "Warning: Linking \${APPIMAGE_FULLPATH} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 				chmod +x "\${APPIMAGE_FULLPATH}"
 				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-				echo "======= AppImage Selection run done! ======="
+				echo "======= AppImage Selection run done with external link! ======="
 				exit 0
 			fi
 		fi
@@ -351,7 +350,7 @@ IFS=$'\n'
 #-------------------------------------------------
 
 #-------------------------------------------------
-[[ -f "\${HERE}/data/bin/${WINE_EXE}" ]] && export PATH="\${HERE}/data/bin:\${PATH}"
+[ -x "\${HERE}/data/bin/${WINE_EXE}" ] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win${WINE_BITS}
 export WINEPREFIX="\${HERE}/data/wine${WINE_BITS}_bottle"
 #-------------------------------------------------
@@ -407,17 +406,16 @@ case "\${1}" in
 
 		if [ "\${APPIMAGE_DIR}" != "\${HERE}/data" ]; then
 			if zenity --question --width=300 --height=200 --text="Warning: The AppImage isn't at \"./data/ directory\"\!\nDo you want to copy the AppImage to the \"./data/\" directory keeping portability?" --title='Warning!'; then
+				[ -f "\${HERE}/data/\${APPIMAGE_FILENAME}" ] && rm -rf "\${HERE}/data/\${APPIMAGE_FILENAME}"
 				cp "\${APPIMAGE_FULLPATH}" "\${HERE}/data/"
 				APPIMAGE_FULLPATH="\${HERE}/data/\${APPIMAGE_FILENAME}"
-				APPIMAGE_DIR="\${APPIMAGE_FULLPATH%\${APPIMAGE_FILENAME}}"
-				APPIMAGE_DIR="\${APPIMAGE_DIR%?}"
 			else
 				echo "Warning: Linking \${APPIMAGE_FULLPATH} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 				chmod +x "\${APPIMAGE_FULLPATH}"
 				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-				echo "======= AppImage Selection run done! ======="
+				echo "======= AppImage Selection run done with external link! ======="
 				exit 0
 			fi
 		fi
