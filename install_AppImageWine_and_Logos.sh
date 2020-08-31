@@ -581,7 +581,7 @@ if [ -d "${INSTALLDIR}" ]; then
 	gtk_fatal_error "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
 fi
 
-installationChoice="$(zenity --width=640 --height=310 \
+installationChoice="$(zenity --width=700 --height=310 \
 	--title="Question: Install Logos Bible" \
 	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v${LOGOS_VERSION} independent of others installations.\nPlease, select the type of installation:" \
 	--list --radiolist --column "S" --column "Descrition" \
