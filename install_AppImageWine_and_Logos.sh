@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.12-rc0"
+export THIS_SCRIPT_VERSION="v2.12-rc1"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -516,6 +516,13 @@ if have_dep wget; then
 else
 	echo '* Your system does not have wget. Please install wget package.'
 	gtk_fatal_error "Your system does not have wget. Please install wget package."
+fi
+
+if have_dep xwd; then
+	echo '* xwd is installed!'
+else
+	echo '* Your system does not have xwd. Please install xwd package.'
+	gtk_fatal_error "Your system does not have xwd. Please install xwd package."
 fi
 
 if have_dep find; then
