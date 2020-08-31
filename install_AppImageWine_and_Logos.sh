@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.11"
+export THIS_SCRIPT_VERSION="v2.12-rc0"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -9,6 +9,8 @@ if [ -z "${WINE_APPIMAGE_URL}" ]; then export WINE_APPIMAGE_URL="https://github.
 #if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/v4.21/wine-i386_x86_64-archlinux.AppImage" ; fi
 if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage_dev/releases/download/continuous-f11wine4/wine-i386_x86_64-archlinux.AppImage" ; fi
 if [ -z "${WINE5_APPIMAGE_URL}" ]; then export WINE5_APPIMAGE_URL="${WINE_APPIMAGE_URL}" ; fi
+if [ -z "${WINE64_5_11_URL}" ]; then export WINE64_5_11_URL="https://www.playonlinux.com/wine/binaries/phoenicis/staging-linux-amd64/PlayOnLinux-wine-5.11-staging-linux-amd64.tar.gz" ; fi
+if [ -z "${FAKE_WINE_APPIMAGE_URL}" ]; then export FAKE_WINE_APPIMAGE_URL="https://github.com/ferion11/libsutil/releases/download/fakeAppImage/wine-fake.AppImage" ; fi
 #if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" ; fi
 # back to Jul 23, 2020 release of winetricks, not more of the last git random broken fun:
 if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks" ; fi
@@ -29,8 +31,12 @@ if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible_Linux_P" ;
 
 export APPDIR="${INSTALLDIR}/data"
 export APPDIR_BINDIR="${APPDIR}/bin"
+export WINE5_TMP_INST_DIRNAME="wineInstallation"
+WINE5_TMP_FILENAME="$(echo "${WINE64_5_11_URL}" | cut -d/ -f8)"
+export WINE5_TMP_FILENAME
 export APPIMAGE_FILENAME="wine-i386_x86_64-archlinux.AppImage"
 export APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
+export FAKE_WINE_APPIMAGE_NAME="wine-fake.AppImage"
 
 # --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
 # -f, --force           Don't check whether packages were already installed
@@ -273,8 +279,8 @@ case "\${1}" in
 		;;
 	"selectAppImage")
 		echo "======= Running AppImage Selection only: ======="
-		APPIMAGE_FILENAME="wine-i386_x86_64-archlinux.AppImage"
-		APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
+		APPIMAGE_FILENAME="${APPIMAGE_FILENAME}"
+		APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"
 
 		APPIMAGE_FULLPATH="\$(zenity --file-selection --filename="\${HERE}"/data/*.AppImage --file-filter='AppImage files | *.AppImage *.Appimage *.appImage *.appimage' --file-filter='All files | *')"
 		if [ -z "\${APPIMAGE_FULLPATH}" ]; then
@@ -390,8 +396,8 @@ case "\${1}" in
 		;;
 	"selectAppImage")
 		echo "======= Running AppImage Selection only: ======="
-		APPIMAGE_FILENAME="wine-i386_x86_64-archlinux.AppImage"
-		APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
+		APPIMAGE_FILENAME="${APPIMAGE_FILENAME}"
+		APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"
 
 		APPIMAGE_FULLPATH="\$(zenity --file-selection --filename="\${HERE}"/data/*.AppImage --file-filter='AppImage files | *.AppImage *.Appimage *.appImage *.appimage' --file-filter='All files | *')"
 		if [ -z "\${APPIMAGE_FULLPATH}" ]; then
@@ -575,14 +581,15 @@ if [ -d "${INSTALLDIR}" ]; then
 	gtk_fatal_error "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
 fi
 
-installationChoice="$(zenity --width=420 --height=270 \
+installationChoice="$(zenity --width=640 --height=310 \
 	--title="Question: Install Logos Bible" \
 	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v${LOGOS_VERSION} independent of others installations.\nPlease, select the type of installation:" \
 	--list --radiolist --column "S" --column "Descrition" \
 	TRUE "1- Install LogosBible32 using Wine AppImage (default)." \
 	FALSE "2- Install LogosBible32 using the native Wine." \
 	FALSE "3- Install LogosBible64 using the native Wine64 (unstable)." \
-	FALSE "4- Install using AppImage v4.21 up to dotnet48 and v5.x to LogosBible32." )"
+	FALSE "4- Install LogosBible32 using AppImage v4.21 up to dotnet48 and replace with v5.x AppImage." \
+	FALSE "5- Install LogosBible64 using Wine64 v5.11 up to dotnet48 and replace with native (unstable)." )"
 
 case "${installationChoice}" in
 	1*)
@@ -601,7 +608,7 @@ case "${installationChoice}" in
 		export WINE_EXE="wine"
 
 		# check for wine installation
-		WINE_VERSION_CHECK="$(wine --version)"
+		WINE_VERSION_CHECK="$(${WINE_EXE} --version)"
 		if [ -z "${WINE_VERSION_CHECK}" ]; then
 			gtk_fatal_error "Wine not found! Please install native Wine first."
 		fi
@@ -617,7 +624,7 @@ case "${installationChoice}" in
 		export WINE_EXE="wine64"
 
 		# check for wine installation
-		WINE_VERSION_CHECK="$(wine64 --version)"
+		WINE_VERSION_CHECK="$(${WINE_EXE} --version)"
 		if [ -z "${WINE_VERSION_CHECK}" ]; then
 			gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
 		fi
@@ -634,14 +641,25 @@ case "${installationChoice}" in
 
 		make_skel "32" "${WINE_EXE}"
 		;;
+	5*)
+		echo "Installing LogosBible 64bits using 2 Wine versions..."
+		export WINEARCH=win64
+		export WINEPREFIX="${APPDIR}/wine64_bottle"
+		export WINE_EXE="wine64"
+
+		make_skel "64" "${WINE_EXE}"
+		;;
 	*)
 		gtk_fatal_error "Installation canceled!"
 esac
 
-# exporting PATH to internal use if using AppImage:
-[[ -z "${NO_APPIMAGE}" ]] && export PATH="${APPDIR_BINDIR}":${PATH}
+# exporting PATH to internal use if using AppImage or LocalDirInstall, doing backup too:
+if [ -z "${NO_APPIMAGE}" ] ; then
+	export OLD_PATH="${PATH}"
+	export PATH="${APPDIR_BINDIR}":"${PATH}"
+fi
 
-if [ -z "${NO_APPIMAGE}" ]; then
+if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win32" ] ; then
 	echo "Using AppImage..."
 	#-------------------------
 	# Geting the AppImage:
@@ -664,7 +682,29 @@ if [ -z "${NO_APPIMAGE}" ]; then
 	fi
 	FILE="${APPDIR}/${APPIMAGE_FILENAME}"
 	chmod +x "${FILE}"
-	echo "Using: $(wine --version)"
+	echo "Using: $(${WINE_EXE} --version)"
+	#-------------------------
+fi
+
+if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win64" ] ; then
+	echo "Using fake AppImage plus ${WINE5_TMP_FILENAME}..."
+	#-------------------------
+	# Geting the fake AppImage and Wine64:
+	gtk_download "${FAKE_WINE_APPIMAGE_URL}" "${WORKDIR}"
+	gtk_download "${WINE64_5_11_URL}" "${WORKDIR}"
+
+	chmod +x "${WORKDIR}/${FAKE_WINE_APPIMAGE_NAME}"
+	mv "${WORKDIR}/${FAKE_WINE_APPIMAGE_NAME}" "${APPDIR}"
+
+	mkdir "${APPDIR}/${WINE5_TMP_INST_DIRNAME}" || die "Cannot create ${WINE5_TMP_INST_DIRNAME}"
+	tar xf "${WORKDIR}/${WINE5_TMP_FILENAME}" -C "${APPDIR}/${WINE5_TMP_INST_DIRNAME}"/ | zenity --progress --title="Extracting..." --text="Extracting: ${WINE5_TMP_FILENAME}\ninto: ${APPDIR}/${WINE5_TMP_INST_DIRNAME}" --pulsate --auto-close --no-cancel
+
+	# update links:
+	rm -rf "${APPDIR_BINDIR:?}/${APPIMAGE_LINK_SELECTION_NAME}"
+	ln -s "../${FAKE_WINE_APPIMAGE_NAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
+	mv "${APPIMAGE_LINK_SELECTION_NAME}" "${APPDIR_BINDIR}"
+
+	echo "Using: $(${WINE_EXE} --version)"
 	#-------------------------
 fi
 
@@ -820,7 +860,27 @@ if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
 	mv "${WORKDIR}/${APPIMAGE_FILENAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	FILE="${APPDIR}/${APPIMAGE_FILENAME}"
 	chmod +x "${FILE}"
-	echo "Using: $(wine --version)"
+	echo "Using: $(${WINE_EXE} --version)"
+	${WINE_EXE} wineboot
+
+	echo "* Waiting for ${WINE_EXE} to proper end..."
+	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+fi
+
+if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win64" ] ; then
+	echo "Removing temp Wine, and using native 64bit one..."
+	rm -rf "${APPDIR:?}/${FAKE_WINE_APPIMAGE_NAME}"
+	rm -rf "${APPDIR:?}/${WINE5_TMP_INST_DIRNAME}"
+
+	# removing the local bin PATH to be sure of using the local 64bit installation
+	export PATH="${OLD_PATH}"
+
+	# check for wine installation
+	WINE_VERSION_CHECK="$(${WINE_EXE} --version)"
+	if [ -z "${WINE_VERSION_CHECK}" ]; then
+		gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
+	fi
+	echo "Using: ${WINE_VERSION_CHECK}"
 	${WINE_EXE} wineboot
 
 	echo "* Waiting for ${WINE_EXE} to proper end..."
