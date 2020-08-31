@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.12-rc2"
+export THIS_SCRIPT_VERSION="v2.12-rc3"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -9,7 +9,7 @@ if [ -z "${WINE_APPIMAGE_URL}" ]; then export WINE_APPIMAGE_URL="https://github.
 #if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/v4.21/wine-i386_x86_64-archlinux.AppImage" ; fi
 if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage_dev/releases/download/continuous-f11wine4/wine-i386_x86_64-archlinux.AppImage" ; fi
 if [ -z "${WINE5_APPIMAGE_URL}" ]; then export WINE5_APPIMAGE_URL="${WINE_APPIMAGE_URL}" ; fi
-if [ -z "${WINE64_5_11_URL}" ]; then export WINE64_5_11_URL="https://www.playonlinux.com/wine/binaries/phoenicis/upstream-linux-amd64/PlayOnLinux-wine-5.11-upstream-linux-amd64.tar.gz" ; fi
+if [ -z "${WINE64_5_11_URL}" ]; then export WINE64_5_11_URL="https://www.playonlinux.com/wine/binaries/phoenicis/upstream-linux-amd64/PlayOnLinux-wine-5.0.2-upstream-linux-amd64.tar.gz" ; fi
 if [ -z "${FAKE_WINE_APPIMAGE_URL}" ]; then export FAKE_WINE_APPIMAGE_URL="https://github.com/ferion11/libsutil/releases/download/fakeAppImage/wine-fake.AppImage" ; fi
 #if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" ; fi
 # back to Jul 23, 2020 release of winetricks, not more of the last git random broken fun:
