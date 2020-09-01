@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.12-rc5"
+export THIS_SCRIPT_VERSION="v2.12-rc6"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -200,6 +200,25 @@ gtk_download() {
 }
 #--------------
 #==========================
+
+wait_process_using_dir() {
+	VERIFICATION_DIR="${1}"
+	VERIFICATION_TIME=7
+
+	for (( c=1; c<=3; c++ ))
+	do
+		PID_LIST="$(fuser "${VERIFICATION_DIR}")"
+		# double quote make one bug!
+		# shellcheck disable=SC2086
+		FIST_PID="$(echo ${PID_LIST} | cut -d' ' -f1)"
+		if [ -z "${FIST_PID}" ]; then
+			sleep "${VERIFICATION_TIME}"
+		else
+			c=1
+			tail --pid="${FIST_PID}" -f /dev/null
+		fi
+	done
+}
 
 #======= making the starting scripts ==============
 create_starting_scripts() {
@@ -719,8 +738,10 @@ gtk_continue_question "Now the script will create and configure the Wine Bottle 
 ${WINE_EXE} wineboot
 
 echo "* Waiting for ${WINE_EXE} to proper end..."
+wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 
+#-------
 cat > "${WORKDIR}"/disable-winemenubuilder.reg << EOF
 REGEDIT4
 
@@ -742,15 +763,22 @@ EOF
 
 echo "${WINE_EXE} regedit.exe disable-winemenubuilder.reg"
 ${WINE_EXE} regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in ${WINEPREFIX}:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close --no-cancel
+
 echo "* Waiting for ${WINE_EXE} to proper end..."
+wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+
 echo "${WINE_EXE} regedit.exe disable-winemenubuilder.reg DONE!"
 
 echo "${WINE_EXE} regedit.exe renderer_gdi.reg"
 ${WINE_EXE} regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close --no-cancel
+
 echo "* Waiting for ${WINE_EXE} to proper end..."
+wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+
 echo "${WINE_EXE} regedit.exe renderer_gdi.reg DONE!"
+#-------
 
 gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
 
@@ -794,6 +822,7 @@ fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} corefonts DONE!"
 #-------------------------------------------------
 echo "* Waiting for ${WINE_EXE} to proper end..."
+wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb"
@@ -826,6 +855,7 @@ fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb DONE!"
 #-------------------------------------------------
 echo "* Waiting for ${WINE_EXE} to proper end..."
+wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48"
@@ -859,6 +889,7 @@ echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48 DONE!"
 #-------------------------------------------------
 
 echo "* Waiting for ${WINE_EXE} to proper end..."
+wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 
 if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
@@ -871,6 +902,7 @@ if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
 	${WINE_EXE} wineboot
 
 	echo "* Waiting for ${WINE_EXE} to proper end..."
+	wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 fi
 
@@ -905,6 +937,7 @@ case "${WINEARCH}" in
 esac
 
 echo "* Waiting for ${WINE_EXE} to proper end..."
+wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 
 if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win64" ] ; then
@@ -924,6 +957,7 @@ if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win64" ] ; then
 	${WINE_EXE} wineboot
 
 	echo "* Waiting for ${WINE_EXE} to proper end..."
+	wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 fi
 
