@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.12-rc4"
+export THIS_SCRIPT_VERSION="v2.12-rc5"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
@@ -596,7 +596,7 @@ installationChoice="$(zenity --width=700 --height=310 \
 	FALSE "2- Install LogosBible32 using the native Wine." \
 	FALSE "3- Install LogosBible64 using the native Wine64 (unstable)." \
 	FALSE "4- Install LogosBible32 using AppImage v4.21 up to dotnet48 and replace with v5.x AppImage." \
-	FALSE "5- Install LogosBible64 using Wine64 v5.11 up to dotnet48 and replace with native (unstable)." )"
+	FALSE "5- Install LogosBible64 using Wine64 v5.11 and replace with native (unstable)." )"
 
 case "${installationChoice}" in
 	1*)
@@ -874,26 +874,6 @@ if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
 	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 fi
 
-if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win64" ] ; then
-	echo "Removing temp Wine, and using native 64bit one..."
-	rm -rf "${APPDIR:?}/${FAKE_WINE_APPIMAGE_NAME}"
-	rm -rf "${APPDIR:?}/${WINE5_TMP_INST_DIRNAME}"
-
-	# removing the local bin PATH to be sure of using the local 64bit installation
-	export PATH="${OLD_PATH}"
-
-	# check for wine installation
-	WINE_VERSION_CHECK="$(${WINE_EXE} --version)"
-	if [ -z "${WINE_VERSION_CHECK}" ]; then
-		gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
-	fi
-	echo "Using: ${WINE_VERSION_CHECK}"
-	${WINE_EXE} wineboot
-
-	echo "* Waiting for ${WINE_EXE} to proper end..."
-	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
-fi
-
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
 # Geting and install the LogosBible:
@@ -926,6 +906,26 @@ esac
 
 echo "* Waiting for ${WINE_EXE} to proper end..."
 wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+
+if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win64" ] ; then
+	echo "Removing temp Wine, and using native 64bit one..."
+	rm -rf "${APPDIR:?}/${FAKE_WINE_APPIMAGE_NAME}"
+	rm -rf "${APPDIR:?}/${WINE5_TMP_INST_DIRNAME}"
+
+	# removing the local bin PATH to be sure of using the local 64bit installation
+	export PATH="${OLD_PATH}"
+
+	# check for wine installation
+	WINE_VERSION_CHECK="$(${WINE_EXE} --version)"
+	if [ -z "${WINE_VERSION_CHECK}" ]; then
+		gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
+	fi
+	echo "Using: ${WINE_VERSION_CHECK}"
+	${WINE_EXE} wineboot
+
+	echo "* Waiting for ${WINE_EXE} to proper end..."
+	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+fi
 
 clean_all
 
