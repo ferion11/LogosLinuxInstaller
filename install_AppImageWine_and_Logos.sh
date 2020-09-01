@@ -615,7 +615,7 @@ installationChoice="$(zenity --width=700 --height=310 \
 	FALSE "2- Install LogosBible32 using the native Wine." \
 	FALSE "3- Install LogosBible64 using the native Wine64 (unstable)." \
 	FALSE "4- Install LogosBible32 using AppImage v4.21 up to dotnet48 and replace with v5.x AppImage." \
-	FALSE "5- Install LogosBible64 using Wine64 v5.11 and replace with native (unstable)." )"
+	FALSE "5- Install LogosBible64 using Wine64 v5.11 and replace with native (Work in progress...)." )"
 
 case "${installationChoice}" in
 	1*)
