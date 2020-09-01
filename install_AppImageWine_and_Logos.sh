@@ -1,10 +1,10 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.12-rc6"
+export THIS_SCRIPT_VERSION="v2.12-rc7"
 
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
-if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x86.msi" ; fi
-if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS8/Installer/8.15.0.0004/Logos-x64.msi" ; fi
+if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.16.0.0002/Logos-x86.msi" ; fi
+if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS8/Installer/8.16.0.0002/Logos-x64.msi" ; fi
 if [ -z "${WINE_APPIMAGE_URL}" ]; then export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/continuous-logos/wine-i386_x86_64-archlinux.AppImage" ; fi
 #if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/v4.21/wine-i386_x86_64-archlinux.AppImage" ; fi
 if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage_dev/releases/download/continuous-f11wine4/wine-i386_x86_64-archlinux.AppImage" ; fi
