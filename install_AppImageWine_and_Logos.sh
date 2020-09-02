@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.13-rc0"
+export THIS_SCRIPT_VERSION="v2.13-rc1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -287,6 +287,7 @@ case "\${1}" in
 		shift
 		"\${WORKDIR}"/winetricks "\$@"
 		rm -rf "\${WORKDIR}"
+		wineserver -w
 		echo "======= winetricks run done! ======="
 		exit 0
 		;;
@@ -344,6 +345,20 @@ case "\${1}" in
 		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
 		echo "======= AppImage Selection run done! ======="
+		exit 0
+		;;
+	"logsOn")
+		echo "======= enable LogosBible logging only: ======="
+		${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
+		wineserver -w
+		echo "======= enable LogosBible logging done! ======="
+		exit 0
+		;;
+	"logsOff")
+		echo "======= disable LogosBible logging only: ======="
+		${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0000 /f
+		wineserver -w
+		echo "======= disable LogosBible logging done! ======="
 		exit 0
 		;;
 	*)
@@ -420,6 +435,7 @@ case "\${1}" in
 		shift
 		"\${WORKDIR}"/winetricks "\$@"
 		rm -rf "\${WORKDIR}"
+		wineserver -w
 		echo "======= winetricks run done! ======="
 		exit 0
 		;;
