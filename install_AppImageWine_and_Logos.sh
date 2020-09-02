@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.13-rc1"
+export THIS_SCRIPT_VERSION="v2.13-rc2"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -718,7 +718,6 @@ if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win32" ] ; then
 	if [ -f "${DOWNLOADED_RESOURCES}/${APPIMAGE_FILENAME}" ]; then
 		echo "${APPIMAGE_FILENAME} exist. Using it..."
 		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_FILENAME}.zsync" "${APPDIR}" | zenity --progress --title="Copying..." --text="Copying: ${APPIMAGE_FILENAME}.zsync\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	else
 		echo "${APPIMAGE_FILENAME} does not exist. Downloading..."
 		if [ -z "${INSTALL_USING_APPIMAGE_4}" ]; then
@@ -728,9 +727,6 @@ if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win32" ] ; then
 		fi
 
 		mv "${WORKDIR}/${APPIMAGE_FILENAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-
-		gtk_download "${WINE_APPIMAGE_URL}.zsync" "${WORKDIR}"
-		mv "${WORKDIR}/${APPIMAGE_FILENAME}.zsync" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_FILENAME}.zsync\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	fi
 	FILE="${APPDIR}/${APPIMAGE_FILENAME}"
 	chmod +x "${FILE}"
