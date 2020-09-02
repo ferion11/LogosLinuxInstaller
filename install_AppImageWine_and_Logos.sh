@@ -1,22 +1,32 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.12"
+export THIS_SCRIPT_VERSION="v2.13-rc0"
 
+#=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.16.0.0002/Logos-x86.msi" ; fi
 if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS8/Installer/8.16.0.0002/Logos-x64.msi" ; fi
+#=================================================
+# Default AppImage (with deps) to install 32bits version:
 if [ -z "${WINE_APPIMAGE_URL}" ]; then export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/continuous-logos/wine-i386_x86_64-archlinux.AppImage" ; fi
+#=================================================
+# Default AppImage (with deps) to install 32bits version using 2 steps (one with 4.x and end with 5.x):
 #if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/v4.21/wine-i386_x86_64-archlinux.AppImage" ; fi
 if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage_dev/releases/download/continuous-f11wine4/wine-i386_x86_64-archlinux.AppImage" ; fi
 if [ -z "${WINE5_APPIMAGE_URL}" ]; then export WINE5_APPIMAGE_URL="${WINE_APPIMAGE_URL}" ; fi
+#=================================================
+# Default wine 64bits to 2 steps installation (using one fixed version to install, then replacing with the native one):
 if [ -z "${WINE64_5_11_URL}" ]; then export WINE64_5_11_URL="https://www.playonlinux.com/wine/binaries/phoenicis/staging-linux-amd64/PlayOnLinux-wine-5.11-staging-linux-amd64.tar.gz" ; fi
 if [ -z "${FAKE_WINE_APPIMAGE_URL}" ]; then export FAKE_WINE_APPIMAGE_URL="https://github.com/ferion11/libsutil/releases/download/fakeAppImage/wine-fake.AppImage" ; fi
+#=================================================
+# winetricks version in use (and downloader option set):
 #if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" ; fi
 # back to Jul 23, 2020 release of winetricks, not more of the last git random broken fun:
 if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks" ; fi
 ## trying one customized version of winetricks:
 ##if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://github.com/ferion11/libsutil/releases/download/winetricks/winetricks" ; fi
 if [ -z "${WINETRICKS_DOWNLOADER}" ]; then export WINETRICKS_DOWNLOADER="wget" ; fi
+#=================================================
 #LOGOS_MVERSION=$(echo "${LOGOS_URL}" | cut -d/ -f4)
 #export LOGOS_MVERSION
 LOGOS_VERSION="$(echo "${LOGOS_URL}" | cut -d/ -f6)"
@@ -41,7 +51,7 @@ export FAKE_WINE_APPIMAGE_NAME="wine-fake.AppImage"
 # --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
 # -f, --force           Don't check whether packages were already installed
 # -q, --unattended      Don't ask any questions, just install automatically
-if [ -z "${WINETRICKS_EXTRA_OPTION}" ]; then export WINETRICKS_EXTRA_OPTION="-q" ; fi
+if [ -z "${WINETRICKS_EXTRA_OPTION+x}" ]; then export WINETRICKS_EXTRA_OPTION="-q" ; fi
 if [ -z "${DOWNLOADED_RESOURCES}" ]; then export DOWNLOADED_RESOURCES="/tmp" ; fi
 
 
