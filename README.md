@@ -1,14 +1,14 @@
 # LogosLinuxInstaller
 > LogosLinuxInstaller is a bash script for installation of Logos Bible on Linux.
 
-##### * NOTE The v2.0 break backward compatibility with previous 1.x versions. It will work like the portable version, with variations that may or may not use AppImage, depending on the user's choice, but all installation alternatives will maintain some isolation from the rest of the system and other installations (the independent directory can be moved/renamed without losing functionality).
+##### * NOTE The v2.x break backward compatibility with previous 1.x versions. It will work like the portable version, with variations that may or may not use AppImage, depending on the user's choice, but all installation alternatives will maintain some isolation from the rest of the system and other installations (the independent directory can be moved/renamed without losing functionality).
 
-### v2.0 or higher  instructions:
+### v2.x or higher  instructions:
 #### 00-  Download and execute:
 You can download the last release [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]").
 - If you have the file `Logos-x86.msi` or `Logos-x64.msi`, you can let one copy of it in `/tmp` (or set the variable DOWNLOADED_RESOURCES to the directory that have it) that the installer will use it. It can be useful to install others version without change the script (the same for the others `winetricks` or `wine-i386_x86_64-archlinux.AppImage` versions).
 - If you want to use some other option for `winetricks`, then just set the variable `WINETRICKS_EXTRA_OPTION` (the default is just `-q`), like:
-`$ export WINETRICKS_EXTRA_OPTION="-q --force"` to force the installation on unsupported versions of Wine.
+`$ export WINETRICKS_EXTRA_OPTION="-q --force"` to force the installation on unsupported versions of Wine, or `$ export WINETRICKS_EXTRA_OPTION=""` to remove the default `-q`.
 
 0.1- After that you need to give permission to execute (You can use some graphical method too, but it will depend on your linux distribution):
 ```
@@ -26,7 +26,7 @@ $ ./install_AppImageWine_and_Logos.sh
 
 ![Step01](/img/step_01.png)
 
-* The default is using the 32bit AppImage, that provide better isolation. But you can choose do it using your native wine 32bits (that I recommend do using the 32bits, but you will need multilib wine installed in your 64bits system) or 64bit (is very unstable, work only on few cases, and need one wine 64bits made with WoW64 compatibility layer with 32bits, because dotnet need the 32bits wine working to install it on the 64bit profile). Option 4 is for better compatibility installation using AppImage (if you don't want AppImage, but like the installation option 4, then just remove the AppImage file from the `data` dir, and it will use your native wine). Regardless of your choice, the installation will be done in isolation from the others.
+* The default is using the 32bit AppImage, that provide better isolation. But you can choose do it using your native wine 32bits (some versions of wine will not work, so use `v5.11`) or 64bit (is unstable, work only on few cases, and need one wine 64bits made with WoW64 compatibility layer with 32bits, because dotnet need the 32bits wine working to install it on the 64bit profile, and again use `v5.11`). Option 4 is for better compatibility 64bits installation using one AppImage, but without deps, so I recommend that you have one wine WoW64 installated anyway for the dependencies (if you don't want AppImage, but like the installation option 4, then just remove the AppImage file from the `data` dir, and it will use your native wine). Regardless of your choice, the installation will be done in isolation from the others.
 
 * Who is travis? Travis-ci is the automated system that test and generates the images, [[HERE]](https://github.com/ferion11/LogosLinuxInstallTests "[HERE]")
 
@@ -117,12 +117,27 @@ If the windows does leave the screen then just holding the `Alt` key you can mov
 * You can also use the `Logos.sh` or `controlPanel.sh` to execute Wine or winetricks commands on that installation, like:
   - `$ ./Logos.sh wine regedit.exe`
   - `$ ./Logos.sh winetricks calibri`
+  - if there is another version of winetricks inside `LogosBible_Linux_P`, the `Logos.sh` or `controlPanel.sh` will use it.
 
 * If, after the installation, you want to use a different version of winetricks, just copy it to the same directory that the `Logos.sh` and `controlPanel.sh`, then the 2 scripts will use it, instead of download the last git version.
 
 * You can run the standalone Logos Bible indexing on the console with:
 ```
 $ ./Logos.sh indexing
+```
+
+* You can enable/disable the Logos Bible logs with:
+```
+$ ./Logos.sh logsOn
+or
+$ ./Logos.sh logsOff
+```
+
+* You can have multiples AppImages on `data` directory, then change it with:
+```
+$ ./Logos.sh selectAppImage
+or
+$ ./controlPanel.sh selectAppImage
 ```
 
 * The `data` directory contains the Wine Bottle and possibly the AppImage, for this installation.
