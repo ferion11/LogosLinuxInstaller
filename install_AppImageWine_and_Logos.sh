@@ -1,11 +1,20 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.13-rc3"
+export THIS_SCRIPT_VERSION="v2.13-rc4"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.16.0.0002/Logos-x86.msi" ; fi
 if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS8/Installer/8.16.0.0002/Logos-x64.msi" ; fi
+
+#LOGOS_MVERSION=$(echo "${LOGOS_URL}" | cut -d/ -f4)
+#export LOGOS_MVERSION
+LOGOS_VERSION="$(echo "${LOGOS_URL}" | cut -d/ -f6)"
+LOGOS_MSI="$(echo "${LOGOS_URL}" | cut -d/ -f7)"
+LOGOS64_MSI="$(echo "${LOGOS64_URL}" | cut -d/ -f7)"
+export LOGOS_VERSION
+export LOGOS_MSI
+export LOGOS64_MSI
 #=================================================
 # Default AppImage (with deps) to install 32bits version:
 if [ -z "${WINE_APPIMAGE_URL}" ]; then export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/continuous-logos/wine-i386_x86_64-archlinux.AppImage" ; fi
@@ -30,32 +39,23 @@ if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubuse
 ## trying one customized version of winetricks:
 ##if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://github.com/ferion11/libsutil/releases/download/winetricks/winetricks" ; fi
 if [ -z "${WINETRICKS_DOWNLOADER}" ]; then export WINETRICKS_DOWNLOADER="wget" ; fi
-#=================================================
-#LOGOS_MVERSION=$(echo "${LOGOS_URL}" | cut -d/ -f4)
-#export LOGOS_MVERSION
-LOGOS_VERSION="$(echo "${LOGOS_URL}" | cut -d/ -f6)"
-LOGOS_MSI="$(echo "${LOGOS_URL}" | cut -d/ -f7)"
-LOGOS64_MSI="$(echo "${LOGOS64_URL}" | cut -d/ -f7)"
-export LOGOS_VERSION
-export LOGOS_MSI
-export LOGOS64_MSI
-
-if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
-if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible_Linux_P" ; fi
-
-export APPDIR="${INSTALLDIR}/data"
-export APPDIR_BINDIR="${APPDIR}/bin"
-export WINE5_TMP_INST_DIRNAME="wineInstallation"
-export APPIMAGE_FILENAME="wine-i386_x86_64-archlinux.AppImage"
-export APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
-export FAKE_WINE_APPIMAGE_NAME="wine-fake.AppImage"
-
 # --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
 # -f, --force           Don't check whether packages were already installed
 # -q, --unattended      Don't ask any questions, just install automatically
 if [ -z "${WINETRICKS_EXTRA_OPTION+x}" ]; then export WINETRICKS_EXTRA_OPTION="-q" ; fi
+#=================================================
+if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
+if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible_Linux_P" ; fi
+export APPDIR="${INSTALLDIR}/data"
+export APPDIR_BINDIR="${APPDIR}/bin"
+export APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
 if [ -z "${DOWNLOADED_RESOURCES}" ]; then export DOWNLOADED_RESOURCES="/tmp" ; fi
+#=================================================
 
+# TODO: change it to named AppImage to each case, push, release, then remove the generic name:
+export APPIMAGE_FILENAME="wine-i386_x86_64-archlinux.AppImage"
+
+#=================================================
 
 #======= Aux =============
 die() { echo >&2 "$*"; exit 1; };
