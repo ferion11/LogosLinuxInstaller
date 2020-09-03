@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.13-rc4"
+export THIS_SCRIPT_VERSION="v2.13-rc5"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -17,20 +17,16 @@ export LOGOS_MSI
 export LOGOS64_MSI
 #=================================================
 # Default AppImage (with deps) to install 32bits version:
-if [ -z "${WINE_APPIMAGE_URL}" ]; then export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/continuous-logos/wine-i386_x86_64-archlinux.AppImage" ; fi
-#=================================================
-# Default AppImage (with deps) to install 32bits version using 2 steps (one with 4.x and end with 5.x):
-#if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/v4.21/wine-i386_x86_64-archlinux.AppImage" ; fi
-if [ -z "${WINE4_APPIMAGE_URL}" ]; then export WINE4_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage_dev/releases/download/continuous-f11wine4/wine-i386_x86_64-archlinux.AppImage" ; fi
-if [ -z "${WINE5_APPIMAGE_URL}" ]; then export WINE5_APPIMAGE_URL="${WINE_APPIMAGE_URL}" ; fi
+export WINE_APPIMAGE_VERSION="v5.11"
+if [ -z "${WINE_APPIMAGE_URL}" ]; then export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/continuous-logos/wine-staging-linux-x86-v5.11-f11-x86_64.AppImage" ; fi
+WINE_APPIMAGE_FILENAME="$(echo "${WINE_APPIMAGE_URL}" | cut -d/ -f9)"
+export WINE_APPIMAGE_FILENAME
 #=================================================
 # Default AppImage (without deps) to install 64bits version:
+export WINE64_APPIMAGE_VERSION="v5.11"
 if [ -z "${WINE64_APPIMAGE_URL}" ]; then export WINE64_APPIMAGE_URL="https://github.com/ferion11/wine_WoW64_nodeps_AppImage/releases/download/v5.11/wine-staging-linux-amd64-nodeps-v5.11-PlayOnLinux-x86_64.AppImage" ; fi
 WINE64_APPIMAGE_FILENAME="$(echo "${WINE64_APPIMAGE_URL}" | cut -d/ -f9)"
 export WINE64_APPIMAGE_FILENAME
-#export WINE64_APPIMAGE_VERSION="v5.11"
-WINE64_APPIMAGE_VERSION="$(echo "${WINE64_APPIMAGE_URL}" | cut -d/ -f8)"
-export WINE64_APPIMAGE_VERSION
 #=================================================
 # winetricks version in use (and downloader option set):
 #if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" ; fi
@@ -51,10 +47,6 @@ export APPDIR_BINDIR="${APPDIR}/bin"
 export APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
 if [ -z "${DOWNLOADED_RESOURCES}" ]; then export DOWNLOADED_RESOURCES="/tmp" ; fi
 #=================================================
-
-# TODO: change it to named AppImage to each case, push, release, then remove the generic name:
-export APPIMAGE_FILENAME="wine-i386_x86_64-archlinux.AppImage"
-
 #=================================================
 
 #======= Aux =============
@@ -311,7 +303,7 @@ case "\${1}" in
 		;;
 	"selectAppImage")
 		echo "======= Running AppImage Selection only: ======="
-		APPIMAGE_FILENAME="${APPIMAGE_FILENAME}"
+		APPIMAGE_FILENAME=""
 		APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"
 
 		APPIMAGE_FULLPATH="\$(zenity --file-selection --filename="\${HERE}"/data/*.AppImage --file-filter='AppImage files | *.AppImage *.Appimage *.appImage *.appimage' --file-filter='All files | *')"
@@ -443,7 +435,7 @@ case "\${1}" in
 		;;
 	"selectAppImage")
 		echo "======= Running AppImage Selection only: ======="
-		APPIMAGE_FILENAME="${APPIMAGE_FILENAME}"
+		APPIMAGE_FILENAME=""
 		APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"
 
 		APPIMAGE_FULLPATH="\$(zenity --file-selection --filename="\${HERE}"/data/*.AppImage --file-filter='AppImage files | *.AppImage *.Appimage *.appImage *.appimage' --file-filter='All files | *')"
@@ -502,8 +494,10 @@ EOF
 make_skel() {
 # ${1} - WINE_BITS: 32 or 64
 # ${2} - WINE_EXE name: wine or wine64
+# ${3} - SET_APPIMAGE_FILENAME
 	WINE_BITS="${1}"
 	WINE_EXE="${2}"
+	SET_APPIMAGE_FILENAME="${3}"
 
 	echo "* Making skel${WINE_BITS} inside ${INSTALLDIR}"
 	mkdir -p "${INSTALLDIR}"
@@ -512,7 +506,7 @@ make_skel() {
 	# Making the links (and dir)
 	mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
 	cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
-	ln -s "../${APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
+	ln -s "../${SET_APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
 	ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
 	[ "${WINE_BITS}" == "64" ] && ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine64
 	ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wineserver
@@ -615,13 +609,13 @@ echo "Starting Zenity GUI..."
 case "${1}" in
 	"skel32")
 		WINE_EXE="wine"
-		make_skel "32" "${WINE_EXE}"
+		make_skel "32" "${WINE_EXE}" "none.AppImage"
 		rm -rf "${WORKDIR}"
 		exit 0
 		;;
 	"skel64")
 		WINE_EXE="wine64"
-		make_skel "64" "${WINE_EXE}"
+		make_skel "64" "${WINE_EXE}" "none.AppImage"
 		rm -rf "${WORKDIR}"
 		exit 0
 		;;
@@ -639,11 +633,10 @@ installationChoice="$(zenity --width=700 --height=310 \
 	--title="Question: Install Logos Bible" \
 	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v${LOGOS_VERSION} independent of others installations.\nPlease, select the type of installation:" \
 	--list --radiolist --column "S" --column "Descrition" \
-	TRUE "1- Install LogosBible32 using Wine AppImage (default)." \
+	TRUE "1- Install LogosBible32 using Wine ${WINE_APPIMAGE_VERSION} AppImage (default)." \
 	FALSE "2- Install LogosBible32 using the native Wine." \
 	FALSE "3- Install LogosBible64 using the native Wine64 (unstable)." \
-	FALSE "4- Install LogosBible32 using AppImage v4.21 up to dotnet48 and replace with v5.x AppImage." \
-	FALSE "5- Install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies (unstable)." )"
+	FALSE "4- Install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies (unstable)." )"
 
 case "${installationChoice}" in
 	1*)
@@ -652,7 +645,9 @@ case "${installationChoice}" in
 		export WINEPREFIX="${APPDIR}/wine32_bottle"
 		export WINE_EXE="wine"
 
-		make_skel "32" "${WINE_EXE}"
+		make_skel "32" "${WINE_EXE}" "${WINE_APPIMAGE_FILENAME}"
+		export SET_APPIMAGE_FILENAME="${WINE_APPIMAGE_FILENAME}"
+		export SET_APPIMAGE_URL="${WINE_APPIMAGE_URL}"
 		;;
 	2*)
 		echo "Installing LogosBible 32bits using the native Wine..."
@@ -668,7 +663,7 @@ case "${installationChoice}" in
 		fi
 		echo "Using: ${WINE_VERSION_CHECK}"
 
-		make_skel "32" "${WINE_EXE}"
+		make_skel "32" "${WINE_EXE}" "none.AppImage"
 		;;
 	3*)
 		echo "Installing LogosBible 64bits using the native Wine..."
@@ -684,24 +679,17 @@ case "${installationChoice}" in
 		fi
 		echo "Using: ${WINE_VERSION_CHECK}"
 
-		make_skel "64" "${WINE_EXE}"
+		make_skel "64" "${WINE_EXE}" "none.AppImage"
 		;;
 	4*)
-		echo "Installing LogosBible 32bits using 2 Wine AppImage..."
-		export WINEARCH=win32
-		export WINEPREFIX="${APPDIR}/wine32_bottle"
-		export WINE_EXE="wine"
-		export INSTALL_USING_APPIMAGE_4="1"
-
-		make_skel "32" "${WINE_EXE}"
-		;;
-	5*)
 		echo "Installing LogosBible 64bits using ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies..."
 		export WINEARCH=win64
 		export WINEPREFIX="${APPDIR}/wine64_bottle"
 		export WINE_EXE="wine64"
 
-		make_skel "64" "${WINE_EXE}"
+		make_skel "64" "${WINE_EXE}" "${WINE64_APPIMAGE_FILENAME}"
+		export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FILENAME}"
+		export SET_APPIMAGE_URL="${WINE64_APPIMAGE_URL}"
 		;;
 	*)
 		gtk_fatal_error "Installation canceled!"
@@ -713,48 +701,21 @@ if [ -z "${NO_APPIMAGE}" ] ; then
 	export PATH="${APPDIR_BINDIR}":"${PATH}"
 fi
 
-if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win32" ] ; then
-	echo "Using AppImage..."
+if [ -z "${NO_APPIMAGE}" ] ; then
+	echo "Using AppImage: ${SET_APPIMAGE_FILENAME}"
 	#-------------------------
 	# Geting the AppImage:
-	if [ -f "${DOWNLOADED_RESOURCES}/${APPIMAGE_FILENAME}" ]; then
-		echo "${APPIMAGE_FILENAME} exist. Using it..."
-		cp "${DOWNLOADED_RESOURCES}/${APPIMAGE_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+	if [ -f "${DOWNLOADED_RESOURCES}/${SET_APPIMAGE_FILENAME}" ]; then
+		echo "${SET_APPIMAGE_FILENAME} exist. Using it..."
+		cp "${DOWNLOADED_RESOURCES}/${SET_APPIMAGE_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${SET_APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	else
-		echo "${APPIMAGE_FILENAME} does not exist. Downloading..."
-		if [ -z "${INSTALL_USING_APPIMAGE_4}" ]; then
-			gtk_download "${WINE_APPIMAGE_URL}" "${WORKDIR}"
-		else
-			gtk_download "${WINE4_APPIMAGE_URL}" "${WORKDIR}"
-		fi
+		echo "${SET_APPIMAGE_FILENAME} does not exist. Downloading..."
+		gtk_download "${SET_APPIMAGE_URL}" "${WORKDIR}"
 
-		mv "${WORKDIR}/${APPIMAGE_FILENAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-	fi
-	FILE="${APPDIR}/${APPIMAGE_FILENAME}"
-	chmod +x "${FILE}"
-	echo "Using: $(${WINE_EXE} --version)"
-	#-------------------------
-fi
-
-if [ -z "${NO_APPIMAGE}" ] && [ "${WINEARCH}" == "win64" ] ; then
-	echo "Using Wine64 WoW64 AppImage ${WINE64_APPIMAGE_FILENAME}..."
-	#-------------------------
-	# Geting the Wine64 WoW64 AppImage:
-	if [ -f "${DOWNLOADED_RESOURCES}/${WINE64_APPIMAGE_FILENAME}" ]; then
-		echo "${WINE64_APPIMAGE_FILENAME} exist. Using it..."
-		cp "${DOWNLOADED_RESOURCES}/${WINE64_APPIMAGE_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${WINE64_APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-	else
-		gtk_download "${WINE64_APPIMAGE_URL}" "${WORKDIR}"
-		mv "${WORKDIR}/${WINE64_APPIMAGE_FILENAME}" "${APPDIR}"
+		mv "${WORKDIR}/${SET_APPIMAGE_FILENAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${SET_APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	fi
 
-	chmod +x "${APPDIR}/${WINE64_APPIMAGE_FILENAME}"
-
-	# update links:
-	rm -rf "${APPDIR_BINDIR:?}/${APPIMAGE_LINK_SELECTION_NAME}"
-	ln -s "../${WINE64_APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
-	mv "${APPIMAGE_LINK_SELECTION_NAME}" "${APPDIR_BINDIR}"
-
+	chmod +x "${APPDIR}/${SET_APPIMAGE_FILENAME}"
 	echo "Using: $(${WINE_EXE} --version)"
 	#-------------------------
 fi
@@ -916,20 +877,6 @@ echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48 DONE!"
 echo "* Waiting for ${WINE_EXE} to proper end..."
 wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
-
-if [ -n "${INSTALL_USING_APPIMAGE_4}" ]; then
-	gtk_download "${WINE5_APPIMAGE_URL}" "${WORKDIR}"
-	rm -rf "${APPDIR:?}/${APPIMAGE_FILENAME}"
-	mv "${WORKDIR}/${APPIMAGE_FILENAME}" "${APPDIR}" | zenity --progress --title="Moving..." --text="Moving: ${APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-	FILE="${APPDIR}/${APPIMAGE_FILENAME}"
-	chmod +x "${FILE}"
-	echo "Using: $(${WINE_EXE} --version)"
-	${WINE_EXE} wineboot
-
-	echo "* Waiting for ${WINE_EXE} to proper end..."
-	wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
-	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
-fi
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
