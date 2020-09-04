@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.14-rc0"
+export THIS_SCRIPT_VERSION="v2.13"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -635,8 +635,8 @@ installationChoice="$(zenity --width=700 --height=310 \
 	--list --radiolist --column "S" --column "Descrition" \
 	TRUE "1- Install LogosBible32 using Wine ${WINE_APPIMAGE_VERSION} AppImage (default)." \
 	FALSE "2- Install LogosBible32 using the native Wine." \
-	FALSE "3- Install LogosBible64 using the native Wine64." \
-	FALSE "4- Install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies." )"
+	FALSE "3- Install LogosBible64 using the native Wine64 (unstable)." \
+	FALSE "4- Install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies (unstable)." )"
 
 case "${installationChoice}" in
 	1*)
