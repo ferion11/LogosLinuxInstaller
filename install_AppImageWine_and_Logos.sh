@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.14"
+export THIS_SCRIPT_VERSION="v2.15-rc0"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -205,23 +205,39 @@ gtk_download() {
 #--------------
 #==========================
 
+# wait to all process that is using the ${1} directory to finish
 wait_process_using_dir() {
 	VERIFICATION_DIR="${1}"
 	VERIFICATION_TIME=7
+	VERIFICATION_NUM=3
 
-	for (( c=1; c<=3; c++ ))
-	do
+	echo "* Starting winetricks-moded wait_process_using_dir..."
+	i=0 ; while true; do
+		i=$((i+1))
+		echo "-------"
+		echo "winetricks-moded: loop with i=${i}"
+
+		echo "winetricks-moded: sleep ${VERIFICATION_TIME}"
+		sleep "${VERIFICATION_TIME}"
+
 		PID_LIST="$(fuser "${VERIFICATION_DIR}")"
+		echo "winetricks-moded PID_LIST: ${PID_LIST}"
+
 		# double quote make one bug!
 		# shellcheck disable=SC2086
 		FIST_PID="$(echo ${PID_LIST} | cut -d' ' -f1)"
-		if [ -z "${FIST_PID}" ]; then
-			sleep "${VERIFICATION_TIME}"
-		else
-			c=1
+		echo "winetricks-moded FIST_PID: ${FIST_PID}"
+		if [ -n "${FIST_PID}" ]; then
+			i=0
+			echo "winetricks-moded: tail --pid=${FIST_PID} -f /dev/null"
 			tail --pid="${FIST_PID}" -f /dev/null
+			continue
 		fi
+
+		echo "-------"
+		[ "${i}" -lt "${VERIFICATION_NUM}" ] || break
 	done
+	echo "* End of winetricks-moded wait_process_using_dir."
 }
 
 #======= making the starting scripts ==============
