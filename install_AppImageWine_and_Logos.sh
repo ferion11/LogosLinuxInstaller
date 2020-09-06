@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.15-rc3"
+export THIS_SCRIPT_VERSION="v2.15-rc4"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -740,41 +740,6 @@ else
 fi
 chmod +x "${WORKDIR}/winetricks"
 
-#-------------------------------------------------
-echo "winetricks ${WINETRICKS_EXTRA_OPTION} corefonts"
-pipe_winetricks="$(mktemp)"
-rm -rf "${pipe_winetricks}"
-mkfifo "${pipe_winetricks}"
-
-# zenity GUI feedback
-zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close < "${pipe_winetricks}" &
-ZENITY_PID="${!}"
-
-"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" corefonts > "${pipe_winetricks}"
-WINETRICKS_STATUS="${?}"
-
-wait "${ZENITY_PID}"
-ZENITY_RETURN="${?}"
-
-#fuser -TERM -k -w "${pipe_winetricks}"
-rm -rf "${pipe_winetricks}"
-
-# NOTE: sometimes the process finish before the wait command, giving the error code 127
-if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
-	if [ "${WINETRICKS_STATUS}" != "0" ] ; then
-		wineserver -k
-		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} corefonts; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
-		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks ${WINETRICKS_EXTRA_OPTION} corefonts\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
-	fi
-else
-	wineserver -k
-	gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
-fi
-echo "winetricks ${WINETRICKS_EXTRA_OPTION} corefonts DONE!"
-#-------------------------------------------------
-echo "* Waiting for ${WINE_EXE} to proper end..."
-wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
-wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
 #-------------------------------------------------
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb"
 pipe_winetricks="$(mktemp)"
