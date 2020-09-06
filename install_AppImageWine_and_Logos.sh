@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.15-rc1"
+export THIS_SCRIPT_VERSION="v2.15-rc2"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -810,10 +810,12 @@ rm -rf "${pipe_winetricks}"
 # NOTE: sometimes the process finish before the wait command, giving the error code 127
 if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
 	if [ "${WINETRICKS_STATUS}" != "0" ] ; then
+		wineserver -k
 		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} corefonts; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks ${WINETRICKS_EXTRA_OPTION} corefonts\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 	fi
 else
+	wineserver -k
 	gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} corefonts DONE!"
@@ -843,10 +845,12 @@ rm -rf "${pipe_winetricks}"
 # NOTE: sometimes the process finish before the wait command, giving the error code 127
 if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
 	if [ "${WINETRICKS_STATUS}" != "0" ] ; then
+		wineserver -k
 		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 	fi
 else
+	wineserver -k
 	gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} settings fontsmooth=rgb DONE!"
@@ -876,10 +880,12 @@ rm -rf "${pipe_winetricks}"
 # NOTE: sometimes the process finish before the wait command, giving the error code 127
 if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
 	if [ "${WINETRICKS_STATUS}" != "0" ] ; then
+		wineserver -k
 		echo "ERROR on : winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 		gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 	fi
 else
+	wineserver -k
 	gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 fi
 echo "winetricks ${WINETRICKS_EXTRA_OPTION} dotnet48 DONE!"
