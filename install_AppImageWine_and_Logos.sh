@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.15-rc0"
+export THIS_SCRIPT_VERSION="v2.15-rc1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -211,25 +211,20 @@ wait_process_using_dir() {
 	VERIFICATION_TIME=7
 	VERIFICATION_NUM=3
 
-	echo "* Starting winetricks-moded wait_process_using_dir..."
+	echo "* Starting wait_process_using_dir..."
 	i=0 ; while true; do
 		i=$((i+1))
 		echo "-------"
-		echo "winetricks-moded: loop with i=${i}"
+		echo "wait_process_using_dir: loop with i=${i}"
 
-		echo "winetricks-moded: sleep ${VERIFICATION_TIME}"
+		echo "wait_process_using_dir: sleep ${VERIFICATION_TIME}"
 		sleep "${VERIFICATION_TIME}"
 
-		PID_LIST="$(fuser "${VERIFICATION_DIR}")"
-		echo "winetricks-moded PID_LIST: ${PID_LIST}"
-
-		# double quote make one bug!
-		# shellcheck disable=SC2086
-		FIST_PID="$(echo ${PID_LIST} | cut -d' ' -f1)"
-		echo "winetricks-moded FIST_PID: ${FIST_PID}"
+		FIST_PID="$(lsof -t "${VERIFICATION_DIR}" | head -n 1)"
+		echo "wait_process_using_dir FIST_PID: ${FIST_PID}"
 		if [ -n "${FIST_PID}" ]; then
 			i=0
-			echo "winetricks-moded: tail --pid=${FIST_PID} -f /dev/null"
+			echo "wait_process_using_dir: tail --pid=${FIST_PID} -f /dev/null"
 			tail --pid="${FIST_PID}" -f /dev/null
 			continue
 		fi
@@ -237,7 +232,7 @@ wait_process_using_dir() {
 		echo "-------"
 		[ "${i}" -lt "${VERIFICATION_NUM}" ] || break
 	done
-	echo "* End of winetricks-moded wait_process_using_dir."
+	echo "* End of wait_process_using_dir."
 }
 
 #======= making the starting scripts ==============
@@ -554,10 +549,10 @@ else
 	exit 1
 fi
 
-if have_dep fuser; then
-	echo '* fuser is installed!'
+if have_dep lsof; then
+	echo '* lsof is installed!'
 else
-	echo '* Your system does not have fuser. Please install fuser package (Usually psmisc).'
+	echo '* Your system does not have lsof. Please install lsof package.'
 	exit 1
 fi
 
