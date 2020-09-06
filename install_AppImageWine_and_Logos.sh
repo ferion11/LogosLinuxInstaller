@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.15-rc2"
+export THIS_SCRIPT_VERSION="v2.15-rc3"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -46,6 +46,7 @@ export APPDIR="${INSTALLDIR}/data"
 export APPDIR_BINDIR="${APPDIR}/bin"
 export APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
 if [ -z "${DOWNLOADED_RESOURCES}" ]; then export DOWNLOADED_RESOURCES="/tmp" ; fi
+if [ -z "${FORCE_ROOT}" ]; then export FORCE_ROOT="" ; fi
 #=================================================
 #=================================================
 
@@ -201,6 +202,17 @@ gtk_download() {
 		gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 	fi
 	echo "${FILENAME} download finished!"
+}
+
+check_commands() {
+	for cmd in "$@"; do
+		if have_dep "${cmd}"; then
+			echo "* command ${cmd} is installed!"
+		else
+			echo "* Your system does not have the command: ${cmd}. Please install ${cmd} package."
+			gtk_fatal_error "Your system does not have command: ${cmd}. Please install command ${cmd} package."
+		fi
+	done
 }
 #--------------
 #==========================
@@ -533,26 +545,8 @@ make_skel() {
 #======= Basic Deps =============
 echo 'Searching for dependencies:'
 
-if [ "$(id -u)" = 0 ]; then
-	echo "* Running Wine/winetricks as root is highly discouraged. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-fi
-
 if [ -z "${DISPLAY}" ]; then
 	echo "* You want to run without X, but it don't work."
-	exit 1
-fi
-
-if have_dep mktemp; then
-	echo '* mktemp is installed!'
-else
-	echo '* Your system does not have mktemp. Please install mktemp package.'
-	exit 1
-fi
-
-if have_dep lsof; then
-	echo '* lsof is installed!'
-else
-	echo '* Your system does not have lsof. Please install lsof package.'
 	exit 1
 fi
 
@@ -563,53 +557,11 @@ else
 	exit 1
 fi
 
-if have_dep wget; then
-	echo '* wget is installed!'
-else
-	echo '* Your system does not have wget. Please install wget package.'
-	gtk_fatal_error "Your system does not have wget. Please install wget package."
-fi
+check_commands mktemp lsof wget xwd find sed grep cabextract ntlm_auth
 
-if have_dep xwd; then
-	echo '* xwd is installed!'
-else
-	echo '* Your system does not have xwd. Please install xwd package.'
-	gtk_fatal_error "Your system does not have xwd. Please install xwd package."
-fi
-
-if have_dep find; then
-	echo '* command find is installed!'
-else
-	echo '* Your system does not have find. Please install find package.'
-	gtk_fatal_error "Your system does not have command find. Please install command find package."
-fi
-
-if have_dep sed; then
-	echo '* command sed is installed!'
-else
-	echo '* Your system does not have sed. Please install sed package.'
-	gtk_fatal_error "Your system does not have command sed. Please install command sed package."
-fi
-
-if have_dep grep; then
-	echo '* command grep is installed!'
-else
-	echo '* Your system does not have grep. Please install grep package.'
-	gtk_fatal_error "Your system does not have command grep. Please install command grep package."
-fi
-
-if have_dep cabextract; then
-	echo '* command cabextract is installed!'
-else
-	echo '* Your system does not have cabextract. Please install cabextract package.'
-	gtk_fatal_error "Your system does not have command cabextract. Please install command cabextract package."
-fi
-
-if have_dep ntlm_auth; then
-	echo '* command ntlm_auth is installed!'
-else
-	echo '* Your system does not have ntlm_auth. Please install ntlm_auth package.'
-	gtk_fatal_error "Your system does not have command ntlm_auth. Please install command ntlm_auth package (Usually winbind or samba)."
+if [ "$(id -u)" = 0 ] && [ -z "${FORCE_ROOT}" ]; then
+	echo "* Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+	gtk_fatal_error "Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
 fi
 
 echo "Starting Zenity GUI..."
