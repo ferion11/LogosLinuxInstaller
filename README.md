@@ -12,6 +12,7 @@ You can download the last release [[HERE]](https://github.com/ferion11/LogosLinu
 - If you have the file `Logos-x86.msi` or `Logos-x64.msi`, you can let one copy of it in `/tmp` (or set the variable DOWNLOADED_RESOURCES to the directory that have it) that the installer will use it. It can be useful to install others version without change the script (the same for the others `winetricks` or `wine-i386_x86_64-archlinux.AppImage` versions).
 - If you want to use some other option for `winetricks`, then just set the variable `WINETRICKS_EXTRA_OPTION` (the default is just `-q`), like:
 `$ export WINETRICKS_EXTRA_OPTION="-q --force"` to force the installation on unsupported versions of Wine, or `$ export WINETRICKS_EXTRA_OPTION=""` to remove the default `-q`.
+- If you have the files downloaded then you can put all in your `/tmp` directory, or set the variable `DOWNLOADED_RESOURCES` to the directory that have it.
 
 0.1- After that you need to give permission to execute (You can use some graphical method too, but it will depend on your linux distribution):
 ```
