@@ -12,7 +12,7 @@ You can download the last release [[HERE]](https://github.com/ferion11/LogosLinu
 - If you have the file `Logos-x86.msi` or `Logos-x64.msi`, you can let one copy of it in `/tmp` (or set the variable DOWNLOADED_RESOURCES to the directory that have it) that the installer will use it. It can be useful to install others version without change the script (the same for the others `winetricks` or `wine-i386_x86_64-archlinux.AppImage` versions).
 - If you want to use some other option for `winetricks`, then just set the variable `WINETRICKS_EXTRA_OPTION` (the default is just `-q`), like:
 `$ export WINETRICKS_EXTRA_OPTION="-q --force"` to force the installation on unsupported versions of Wine, or `$ export WINETRICKS_EXTRA_OPTION=""` to remove the default `-q`.
-- If you have the files downloaded then you can put all in your `/tmp` directory, or set the variable `DOWNLOADED_RESOURCES` to the directory that have it.
+- If you have the files downloaded then you can put all in your `/tmp` directory, or set the variable `DOWNLOADED_RESOURCES`, like `$ export DOWNLOADED_RESOURCES="${HOME}/Downloads"`.
 
 0.1- After that you need to give permission to execute (You can use some graphical method too, but it will depend on your linux distribution):
 ```
@@ -175,3 +175,7 @@ $ cp LogosBible_Linux_P_old/data/*.AppImage LogosBible_Linux_P/data/
 ```
 
 21.1.5 - Test the new version, and if work then you can remove the old `LogosBible_Linux_P_old`
+
+#### 22- Alternative Fast Installations:
+In this repository there is a version with "Fast Installations" that part of the procedures are done on the test server, and only the installation of LogosBible is done on the user's equipment: [[HERE]](https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/fast/install_AppImageWine_and_Logos.sh "[HERE]")
+This alternative can help anyone who is having issues with the first part of the installation.
