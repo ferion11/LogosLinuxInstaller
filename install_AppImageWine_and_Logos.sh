@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc4"
+export THIS_SCRIPT_VERSION="v2.16-rc5"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -35,10 +35,6 @@ export WINE64_APPIMAGE_FILENAME
 # trying one customized version of winetricks, of the link above:
 if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://github.com/ferion11/libsutil/releases/download/winetricks/winetricks" ; fi
 if [ -z "${WINETRICKS_DOWNLOADER}" ]; then export WINETRICKS_DOWNLOADER="wget" ; fi
-# --force causes winetricks to install regardless of reported bugs. It also doesn't check whether it is already installed or not.
-# -f, --force           Don't check whether packages were already installed
-# -q, --unattended      Don't ask any questions, just install automatically
-if [ -z "${WINETRICKS_EXTRA_OPTION+x}" ]; then export WINETRICKS_EXTRA_OPTION="-q" ; fi
 #=================================================
 if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
 if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible_Linux_P" ; fi
@@ -742,22 +738,16 @@ chmod +x "${WORKDIR}/winetricks"
 
 #-------------------------------------------------
 winetricks_install() {
-	if [ -z "${WINETRICKS_EXTRA_OPTION}" ]; then
-		WINETRICKS_ARGS="${*}"
-	else
-		WINETRICKS_ARGS="${WINETRICKS_EXTRA_OPTION} ${*}"
-	fi
-
-	echo "winetricks ${WINETRICKS_ARGS}"
+	echo "winetricks ${*}"
 	pipe_winetricks="$(mktemp)"
 	rm -rf "${pipe_winetricks}"
 	mkfifo "${pipe_winetricks}"
 
 	# zenity GUI feedback
-	zenity --progress --title="Winetricks ${WINETRICKS_ARGS}" --text="Winetricks installing ${WINETRICKS_ARGS}" --pulsate --auto-close < "${pipe_winetricks}" &
+	zenity --progress --title="Winetricks ${*}" --text="Winetricks installing ${*}" --pulsate --auto-close < "${pipe_winetricks}" &
 	ZENITY_PID="${!}"
 
-	"${WORKDIR}"/winetricks "${WINETRICKS_ARGS}" > "${pipe_winetricks}"
+	"${WORKDIR}"/winetricks "${@}" > "${pipe_winetricks}"
 	WINETRICKS_STATUS="${?}"
 
 	wait "${ZENITY_PID}"
@@ -770,21 +760,21 @@ winetricks_install() {
 	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
 		if [ "${WINETRICKS_STATUS}" != "0" ] ; then
 			wineserver -k
-			echo "ERROR on : winetricks ${WINETRICKS_ARGS}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
-			gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks ${WINETRICKS_ARGS}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
+			echo "ERROR on : winetricks ${*}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
+			gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks ${*}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 		fi
 	else
 		wineserver -k
 		gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 	fi
-	echo "winetricks ${WINETRICKS_ARGS} DONE!"
+	echo "winetricks ${*} DONE!"
 
 	heavy_wineserver_wait
 }
 
-winetricks_install "corefonts"
-winetricks_install "settings fontsmooth=rgb"
-winetricks_install "dotnet48"
+winetricks_install corefonts
+winetricks_install settings fontsmooth=rgb
+winetricks_install dotnet48
 #-------------------------------------------------
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
