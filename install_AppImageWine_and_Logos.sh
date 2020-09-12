@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc6"
+export THIS_SCRIPT_VERSION="v2.16-rc7"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -219,6 +219,7 @@ wait_process_using_dir() {
 	VERIFICATION_TIME=7
 	VERIFICATION_NUM=3
 
+	echo "---------------------"
 	echo "* Starting wait_process_using_dir..."
 	i=0 ; while true; do
 		i=$((i+1))
@@ -241,6 +242,7 @@ wait_process_using_dir() {
 		[ "${i}" -lt "${VERIFICATION_NUM}" ] || break
 	done
 	echo "* End of wait_process_using_dir."
+	echo "---------------------"
 }
 
 #======= making the starting scripts ==============
@@ -825,6 +827,7 @@ esac
 heavy_wineserver_wait
 echo "================================================="
 clean_all
+echo "================================================="
 
 if gtk_question "Logos Bible Installed!\nYou can run it using the script Logos.sh inside ${INSTALLDIR}.\nDo you want to run it now?\nNOTE: Just close the error on the first execution."; then
 	"${INSTALLDIR}"/Logos.sh
