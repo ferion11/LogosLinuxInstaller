@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc3"
+export THIS_SCRIPT_VERSION="v2.16-rc4"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -571,13 +571,13 @@ echo "Starting Zenity GUI..."
 #======= Parsing =============
 case "${1}" in
 	"skel32")
-		WINE_EXE="wine"
+		export WINE_EXE="wine"
 		make_skel "32" "${WINE_EXE}" "none.AppImage"
 		rm -rf "${WORKDIR}"
 		exit 0
 		;;
 	"skel64")
-		WINE_EXE="wine64"
+		export WINE_EXE="wine64"
 		make_skel "64" "${WINE_EXE}" "none.AppImage"
 		rm -rf "${WORKDIR}"
 		exit 0
