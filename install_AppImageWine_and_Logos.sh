@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc0"
+export THIS_SCRIPT_VERSION="v2.16-rc1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -696,7 +696,6 @@ REGEDIT4
 [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
 "winemenubuilder.exe"=""
 
-
 EOF
 
 cat > "${WORKDIR}"/renderer_gdi.reg << EOF
@@ -706,24 +705,20 @@ REGEDIT4
 "DirectDrawRenderer"="gdi"
 "renderer"="gdi"
 
-
 EOF
 
-echo "${WINE_EXE} regedit.exe disable-winemenubuilder.reg"
-${WINE_EXE} regedit.exe "${WORKDIR}"/disable-winemenubuilder.reg | zenity --progress --title="Wine regedit" --text="Wine is blocking in ${WINEPREFIX}:\nfiletype associations, add menu items, or create desktop links" --pulsate --auto-close --no-cancel
+wine_reg_install() {
+	REG_FILENAME="${1}"
+	echo "${WINE_EXE} regedit.exe ${REG_FILENAME}"
+	${WINE_EXE} regedit.exe "${WORKDIR}"/"${REG_FILENAME}" | zenity --progress --title="Wine regedit" --text="Wine is installing ${REG_FILENAME} in ${WINEPREFIX}" --pulsate --auto-close --no-cancel
 
-echo "* Waiting for ${WINE_EXE} to proper end..."
-wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+	echo "* Waiting for ${WINE_EXE} to proper end..."
+	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+	echo "${WINE_EXE} regedit.exe ${REG_FILENAME} DONE!"
+}
 
-echo "${WINE_EXE} regedit.exe disable-winemenubuilder.reg DONE!"
-
-echo "${WINE_EXE} regedit.exe renderer_gdi.reg"
-${WINE_EXE} regedit.exe "${WORKDIR}"/renderer_gdi.reg | zenity --progress --title="Wine regedit" --text="Wine is changing the renderer to gdi:\nthe old DirectDrawRenderer and the new renderer key" --pulsate --auto-close --no-cancel
-
-echo "* Waiting for ${WINE_EXE} to proper end..."
-wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
-
-echo "${WINE_EXE} regedit.exe renderer_gdi.reg DONE!"
+wine_reg_install "disable-winemenubuilder.reg"
+wine_reg_install "renderer_gdi.reg"
 #-------
 
 gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
@@ -747,8 +742,13 @@ mkfifo "${pipe_winetricks}"
 zenity --progress --title="Winetricks corefonts" --text="Winetricks installing corefonts" --pulsate --auto-close < "${pipe_winetricks}" &
 ZENITY_PID="${!}"
 
-"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" corefonts > "${pipe_winetricks}"
-WINETRICKS_STATUS="${?}"
+if [ -z "${WINETRICKS_EXTRA_OPTION}" ]; then
+	"${WORKDIR}"/winetricks corefonts > "${pipe_winetricks}"
+	WINETRICKS_STATUS="${?}"
+else
+	"${WORKDIR}"/winetricks "${WINETRICKS_EXTRA_OPTION}" corefonts > "${pipe_winetricks}"
+	WINETRICKS_STATUS="${?}"
+fi
 
 wait "${ZENITY_PID}"
 ZENITY_RETURN="${?}"
