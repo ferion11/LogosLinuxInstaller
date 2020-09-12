@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc5"
+export THIS_SCRIPT_VERSION="v2.16-rc6"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -539,6 +539,7 @@ make_skel() {
 #==================================================
 
 #======= Basic Deps =============
+echo "================================================="
 echo 'Searching for dependencies:'
 
 if [ -z "${DISPLAY}" ]; then
@@ -560,6 +561,7 @@ if [ "$(id -u)" = 0 ] && [ -z "${FORCE_ROOT}" ]; then
 	gtk_fatal_error "Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
 fi
 
+echo "================================================="
 echo "Starting Zenity GUI..."
 #==========================
 
@@ -570,6 +572,7 @@ case "${1}" in
 		export WINE_EXE="wine"
 		make_skel "32" "${WINE_EXE}" "none.AppImage"
 		rm -rf "${WORKDIR}"
+		echo "================================================="
 		exit 0
 		;;
 	"skel64")
@@ -577,9 +580,11 @@ case "${1}" in
 		make_skel "64" "${WINE_EXE}" "none.AppImage"
 		rm -rf "${WORKDIR}"
 		exit 0
+		echo "================================================="
 		;;
 	*)
 		echo "No arguments parsed."
+		echo "================================================="
 esac
 
 #======= Main =============
@@ -661,6 +666,7 @@ if [ -z "${NO_APPIMAGE}" ] ; then
 fi
 
 if [ -z "${NO_APPIMAGE}" ] ; then
+	echo "================================================="
 	echo "Using AppImage: ${SET_APPIMAGE_FILENAME}"
 	#-------------------------
 	# Geting the AppImage:
@@ -676,6 +682,7 @@ if [ -z "${NO_APPIMAGE}" ] ; then
 
 	chmod +x "${APPDIR}/${SET_APPIMAGE_FILENAME}"
 	echo "Using: $(${WINE_EXE} --version)"
+	echo "================================================="
 	#-------------------------
 fi
 #-------------------------------------------------
@@ -691,8 +698,10 @@ heavy_wineserver_wait() {
 }
 
 gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
+echo "================================================="
 ${WINE_EXE} wineboot
 light_wineserver_wait
+echo "================================================="
 
 #-------------------------------------------------
 cat > "${WORKDIR}"/disable-winemenubuilder.reg << EOF
@@ -720,9 +729,11 @@ wine_reg_install() {
 	light_wineserver_wait
 	echo "${WINE_EXE} regedit.exe ${REG_FILENAME} DONE!"
 }
-
+echo "================================================="
 wine_reg_install "disable-winemenubuilder.reg"
+echo "================================================="
 wine_reg_install "renderer_gdi.reg"
+echo "================================================="
 #-------------------------------------------------
 
 gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
@@ -747,7 +758,8 @@ winetricks_install() {
 	zenity --progress --title="Winetricks ${*}" --text="Winetricks installing ${*}" --pulsate --auto-close < "${pipe_winetricks}" &
 	ZENITY_PID="${!}"
 
-	"${WORKDIR}"/winetricks "${@}" > "${pipe_winetricks}"
+	#"${WORKDIR}"/winetricks "${@}" > "${pipe_winetricks}"
+	"${WORKDIR}"/winetricks "${@}" | tee "${pipe_winetricks}"
 	WINETRICKS_STATUS="${?}"
 
 	wait "${ZENITY_PID}"
@@ -771,14 +783,18 @@ winetricks_install() {
 
 	heavy_wineserver_wait
 }
-
+echo "================================================="
 winetricks_install corefonts
+echo "================================================="
 winetricks_install settings fontsmooth=rgb
+echo "================================================="
 winetricks_install dotnet48
+echo "================================================="
 #-------------------------------------------------
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
+echo "================================================="
 # Geting and install the LogosBible:
 case "${WINEARCH}" in
 	win32)
@@ -807,6 +823,7 @@ case "${WINEARCH}" in
 		gtk_fatal_error "Installation failed!"
 esac
 heavy_wineserver_wait
+echo "================================================="
 clean_all
 
 if gtk_question "Logos Bible Installed!\nYou can run it using the script Logos.sh inside ${INSTALLDIR}.\nDo you want to run it now?\nNOTE: Just close the error on the first execution."; then
@@ -814,5 +831,6 @@ if gtk_question "Logos Bible Installed!\nYou can run it using the script Logos.s
 fi
 
 echo "End!"
+echo "================================================="
 exit 0
 #==========================
