@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc8"
+export THIS_SCRIPT_VERSION="v2.16-rc9"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -595,8 +595,9 @@ if [ -d "${INSTALLDIR}" ]; then
 	gtk_fatal_error "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
 fi
 
+echo "* Script version: ${THIS_SCRIPT_VERSION}"
 installationChoice="$(zenity --width=700 --height=310 \
-	--title="Question: Install Logos Bible" \
+	--title="Question: Install Logos Bible using script ${THIS_SCRIPT_VERSION}" \
 	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v${LOGOS_VERSION} independent of others installations.\nPlease, select the type of installation:" \
 	--list --radiolist --column "S" --column "Descrition" \
 	TRUE "1- Install LogosBible32 using Wine ${WINE_APPIMAGE_VERSION} AppImage (default)." \
