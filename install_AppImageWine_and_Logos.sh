@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc7"
+export THIS_SCRIPT_VERSION="v2.16-rc8"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -701,6 +701,7 @@ heavy_wineserver_wait() {
 
 gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
 echo "================================================="
+echo "${WINE_EXE} wineboot"
 ${WINE_EXE} wineboot
 light_wineserver_wait
 echo "================================================="
@@ -808,6 +809,7 @@ case "${WINEARCH}" in
 			echo "${LOGOS_MSI} does not exist. Downloading..."
 			gtk_download "${LOGOS_URL}" "${WORKDIR}"
 		fi
+		echo "${WINE_EXE} msiexec /i ${LOGOS_MSI}"
 		${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS_MSI}"
 		;;
 	win64)
@@ -819,6 +821,7 @@ case "${WINEARCH}" in
 			echo "${LOGOS64_MSI} does not exist. Downloading..."
 			gtk_download "${LOGOS64_URL}" "${WORKDIR}"
 		fi
+		echo "${WINE_EXE} msiexec /i ${LOGOS64_MSI}"
 		${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
 		;;
 	*)
