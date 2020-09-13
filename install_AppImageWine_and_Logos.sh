@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc10"
+export THIS_SCRIPT_VERSION="v2.16-rc11"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -394,7 +394,7 @@ case "\${1}" in
 		echo "Categories=Education;" >> "\${HERE}"/LogosBible.desktop
 		chmod +x "\${HERE}"/LogosBible.desktop
 		mv "\${HERE}"/LogosBible.desktop "\${HOME}/.local/share/applications"
-		echo "File: "\${HOME}/.local/share/applications/LogosBible.desktop" updated"
+		echo "File: \${HOME}/.local/share/applications/LogosBible.desktop updated"
 		echo "======= making new LogosBible.desktop shortcut done! ======="
 		exit 0
 		;;
