@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc9"
+export THIS_SCRIPT_VERSION="v2.16-rc10"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -15,6 +15,9 @@ LOGOS64_MSI="$(echo "${LOGOS64_URL}" | cut -d/ -f7)"
 export LOGOS_VERSION
 export LOGOS_MSI
 export LOGOS64_MSI
+#=================================================
+if [ -z "${LOGOS_ICON_URL}" ]; then export LOGOS_ICON_URL="https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/master/img/logos4-128-icon.png" ; fi
+if [ -z "${LOGOS_ICON_FILENAME}" ]; then export LOGOS_ICON_FILENAME="logos4-128-icon.png" ; fi
 #=================================================
 # Default AppImage (with deps) to install 32bits version:
 export WINE_APPIMAGE_VERSION="v5.11"
@@ -374,6 +377,25 @@ case "\${1}" in
 		${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0000 /f
 		wineserver -w
 		echo "======= disable LogosBible logging done! ======="
+		exit 0
+		;;
+	"shortcut")
+		echo "======= making new LogosBible shortcut only: ======="
+		[ ! -f "\${HERE}/data/${LOGOS_ICON_FILENAME}" ] && wget -c "${LOGOS_ICON_URL}" -P "\${HERE}/data"
+		mkdir -p "\${HOME}/.local/share/applications"
+		rm -rf "\${HOME}/.local/share/applications/LogosBible.desktop"
+		echo "[Desktop Entry]" > "\${HERE}"/LogosBible.desktop
+		echo "Name=LogosBible" >> "\${HERE}"/LogosBible.desktop
+		echo "Comment=A Bible Study Library with Built-In Tools" >> "\${HERE}"/LogosBible.desktop
+		echo "Exec=\${HERE}/Logos.sh" >> "\${HERE}"/LogosBible.desktop
+		echo "Icon=\${HERE}/data/logos4-128-icon.png" >> "\${HERE}"/LogosBible.desktop
+		echo "Terminal=false" >> "\${HERE}"/LogosBible.desktop
+		echo "Type=Application" >> "\${HERE}"/LogosBible.desktop
+		echo "Categories=Education;" >> "\${HERE}"/LogosBible.desktop
+		chmod +x "\${HERE}"/LogosBible.desktop
+		mv "\${HERE}"/LogosBible.desktop "\${HOME}/.local/share/applications"
+		echo "File: "\${HOME}/.local/share/applications/LogosBible.desktop" updated"
+		echo "======= making new LogosBible.desktop shortcut done! ======="
 		exit 0
 		;;
 	*)
