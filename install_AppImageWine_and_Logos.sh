@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc13"
+export THIS_SCRIPT_VERSION="v2.16-rc14"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -37,7 +37,8 @@ export WINE64_APPIMAGE_FILENAME
 #if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks" ; fi
 # trying one customized version of winetricks, of the link above:
 if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://github.com/ferion11/libsutil/releases/download/winetricks/winetricks" ; fi
-if [ -z "${WINETRICKS_DOWNLOADER}" ]; then export WINETRICKS_DOWNLOADER="wget" ; fi
+if [ -z "${WINETRICKS_DOWNLOADER+x}" ]; then export WINETRICKS_DOWNLOADER="wget" ; fi
+if [ -z "${WINETRICKS_UNATTENDED+x}" ]; then export WINETRICKS_UNATTENDED="" ; fi
 #=================================================
 if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
 if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible_Linux_P" ; fi
@@ -45,7 +46,8 @@ export APPDIR="${INSTALLDIR}/data"
 export APPDIR_BINDIR="${APPDIR}/bin"
 export APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
 if [ -z "${DOWNLOADED_RESOURCES}" ]; then export DOWNLOADED_RESOURCES="${PWD}" ; fi
-if [ -z "${FORCE_ROOT}" ]; then export FORCE_ROOT="" ; fi
+if [ -z "${FORCE_ROOT+x}" ]; then export FORCE_ROOT="" ; fi
+if [ -z "${WINEBOOT_GUI+x}" ]; then export WINEBOOT_GUI="" ; fi
 #=================================================
 #=================================================
 
@@ -725,7 +727,11 @@ heavy_wineserver_wait() {
 gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
 echo "================================================="
 echo "${WINE_EXE} wineboot"
-(DISPLAY="" ${WINE_EXE} wineboot) | zenity --progress --title="Waiting ${WINE_EXE} wineboot" --text="Waiting for ${WINE_EXE} wineboot..." --pulsate --auto-close --no-cancel
+if [ -z "${WINEBOOT_GUI}" ]; then
+	(DISPLAY="" ${WINE_EXE} wineboot) | zenity --progress --title="Waiting ${WINE_EXE} wineboot" --text="Waiting for ${WINE_EXE} wineboot..." --pulsate --auto-close --no-cancel
+else
+	${WINE_EXE} wineboot
+fi
 light_wineserver_wait
 echo "================================================="
 
@@ -809,13 +815,23 @@ winetricks_install() {
 
 	heavy_wineserver_wait
 }
-echo "================================================="
-winetricks_install corefonts
-echo "================================================="
-winetricks_install settings fontsmooth=rgb
-echo "================================================="
-winetricks_install dotnet48
-echo "================================================="
+if [ -z "${WINETRICKS_UNATTENDED}" ]; then
+	echo "================================================="
+	winetricks_install corefonts
+	echo "================================================="
+	winetricks_install settings fontsmooth=rgb
+	echo "================================================="
+	winetricks_install dotnet48
+	echo "================================================="
+else
+	echo "================================================="
+	winetricks_install -q corefonts
+	echo "================================================="
+	winetricks_install -q settings fontsmooth=rgb
+	echo "================================================="
+	winetricks_install -q dotnet48
+	echo "================================================="
+fi
 #-------------------------------------------------
 
 gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
