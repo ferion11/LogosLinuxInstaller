@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16-rc11"
+export THIS_SCRIPT_VERSION="v2.16-rc12"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -44,7 +44,7 @@ if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible_Linux_P" ;
 export APPDIR="${INSTALLDIR}/data"
 export APPDIR_BINDIR="${APPDIR}/bin"
 export APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
-if [ -z "${DOWNLOADED_RESOURCES}" ]; then export DOWNLOADED_RESOURCES="/tmp" ; fi
+if [ -z "${DOWNLOADED_RESOURCES}" ]; then export DOWNLOADED_RESOURCES="${PWD}" ; fi
 if [ -z "${FORCE_ROOT}" ]; then export FORCE_ROOT="" ; fi
 #=================================================
 #=================================================
