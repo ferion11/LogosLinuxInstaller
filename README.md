@@ -1,5 +1,5 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f730f74748c348cb9b3ff2fa1654c84b)](https://app.codacy.com/manual/ferion11/LogosLinuxInstaller?utm_source=github.com&utm_medium=referral&utm_content=ferion11/LogosLinuxInstaller&utm_campaign=Badge_Grade_Dashboard)
-[![Automation testing](https://img.shields.io/badge/Automation-testing-sucess)](https://github.com/ferion11/LogosLinuxInstallTests) [![Installer LogosBible](https://img.shields.io/badge/Installer-LogosBible-blue)](https://www.logos.com)
+[![Automation testing](https://img.shields.io/badge/Automation-testing-sucess)](https://github.com/ferion11/LogosLinuxInstallTests) [![Installer LogosBible](https://img.shields.io/badge/Installer-LogosBible-blue)](https://www.logos.com) [![LastRelease](https://img.shields.io/github/v/release/ferion11/LogosLinuxInstaller)](https://github.com/ferion11/LogosLinuxInstaller/releases)
 
 # LogosLinuxInstaller
 > LogosLinuxInstaller is a bash script for installation of Logos Bible on Linux.
