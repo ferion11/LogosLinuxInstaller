@@ -177,5 +177,5 @@ $ cp LogosBible_Linux_P_old/data/*.AppImage LogosBible_Linux_P/data/
 21.1.5 - Test the new version, and if work then you can remove the old `LogosBible_Linux_P_old`
 
 #### 22- Alternative Fast Installations:
-In this repository there is a version with "Fast Installations" that part of the procedures are done on the test server, and only the installation of LogosBible is done on the user's equipment: [[HERE]](https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/fast/install_AppImageWine_and_Logos.sh "[HERE]")
+In this repository there is a version with "Fast Installations" that part of the procedures are done on the test server, and only the installation of LogosBible is done on the user's equipment: [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]")
 This alternative can help anyone who is having issues with the first part of the installation.
