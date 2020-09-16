@@ -1,35 +1,28 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.16"
+export THIS_SCRIPT_VERSION="v2.17-rc0"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
 if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.16.0.0002/Logos-x86.msi" ; fi
 if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS8/Installer/8.16.0.0002/Logos-x64.msi" ; fi
 
-#LOGOS_MVERSION=$(echo "${LOGOS_URL}" | cut -d/ -f4)
-#export LOGOS_MVERSION
-LOGOS_VERSION="$(echo "${LOGOS_URL}" | cut -d/ -f6)"
-LOGOS_MSI="$(echo "${LOGOS_URL}" | cut -d/ -f7)"
-LOGOS64_MSI="$(echo "${LOGOS64_URL}" | cut -d/ -f7)"
-export LOGOS_VERSION
-export LOGOS_MSI
-export LOGOS64_MSI
+#LOGOS_MVERSION=$(echo "${LOGOS_URL}" | cut -d/ -f4); export LOGOS_MVERSION
+LOGOS_VERSION="$(echo "${LOGOS_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
+LOGOS_MSI="$(basename "${LOGOS_URL}")"; export LOGOS_MSI
+LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
 #=================================================
 if [ -z "${LOGOS_ICON_URL}" ]; then export LOGOS_ICON_URL="https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/master/img/logos4-128-icon.png" ; fi
-if [ -z "${LOGOS_ICON_FILENAME}" ]; then export LOGOS_ICON_FILENAME="logos4-128-icon.png" ; fi
 #=================================================
 # Default AppImage (with deps) to install 32bits version:
 export WINE_APPIMAGE_VERSION="v5.11"
 if [ -z "${WINE_APPIMAGE_URL}" ]; then export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/continuous-logos/wine-staging-linux-x86-v5.11-f11-x86_64.AppImage" ; fi
-WINE_APPIMAGE_FILENAME="$(echo "${WINE_APPIMAGE_URL}" | cut -d/ -f9)"
-export WINE_APPIMAGE_FILENAME
+WINE_APPIMAGE_FILENAME="$(basename "${WINE_APPIMAGE_URL}")"; export WINE_APPIMAGE_FILENAME
 #=================================================
 # Default AppImage (without deps) to install 64bits version:
 export WINE64_APPIMAGE_VERSION="v5.11"
 if [ -z "${WINE64_APPIMAGE_URL}" ]; then export WINE64_APPIMAGE_URL="https://github.com/ferion11/wine_WoW64_nodeps_AppImage/releases/download/v5.11/wine-staging-linux-amd64-nodeps-v5.11-PlayOnLinux-x86_64.AppImage" ; fi
-WINE64_APPIMAGE_FILENAME="$(echo "${WINE64_APPIMAGE_URL}" | cut -d/ -f9)"
-export WINE64_APPIMAGE_FILENAME
+WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_APPIMAGE_FILENAME
 #=================================================
 # winetricks version in use (and downloader option set):
 #if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" ; fi
@@ -275,6 +268,12 @@ IFS=$'\n'
 [ -x "\${HERE}/data/bin/${WINE_EXE}" ] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win${WINE_BITS}
 export WINEPREFIX="\${HERE}/data/wine${WINE_BITS}_bottle"
+#-------
+[ -z "\${WINETRICKS_URL}" ] && export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
+[ -z "\${WINETRICKS_DOWNLOADER+x}" ] && export WINETRICKS_DOWNLOADER="wget"
+#-------
+[ -z "\${LOGOS_ICON_URL}" ] && export LOGOS_ICON_URL="${LOGOS_ICON_URL}"
+LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILENAME
 #-------------------------------------------------
 
 #-------------------------------------------------
@@ -301,7 +300,7 @@ case "\${1}" in
 		echo "======= Running winetricks only: ======="
 		WORKDIR="\$(mktemp -d)"
 		if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
-		else wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+		else wget -c -P "\${WORKDIR}" "\${WINETRICKS_URL}"
 		fi
 		chmod +x "\${WORKDIR}"/winetricks
 		shift
@@ -383,7 +382,7 @@ case "\${1}" in
 		;;
 	"shortcut")
 		echo "======= making new LogosBible shortcut only: ======="
-		[ ! -f "\${HERE}/data/${LOGOS_ICON_FILENAME}" ] && wget -c "${LOGOS_ICON_URL}" -P "\${HERE}/data"
+		[ ! -f "\${HERE}/data/\${LOGOS_ICON_FILENAME}" ] && wget -c "\${LOGOS_ICON_URL}" -P "\${HERE}/data"
 		mkdir -p "\${HOME}/.local/share/applications"
 		rm -rf "\${HOME}/.local/share/applications/LogosBible.desktop"
 		echo "[Desktop Entry]" > "\${HERE}"/LogosBible.desktop
@@ -442,6 +441,9 @@ IFS=$'\n'
 [ -x "\${HERE}/data/bin/${WINE_EXE}" ] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win${WINE_BITS}
 export WINEPREFIX="\${HERE}/data/wine${WINE_BITS}_bottle"
+#-------
+[ -z "\${WINETRICKS_URL}" ] && export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
+[ -z "\${WINETRICKS_DOWNLOADER+x}" ] && export WINETRICKS_DOWNLOADER="wget"
 #-------------------------------------------------
 
 #-------------------------------------------------
@@ -468,7 +470,7 @@ case "\${1}" in
 		echo "======= Running winetricks only: ======="
 		WORKDIR="\$(mktemp -d)"
 		if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
-		else wget -c -P "\${WORKDIR}" https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
+		else wget -c -P "\${WORKDIR}" "\${WINETRICKS_URL}"
 		fi
 		chmod +x "\${WORKDIR}"/winetricks
 		shift
