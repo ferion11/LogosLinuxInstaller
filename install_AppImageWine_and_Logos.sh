@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.17-rc0"
+export THIS_SCRIPT_VERSION="v2.17-rc1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -378,6 +378,15 @@ case "\${1}" in
 		${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0000 /f
 		wineserver -w
 		echo "======= disable LogosBible logging done! ======="
+		exit 0
+		;;
+	"dirlink")
+		echo "======= making LogosBible dir link only: ======="
+		LOGOS_EXE="\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")"
+		LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
+		rm -f "\${HERE}/installation_dir"
+		ln -s "\${LOGOS_DIR}" "\${HERE}/installation_dir"
+		echo "======= making LogosBible dir link done! ======="
 		exit 0
 		;;
 	"shortcut")
