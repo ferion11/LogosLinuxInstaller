@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.17-rc2"
+export THIS_SCRIPT_VERSION="v2.17-rc3"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -395,8 +395,10 @@ case "\${1}" in
 		echo "======= making LogosBible dir link only: ======="
 		LOGOS_EXE="\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")"
 		LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
+		LOGOS_DIR_RELATIVE="\$(realpath --relative-to="\${HERE}" "\${LOGOS_DIR}")"
 		rm -f "\${HERE}/installation_dir"
-		ln -s "\${LOGOS_DIR}" "\${HERE}/installation_dir"
+		ln -s "\${LOGOS_DIR_RELATIVE}" "\${HERE}/installation_dir"
+		echo "dirlink created at: \${HERE}/installation_dir"
 		echo "======= making LogosBible dir link done! ======="
 		exit 0
 		;;
