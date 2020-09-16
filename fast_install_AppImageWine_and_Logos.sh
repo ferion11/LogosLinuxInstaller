@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.17-rc4"
+export THIS_SCRIPT_VERSION="fast-v2.17-rc5"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -260,9 +260,6 @@ IFS=$'\n'
 export WINEARCH=win${WINE_BITS}
 export WINEPREFIX="\${HERE}/data/wine${WINE_BITS}_bottle"
 #-------
-[ -z "\${WINETRICKS_URL}" ] && export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
-[ -z "\${WINETRICKS_DOWNLOADER+x}" ] && export WINETRICKS_DOWNLOADER="wget"
-#-------
 [ -z "\${LOGOS_ICON_URL}" ] && export LOGOS_ICON_URL="${LOGOS_ICON_URL}"
 LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILENAME
 #-------------------------------------------------
@@ -270,35 +267,15 @@ LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILEN
 #-------------------------------------------------
 case "\${1}" in
 	"${WINE_EXE}")
-		# ${WINE_EXE} Run:
-		echo "======= Running ${WINE_EXE} only: ======="
-		shift
-		${WINE_EXE} "\$@"
-		wineserver -w
-		echo "======= ${WINE_EXE} run done! ======="
+		"\${HERE}/controlPanel.sh" "\$@"
 		exit 0
 		;;
 	"wineserver")
-		# wineserver Run:
-		echo "======= Running wineserver only: ======="
-		shift
-		wineserver "\$@"
-		echo "======= wineserver run done! ======="
+		"\${HERE}/controlPanel.sh" "\$@"
 		exit 0
 		;;
 	"winetricks")
-		# winetricks Run:
-		echo "======= Running winetricks only: ======="
-		WORKDIR="\$(mktemp -d)"
-		if [ -f "\${HERE}/winetricks" ]; then cp "\${HERE}/winetricks" "\${WORKDIR}"
-		else wget -c -P "\${WORKDIR}" "\${WINETRICKS_URL}"
-		fi
-		chmod +x "\${WORKDIR}"/winetricks
-		shift
-		"\${WORKDIR}"/winetricks "\$@"
-		rm -rf "\${WORKDIR}"
-		wineserver -w
-		echo "======= winetricks run done! ======="
+		"\${HERE}/controlPanel.sh" "\$@"
 		exit 0
 		;;
 	"indexing")
