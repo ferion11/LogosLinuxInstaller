@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.17-rc1"
+export THIS_SCRIPT_VERSION="v2.17-rc2"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -324,6 +324,17 @@ case "\${1}" in
 		${WINE_EXE} "\${LOGOS_INDEXER_EXE}"
 		wineserver -w
 		echo "======= indexing of LogosBible run done! ======="
+		exit 0
+		;;
+	"removeAllIndex")
+		echo "======= removing all LogosBible index files only: ======="
+		LOGOS_EXE="\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")"
+		LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
+		rm -fv "\${LOGOS_DIR}"/Data/*/BibleIndex/*
+		rm -fv "\${LOGOS_DIR}"/Data/*/LibraryIndex/*
+		rm -fv "\${LOGOS_DIR}"/Data/*/PersonalBookIndex/*
+		rm -fv "\${LOGOS_DIR}"/Data/*/LibraryCatalog/*
+		echo "======= removing all LogosBible index files done! ======="
 		exit 0
 		;;
 	"selectAppImage")
