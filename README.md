@@ -4,15 +4,15 @@
 # LogosLinuxInstaller
 > LogosLinuxInstaller is a bash script for installation of Logos Bible on Linux.
 
-##### * NOTE The v2.x break backward compatibility with previous 1.x versions. It will work like the portable version, with variations that may or may not use AppImage, depending on the user's choice, but all installation alternatives will maintain some isolation from the rest of the system and other installations (the independent directory can be moved/renamed without losing functionality).
+##### * NOTE The v2.x break backward compatibility with previous 1.x versions. It will work like the portable version, with variations that may or may not use AppImage, depending on the user's choice, but all installation alternatives will maintain some isolation from the rest of the system and other installations (the independent directory can be moved/renamed without losing the basic functionality).
 
 ### v2.x or higher  instructions:
 #### 00-  Download and execute:
-You can download the last release [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]").
-- If you have the file `Logos-x86.msi` or `Logos-x64.msi`, you can let one copy of it in `/tmp` (or set the variable DOWNLOADED_RESOURCES to the directory that have it) that the installer will use it. It can be useful to install others version without change the script (the same for the others `winetricks` or `wine-i386_x86_64-archlinux.AppImage` versions).
-- If you want to use some other option for `winetricks`, then just set the variable `WINETRICKS_EXTRA_OPTION` (the default is just `-q`), like:
-`$ export WINETRICKS_EXTRA_OPTION="-q --force"` to force the installation on unsupported versions of Wine, or `$ export WINETRICKS_EXTRA_OPTION=""` to remove the default `-q`.
-- If you have the files downloaded then you can put all in your `/tmp` directory, or set the variable `DOWNLOADED_RESOURCES`, like `$ export DOWNLOADED_RESOURCES="${HOME}/Downloads"`.
+You can download the last release [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]"). Highlighting the main environment variables:
+- `DOWNLOADED_RESOURCES`: used to use a directory where the script will search for files by name before attempting to download from the internet (default is `${PWD}`).
+- `INSTALLDIR`: used to change the installation directory (default is `${HOME}/LogosBible_Linux_P`)
+- `WINETRICKS_URL`: to be able to change the source of winetricks.
+- `LOGOS_URL` and `LOGOS64_URL`: to be able to change the source of the LogosBible installer.
 
 0.1- After that you need to give permission to execute (You can use some graphical method too, but it will depend on your linux distribution):
 ```
@@ -22,6 +22,8 @@ $ chmod +x install_AppImageWine_and_Logos.sh
 0.2- Then execute (you don't need sudo or root acess):
 ```
 $ ./install_AppImageWine_and_Logos.sh
+or with one or more environment variables like:
+$ DOWNLOADED_RESOURCES=${HOME}/Downloads INSTALLDIR=/tmp/logosBibleTemp ./install_AppImageWine_and_Logos.sh
 ```
 
 - You can get the skel with the options `skel32` and `skel64`. It can be useful if you want just the scripts to update one of your local installations. And you can reuse the WineBottle from others installation too.
@@ -136,6 +138,7 @@ If the windows does leave the screen then just holding the `Alt` key you can mov
 
 * You can also use the `Logos.sh` or `controlPanel.sh` to execute Wine or winetricks commands on that installation, like:
   - `$ ./Logos.sh wine regedit.exe`
+  - `$ ./Logos.sh wineserver -w`
   - `$ ./Logos.sh winetricks calibri`
   - if there is another version of winetricks inside `LogosBible_Linux_P`, the `Logos.sh` or `controlPanel.sh` will use it.
 
@@ -144,6 +147,21 @@ If the windows does leave the screen then just holding the `Alt` key you can mov
 * You can run the standalone Logos Bible indexing on the console with:
 ```
 $ ./Logos.sh indexing
+```
+
+* You can remove all index files and catalog to workaround some indexing bug:
+```
+$ ./Logos.sh removeAllIndex
+```
+
+* You can create one symbolic link to the installation of LogosBible inside the Bottle, on the same dir that `Logos.sh`:
+```
+$ ./Logos.sh dirlink
+```
+
+* You can create/update one `LogosBible.desktop` (in `${HOME}/.local/share/applications`) that will point to the current location of `Logos.sh`:
+```
+$ ./Logos.sh shortcut
 ```
 
 * You can enable/disable the Logos Bible logs with:
