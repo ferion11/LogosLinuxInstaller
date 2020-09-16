@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.17-rc3"
+export THIS_SCRIPT_VERSION="v2.17-rc4"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -338,43 +338,7 @@ case "\${1}" in
 		exit 0
 		;;
 	"selectAppImage")
-		echo "======= Running AppImage Selection only: ======="
-		APPIMAGE_FILENAME=""
-		APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"
-
-		APPIMAGE_FULLPATH="\$(zenity --file-selection --filename="\${HERE}"/data/*.AppImage --file-filter='AppImage files | *.AppImage *.Appimage *.appImage *.appimage' --file-filter='All files | *')"
-		if [ -z "\${APPIMAGE_FULLPATH}" ]; then
-			echo "No *.AppImage file selected! exiting..."
-			exit 1
-		fi
-
-		APPIMAGE_FILENAME="\${APPIMAGE_FULLPATH##*/}"
-		APPIMAGE_DIR="\${APPIMAGE_FULLPATH%\${APPIMAGE_FILENAME}}"
-		APPIMAGE_DIR="\${APPIMAGE_DIR%?}"
-		#-------
-
-		if [ "\${APPIMAGE_DIR}" != "\${HERE}/data" ]; then
-			if zenity --question --width=300 --height=200 --text="Warning: The AppImage isn't at \"./data/ directory\"\!\nDo you want to copy the AppImage to the \"./data/\" directory keeping portability?" --title='Warning!'; then
-				[ -f "\${HERE}/data/\${APPIMAGE_FILENAME}" ] && rm -rf "\${HERE}/data/\${APPIMAGE_FILENAME}"
-				cp "\${APPIMAGE_FULLPATH}" "\${HERE}/data/"
-				APPIMAGE_FULLPATH="\${HERE}/data/\${APPIMAGE_FILENAME}"
-			else
-				echo "Warning: Linking \${APPIMAGE_FULLPATH} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
-				chmod +x "\${APPIMAGE_FULLPATH}"
-				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
-				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
-				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-				echo "======= AppImage Selection run done with external link! ======="
-				exit 0
-			fi
-		fi
-
-		echo "Info: Linking ../\${APPIMAGE_FILENAME} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
-		chmod +x "\${APPIMAGE_FULLPATH}"
-		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
-		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
-		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-		echo "======= AppImage Selection run done! ======="
+		"\${HERE}/controlPanel.sh" "\$@"
 		exit 0
 		;;
 	"logsOn")
