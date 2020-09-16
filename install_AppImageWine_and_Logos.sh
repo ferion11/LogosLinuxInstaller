@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.17-rc5"
+export THIS_SCRIPT_VERSION="v2.17-rc6"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -80,16 +80,12 @@ mkdir_critical() {
 
 gtk_question() {
 	if zenity --question --width=300 --height=200 --text "$@" --title='Question:'
-	then
-		return 0
-	else
-		return 1
+	then return 0
+	else return 1
 	fi
 }
 gtk_continue_question() {
-	if ! gtk_question "$@"; then
-		gtk_fatal_error "The installation is cancelled!"
-	fi
+	if ! gtk_question "$@"; then gtk_fatal_error "The installation is cancelled!"; fi
 }
 
 # shellcheck disable=SC2028
@@ -614,9 +610,7 @@ case "${installationChoice}" in
 
 		# check for wine installation
 		WINE_VERSION_CHECK="$(${WINE_EXE} --version)"
-		if [ -z "${WINE_VERSION_CHECK}" ]; then
-			gtk_fatal_error "Wine not found! Please install native Wine first."
-		fi
+		[ -z "${WINE_VERSION_CHECK}" ] && gtk_fatal_error "Wine not found! Please install native Wine first."
 		echo "Using: ${WINE_VERSION_CHECK}"
 
 		make_skel "32" "${WINE_EXE}" "none.AppImage"
@@ -630,9 +624,7 @@ case "${installationChoice}" in
 
 		# check for wine installation
 		WINE_VERSION_CHECK="$(${WINE_EXE} --version)"
-		if [ -z "${WINE_VERSION_CHECK}" ]; then
-			gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
-		fi
+		[ -z "${WINE_VERSION_CHECK}" ] && gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
 		echo "Using: ${WINE_VERSION_CHECK}"
 
 		make_skel "64" "${WINE_EXE}" "none.AppImage"
