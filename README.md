@@ -66,7 +66,7 @@ $ ./install_AppImageWine_and_Logos.sh
 
 ![Step09](/img/step_09.png)
 
-#### 10- For the  MS DotNet 4.8 update, there is one warning but we aren't using Windows, so just click on `Continue`:
+#### 10- For the  MS DotNet 4.8 update, there is one warning but we aren't using `Windows Installer Service`, so just click on `Continue`:
 
 ![Step10](/img/step_10.png)
 
@@ -82,41 +82,41 @@ $ ./install_AppImageWine_and_Logos.sh
 
 ![Step13](/img/step_13.png)
 
-#### 14- It will ask if you wanna continue the installation knowing that it will download and install the LogosBible, so just click Yes:
+#### 14- It will ask if you wanna continue the installation knowing that it will download and install the LogosBible, so just click `Yes`:
 
 ![Step14](/img/step_14.png)
 
-Why do I need to click Yes here? Because it's a good stopping point to find out what's going on, and these stopping points only happen close to other mandatory interaction stops too.
+Why do I need to click `Yes` here? Because it's a good stopping point to find out what's going on, and these stopping points only happen close to other mandatory interaction stops too.
 
-#### 15- It will download and execute the msi LogosBible installer file first:
+#### 15- It will download and execute the `msi` LogosBible installer file first:
 
 ![Step15](/img/step_15.png)
 
-What is an msi? Microsoft Windows Installer.
+What is an `msi`? Microsoft Windows Installer.
 
-#### 16- Then we see the first LogosBible installation screen, just click on Next:
+#### 16- Then we see the first LogosBible installation screen, just click on `Next`:
 
 ![Step16](/img/step_16.png)
 
-#### 17- Mark the checkbox to accept the EULA (End User License Agreement) then click Next:
+#### 17- Mark the checkbox to accept the EULA (End User License Agreement) then click `Next`:
 
 ![Step17](/img/step_17.png)
 
-#### 18- Choose the type of installation, it can be Typical, or Custom if you prefer it:
+#### 18- Choose the type of installation, it can be `Typical`, or `Custom` if you prefer it:
 
 ![Step18](/img/step_18.png)
 
-I like to choose Custom and change the path to `c:\Logos\` (because it's easy to find), but it's my preference, any path chosen inside the Wine Bottle will work normally. Choose Typical for the default.
+I like to choose `Custom` and change the path to `c:\Logos\` (because it's easy to find), but it's my preference, any path chosen inside the Wine Bottle will work normally. Choose `Typical` for the default.
 
-#### 19- Then click Install to begin the installation:
+#### 19- Then click `Install` to begin the installation:
 
 ![Step19](/img/step_19.png)
 
-#### 20- At the end click on Finish:
+#### 20- At the end click on `Finish`:
 
 ![Step20](/img/step_20.png)
 
-#### 21- Congratulations! Installation is complete. You can run it for the first time by clicking Yes:
+#### 21- Congratulations! Installation is complete. You can run it for the first time by clicking `Yes`:
 
 ![Step21](/img/step_21.png)
 
