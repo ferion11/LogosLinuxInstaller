@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.17-rc6"
+export THIS_SCRIPT_VERSION="fast-v2.17-rc7"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -262,15 +262,7 @@ LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILEN
 
 #-------------------------------------------------
 case "\${1}" in
-	"${WINE_EXE}")
-		"\${HERE}/controlPanel.sh" "\$@"
-		exit 0
-		;;
-	"wineserver")
-		"\${HERE}/controlPanel.sh" "\$@"
-		exit 0
-		;;
-	"winetricks")
+	"${WINE_EXE}"|"wineserver"|"winetricks"|"selectAppImage")
 		"\${HERE}/controlPanel.sh" "\$@"
 		exit 0
 		;;
@@ -299,10 +291,6 @@ case "\${1}" in
 		rm -fv "\${LOGOS_DIR}"/Data/*/PersonalBookIndex/*
 		rm -fv "\${LOGOS_DIR}"/Data/*/LibraryCatalog/*
 		echo "======= removing all LogosBible index files done! ======="
-		exit 0
-		;;
-	"selectAppImage")
-		"\${HERE}/controlPanel.sh" "\$@"
 		exit 0
 		;;
 	"logsOn")
