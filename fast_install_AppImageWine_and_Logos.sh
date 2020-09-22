@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.17"
+export THIS_SCRIPT_VERSION="fast-v2.18-rc0"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -445,6 +445,7 @@ case "\${1}" in
 				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
+				(DISPLAY="" "\${HERE}/controlPanel.sh" ${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle..." --pulsate --auto-close --no-cancel
 				echo "======= AppImage Selection run done with external link! ======="
 				exit 0
 			fi
@@ -455,6 +456,7 @@ case "\${1}" in
 		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
+		(DISPLAY="" "\${HERE}/controlPanel.sh" ${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle..." --pulsate --auto-close --no-cancel
 		echo "======= AppImage Selection run done! ======="
 		exit 0
 		;;
