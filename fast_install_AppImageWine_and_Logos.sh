@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.18-rc0"
+export THIS_SCRIPT_VERSION="fast-v2.18-rc1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -21,7 +21,7 @@ WINE_APPIMAGE_FILENAME="$(basename "${WINE_APPIMAGE_URL}")"; export WINE_APPIMAG
 #=================================================
 # Default AppImage (without deps) to install 64bits version:
 export WINE64_APPIMAGE_VERSION="v5.11"
-if [ -z "${WINE64_APPIMAGE_URL}" ]; then export WINE64_APPIMAGE_URL="https://github.com/ferion11/wine_WoW64_nodeps_AppImage/releases/download/v5.11/wine-staging-linux-amd64-nodeps-v5.11-PlayOnLinux-x86_64.AppImage" ; fi
+if [ -z "${WINE64_APPIMAGE_URL}" ]; then export WINE64_APPIMAGE_URL="https://github.com/ferion11/wine_WoW64_nodeps_AppImage/releases/download/continuous-logos/wine-staging-linux-amd64-nodeps-v5.11-f11-x86_64.AppImage" ; fi
 WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_APPIMAGE_FILENAME
 #=================================================
 if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
