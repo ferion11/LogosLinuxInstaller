@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.19-rc0"
+export THIS_SCRIPT_VERSION="fast-v2.19"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
