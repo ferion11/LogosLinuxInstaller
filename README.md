@@ -8,7 +8,8 @@
 
 ### v2.x or higher  instructions:
 #### 00-  Download and execute:
-You can download the last release [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]"). Highlighting the main environment variables:
+There is one small video of the installation using the `fast_install_AppImageWine_and_Logos.sh` [[by clicking here]](https://github.com/ferion11/LogosLinuxInstallTests/releases/download/release-0a/LogosBible_Install.mp4 "[by clicking here]").
+You can download the last release [[CLICK HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[CLICK HERE]"). Highlighting the main environment variables:
 - `DOWNLOADED_RESOURCES`: used to use a directory where the script will search for files by name before attempting to download from the internet (default is `${PWD}`).
 - `INSTALLDIR`: used to change the installation directory (default is `${HOME}/LogosBible_Linux_P`)
 - `WINETRICKS_URL`: to be able to change the source of winetricks.
