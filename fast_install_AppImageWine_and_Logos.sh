@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.19"
+export THIS_SCRIPT_VERSION="fast-v2.20-rc0"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -32,6 +32,7 @@ export APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
 if [ -z "${DOWNLOADED_RESOURCES}" ]; then export DOWNLOADED_RESOURCES="${PWD}" ; fi
 if [ -z "${FORCE_ROOT+x}" ]; then export FORCE_ROOT="" ; fi
 if [ -z "${WINEBOOT_GUI+x}" ]; then export WINEBOOT_GUI="" ; fi
+export EXTRA_INFO="Usually is necessary: winbind cabextract libjpeg8."
 #=================================================
 #=================================================
 
@@ -190,8 +191,20 @@ check_commands() {
 		if have_dep "${cmd}"; then
 			echo "* command ${cmd} is installed!"
 		else
-			echo "* Your system does not have the command: ${cmd}. Please install ${cmd} package."
-			gtk_fatal_error "Your system does not have command: ${cmd}. Please install command ${cmd} package."
+			echo "* Your system does not have the command: ${cmd}. Please install command ${cmd} package. ${EXTRA_INFO}"
+			gtk_fatal_error "Your system does not have command: ${cmd}. Please install command ${cmd} package.\n ${EXTRA_INFO}"
+		fi
+	done
+}
+# shellcheck disable=SC2001
+check_libs() {
+	for lib in "$@"; do
+		HAVE_LIB="$(ldconfig -N -v "$(sed 's/:/ /g' <<< "${LD_LIBRARY_PATH}")" 2>/dev/null | grep "${lib}")"
+		if [ -n "${HAVE_LIB}" ]; then
+			echo "* ${lib} is installed!"
+		else
+			echo "* Your system does not have the lib: ${lib}. Please install ${lib} package. ${EXTRA_INFO}"
+			gtk_fatal_error "Your system does not have lib: ${lib}. Please install ${lib} package.\n ${EXTRA_INFO}"
 		fi
 	done
 }
@@ -523,6 +536,7 @@ else
 fi
 
 check_commands mktemp patch lsof wget xwd find sed grep cabextract ntlm_auth
+check_libs libjpeg.so.8
 
 if [ "$(id -u)" = 0 ] && [ -z "${FORCE_ROOT}" ]; then
 	echo "* Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
