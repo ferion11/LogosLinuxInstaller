@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.20-rc0"
+export THIS_SCRIPT_VERSION="v2.20-rc1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
@@ -545,7 +545,7 @@ else
 fi
 
 check_commands mktemp patch lsof wget xwd find sed grep cabextract ntlm_auth
-check_libs libjpeg.so.8
+#check_libs libjpeg.so.8
 
 if [ "$(id -u)" = 0 ] && [ -z "${FORCE_ROOT}" ]; then
 	echo "* Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
