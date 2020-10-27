@@ -4,8 +4,6 @@
 # LogosLinuxInstaller
 > LogosLinuxInstaller is a bash script for installation of Logos Bible on Linux.
 
-##### * NOTE The v2.x break backward compatibility with previous 1.x versions. It will work like the portable version, with variations that may or may not use AppImage, depending on the user's choice, but all installation alternatives will maintain some isolation from the rest of the system and other installations (the independent directory can be moved/renamed without losing the basic functionality).
-
 ### v2.x or higher  instructions:
 #### 00-  Download and execute:
 There is one small video of the installation using the `fast_install_AppImageWine_and_Logos.sh` [[by clicking here]](https://github.com/ferion11/LogosLinuxInstallTests/releases/download/release-0a/LogosBible_Install.mp4 "[by clicking here]").
@@ -13,7 +11,7 @@ You can download the last release [[CLICK HERE]](https://github.com/ferion11/Log
 - `DOWNLOADED_RESOURCES`: used to use a directory where the script will search for files by name before attempting to download from the internet (default is `${PWD}`).
 - `INSTALLDIR`: used to change the installation directory (default is `${HOME}/LogosBible_Linux_P`)
 - `WINETRICKS_URL`: to be able to change the source of winetricks.
-- `LOGOS_URL` and `LOGOS64_URL`: to be able to change the source of the LogosBible installer.
+- `LOGOS64_URL`: to be able to change the source of the LogosBible installer.
 
 0.1- After that you need to give permission to execute (You can use some graphical method too, but it will depend on your linux distribution):
 ```
@@ -27,13 +25,13 @@ or with one or more environment variables like:
 $ DOWNLOADED_RESOURCES=${HOME}/Downloads INSTALLDIR=/tmp/logosBibleTemp ./install_AppImageWine_and_Logos.sh
 ```
 
-- You can get the skel with the options `skel32` and `skel64`. It can be useful if you want just the scripts to update one of your local installations. And you can reuse the WineBottle from others installation too.
+- You can get the skel with the options `skel64`. It can be useful if you want just the scripts to update one of your local installations. And you can reuse the WineBottle from others installation too.
 
 #### 01- The installation start here:
 
 ![Step01](/img/step_01.png)
 
-* The default is using the 32bit AppImage, that provide better isolation. But you can choose do it using your native wine 32bits (some versions of wine will not work, so use `v5.11`, or the `fast version`) or 64bit (is unstable, work only on few cases, and need one wine 64bits made with WoW64 compatibility layer with 32bits, because dotnet need the 32bits wine working to install it on the 64bit profile, and again use `v5.11` or the `fast version`). Option 4 is for better compatibility 64bits installation using one AppImage, but without deps, so I recommend that you have one wine WoW64 installated anyway for the dependencies (if you don't want AppImage, but like the installation option 4, then just remove the AppImage file from the `data` dir, and it will use your native wine). Regardless of your choice, the installation will be done in isolation from the others.
+* The default is using the AppImage nodeps, that provide some isolation. But you can choose do it using your native wine 64bits WoW64 (some versions of wine will not work, so use `v5.11`, or the `fast version`). If you remove the AppImage file from the `data` dir, then it will use your native wine). Regardless of your choice, the installation will be done in isolation from the others.
 
 * Who is travis? Travis-ci is the automated system that test and generates the images, [[HERE]](https://github.com/ferion11/LogosLinuxInstallTests "[HERE]")
 
@@ -196,16 +194,16 @@ $ mv LogosBible_Linux_P LogosBible_Linux_P_old
 
 25.1.2 - Download the last script [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]")
 
-25.1.3 - Make it executable and execute with the option `skel32` or `skel64`, like:
+25.1.3 - Make it executable and execute with the option `skel64`, like:
 ```
 $ chmod +x install_AppImageWine_and_Logos.sh
-$ ./install_AppImageWine_and_Logos.sh skel32
+$ ./install_AppImageWine_and_Logos.sh skel64
 ```
 
 25.1.4 - Copy the wineBottle and if you are using AppImage then copy it too:
 ```
-$ rm -rf LogosBible_Linux_P/data/wine32_bottle
-$ cp -r LogosBible_Linux_P_old/data/wine32_bottle LogosBible_Linux_P/data/
+$ rm -rf LogosBible_Linux_P/data/wine64_bottle
+$ cp -r LogosBible_Linux_P_old/data/wine64_bottle LogosBible_Linux_P/data/
 $ cp LogosBible_Linux_P_old/data/*.AppImage LogosBible_Linux_P/data/
 ```
 

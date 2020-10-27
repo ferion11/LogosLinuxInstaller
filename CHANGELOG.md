@@ -84,4 +84,9 @@
   - added silent `wineboot` after `selectAppImage`
   - change default AppImage to `f11-build-v5.11` with `wineserver` bugfix patch.
 * from v2.18 to v2.19:
-  -  update to LogosBible 8.17.0.0011
+  - update to LogosBible 8.17.0.0011
+* from v2.19 to v2.20:
+  - Added default message for some deps
+  - Removed the unsupported 32bit version
+  - Changed the AppImage to include one extra libjpeg8 (if you don't have on installed)
+  - update to LogosBible 9.0.0.0168
