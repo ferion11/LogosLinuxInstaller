@@ -1,23 +1,16 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.20-rc1"
+export THIS_SCRIPT_VERSION="fast-v2.20-rc2"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_8_Beta_Program
-if [ -z "${LOGOS_URL}" ]; then export LOGOS_URL="https://downloads.logoscdn.com/LBS8/Installer/8.17.0.0011/Logos-x86.msi" ; fi
 if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS8/Installer/8.17.0.0011/Logos-x64.msi" ; fi
 
-#LOGOS_MVERSION=$(echo "${LOGOS_URL}" | cut -d/ -f4); export LOGOS_MVERSION
-LOGOS_VERSION="$(echo "${LOGOS_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
-LOGOS_MSI="$(basename "${LOGOS_URL}")"; export LOGOS_MSI
+#LOGOS_MVERSION=$(echo "${LOGOS64_URL}" | cut -d/ -f4); export LOGOS_MVERSION
+LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
 LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
 #=================================================
 if [ -z "${LOGOS_ICON_URL}" ]; then export LOGOS_ICON_URL="https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/master/img/logos4-128-icon.png" ; fi
-#=================================================
-# Default AppImage (with deps) to install 32bits version:
-export WINE_APPIMAGE_VERSION="v5.11"
-if [ -z "${WINE_APPIMAGE_URL}" ]; then export WINE_APPIMAGE_URL="https://github.com/ferion11/Wine_Appimage/releases/download/continuous-logos/wine-staging-linux-x86-v5.11-f11-x86_64.AppImage" ; fi
-WINE_APPIMAGE_FILENAME="$(basename "${WINE_APPIMAGE_URL}")"; export WINE_APPIMAGE_FILENAME
 #=================================================
 # Default AppImage (without deps) to install 64bits version:
 export WINE64_APPIMAGE_VERSION="v5.11"
@@ -550,13 +543,6 @@ echo "Starting Zenity GUI..."
 
 #======= Parsing =============
 case "${1}" in
-	"skel32")
-		export WINE_EXE="wine"
-		make_skel "32" "${WINE_EXE}" "none.AppImage"
-		rm -rf "${WORKDIR}"
-		echo "================================================="
-		exit 0
-		;;
 	"skel64")
 		export WINE_EXE="wine64"
 		make_skel "64" "${WINE_EXE}" "none.AppImage"
@@ -580,37 +566,21 @@ installationChoice="$(zenity --width=700 --height=310 \
 	--title="Question: Install Logos Bible using script ${THIS_SCRIPT_VERSION}" \
 	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v${LOGOS_VERSION} independent of others installations.\nPlease, select the type of installation:" \
 	--list --radiolist --column "S" --column "Descrition" \
-	TRUE "1- Fast install LogosBible32 using Wine ${WINE_APPIMAGE_VERSION} AppImage (default)." \
-	FALSE "2- Fast install LogosBible32 using the native Wine." \
-	FALSE "3- Fast install LogosBible64 using the native Wine64 (unstable)." \
-	FALSE "4- Fast install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies (unstable)." )"
+	TRUE "1- Fast install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies (default)." \
+	FALSE "2- Fast install LogosBible64 using the native Wine64." )"
 
 case "${installationChoice}" in
 	1*)
-		echo "Installing LogosBible 32bits using Wine AppImage..."
-		export WINEARCH=win32
-		export WINEPREFIX="${APPDIR}/wine32_bottle"
-		export WINE_EXE="wine"
+		echo "Installing LogosBible 64bits using ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies..."
+		export WINEARCH=win64
+		export WINEPREFIX="${APPDIR}/wine64_bottle"
+		export WINE_EXE="wine64"
 
-		make_skel "32" "${WINE_EXE}" "${WINE_APPIMAGE_FILENAME}"
-		export SET_APPIMAGE_FILENAME="${WINE_APPIMAGE_FILENAME}"
-		export SET_APPIMAGE_URL="${WINE_APPIMAGE_URL}"
+		make_skel "64" "${WINE_EXE}" "${WINE64_APPIMAGE_FILENAME}"
+		export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FILENAME}"
+		export SET_APPIMAGE_URL="${WINE64_APPIMAGE_URL}"
 		;;
 	2*)
-		echo "Installing LogosBible 32bits using the native Wine..."
-		export NO_APPIMAGE="1"
-		export WINEARCH=win32
-		export WINEPREFIX="${APPDIR}/wine32_bottle"
-		export WINE_EXE="wine"
-
-		# check for wine installation
-		WINE_VERSION_CHECK="$(${WINE_EXE} --version)"
-		[ -z "${WINE_VERSION_CHECK}" ] && gtk_fatal_error "Wine not found! Please install native Wine first."
-		echo "Using: ${WINE_VERSION_CHECK}"
-
-		make_skel "32" "${WINE_EXE}" "none.AppImage"
-		;;
-	3*)
 		echo "Installing LogosBible 64bits using the native Wine..."
 		export NO_APPIMAGE="1"
 		export WINEARCH=win64
@@ -623,16 +593,6 @@ case "${installationChoice}" in
 		echo "Using: ${WINE_VERSION_CHECK}"
 
 		make_skel "64" "${WINE_EXE}" "none.AppImage"
-		;;
-	4*)
-		echo "Installing LogosBible 64bits using ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies..."
-		export WINEARCH=win64
-		export WINEPREFIX="${APPDIR}/wine64_bottle"
-		export WINE_EXE="wine64"
-
-		make_skel "64" "${WINE_EXE}" "${WINE64_APPIMAGE_FILENAME}"
-		export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FILENAME}"
-		export SET_APPIMAGE_URL="${WINE64_APPIMAGE_URL}"
 		;;
 	*)
 		gtk_fatal_error "Installation canceled!"
@@ -678,40 +638,19 @@ heavy_wineserver_wait() {
 
 echo "================================================="
 # get and install pre-made wineBottle
-case "${WINEARCH}" in
-	win32)
-		WINE_BOTTLE_TARGZ_URL="https://github.com/ferion11/wine64_bottle_dotnet/releases/download/wine32-v5.11/wine32_bottle.tar.gz"
-		WINE_BOTTLE_TARGZ_NAME="wine32_bottle.tar.gz"
-		echo "Installing pre-made wineBottle 32bits..."
-		if [ -f "${DOWNLOADED_RESOURCES}/${WINE_BOTTLE_TARGZ_NAME}" ]; then
-			echo "${WINE_BOTTLE_TARGZ_NAME} exist. Using it..."
-			cp "${DOWNLOADED_RESOURCES}/${WINE_BOTTLE_TARGZ_NAME}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${WINE_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
-		else
-			echo "${WINE_BOTTLE_TARGZ_NAME} does not exist. Downloading..."
-			gtk_download "${WINE_BOTTLE_TARGZ_URL}" "${WORKDIR}"
-		fi
+WINE64_BOTTLE_TARGZ_URL="https://github.com/ferion11/wine64_bottle_dotnet/releases/download/v5.11/wine64_bottle.tar.gz"
+WINE64_BOTTLE_TARGZ_NAME="wine64_bottle.tar.gz"
+echo "Installing pre-made wineBottle 64bits..."
+if [ -f "${DOWNLOADED_RESOURCES}/${WINE64_BOTTLE_TARGZ_NAME}" ]; then
+	echo "${WINE64_BOTTLE_TARGZ_NAME} exist. Using it..."
+	cp "${DOWNLOADED_RESOURCES}/${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+else
+	echo "${WINE64_BOTTLE_TARGZ_NAME} does not exist. Downloading..."
+	gtk_download "${WINE64_BOTTLE_TARGZ_URL}" "${WORKDIR}"
+fi
 
-		echo "Extracting: ${WINE_BOTTLE_TARGZ_NAME} into: ${APPDIR}"
-		tar xzf "${WORKDIR}"/"${WINE_BOTTLE_TARGZ_NAME}" -C "${APPDIR}"/ | zenity --progress --title="Extracting..." --text="Extracting: ${WINE_BOTTLE_TARGZ_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-		;;
-	win64)
-		WINE64_BOTTLE_TARGZ_URL="https://github.com/ferion11/wine64_bottle_dotnet/releases/download/v5.11/wine64_bottle.tar.gz"
-		WINE64_BOTTLE_TARGZ_NAME="wine64_bottle.tar.gz"
-		echo "Installing pre-made wineBottle 64bits..."
-		if [ -f "${DOWNLOADED_RESOURCES}/${WINE64_BOTTLE_TARGZ_NAME}" ]; then
-			echo "${WINE64_BOTTLE_TARGZ_NAME} exist. Using it..."
-			cp "${DOWNLOADED_RESOURCES}/${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
-		else
-			echo "${WINE64_BOTTLE_TARGZ_NAME} does not exist. Downloading..."
-			gtk_download "${WINE64_BOTTLE_TARGZ_URL}" "${WORKDIR}"
-		fi
-
-		echo "Extracting: ${WINE64_BOTTLE_TARGZ_NAME} into: ${APPDIR}"
-		tar xzf "${WORKDIR}"/"${WINE64_BOTTLE_TARGZ_NAME}" -C "${APPDIR}"/ | zenity --progress --title="Extracting..." --text="Extracting: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-		;;
-	*)
-		gtk_fatal_error "Installation failed!"
-esac
+echo "Extracting: ${WINE64_BOTTLE_TARGZ_NAME} into: ${APPDIR}"
+tar xzf "${WORKDIR}"/"${WINE64_BOTTLE_TARGZ_NAME}" -C "${APPDIR}"/ | zenity --progress --title="Extracting..." --text="Extracting: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 echo "================================================="
 
 gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of gecko and say No to any error. Do you wish to continue?"
@@ -730,34 +669,17 @@ gtk_continue_question "Now the script will download and install Logos Bible on $
 
 echo "================================================="
 # Geting and install the LogosBible:
-case "${WINEARCH}" in
-	win32)
-		echo "Installing LogosBible 32bits..."
-		if [ -f "${DOWNLOADED_RESOURCES}/${LOGOS_MSI}" ]; then
-			echo "${LOGOS_MSI} exist. Using it..."
-			cp "${DOWNLOADED_RESOURCES}/${LOGOS_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
-		else
-			echo "${LOGOS_MSI} does not exist. Downloading..."
-			gtk_download "${LOGOS_URL}" "${WORKDIR}"
-		fi
-		echo "${WINE_EXE} msiexec /i ${LOGOS_MSI}"
-		${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS_MSI}"
-		;;
-	win64)
-		echo "Installing LogosBible 64bits..."
-		if [ -f "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" ]; then
-			echo "${LOGOS64_MSI} exist. Using it..."
-			cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
-		else
-			echo "${LOGOS64_MSI} does not exist. Downloading..."
-			gtk_download "${LOGOS64_URL}" "${WORKDIR}"
-		fi
-		echo "${WINE_EXE} msiexec /i ${LOGOS64_MSI}"
-		${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
-		;;
-	*)
-		gtk_fatal_error "Installation failed!"
-esac
+echo "Installing LogosBible 64bits..."
+if [ -f "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" ]; then
+	echo "${LOGOS64_MSI} exist. Using it..."
+	cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+else
+	echo "${LOGOS64_MSI} does not exist. Downloading..."
+	gtk_download "${LOGOS64_URL}" "${WORKDIR}"
+fi
+echo "${WINE_EXE} msiexec /i ${LOGOS64_MSI}"
+${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
+
 heavy_wineserver_wait
 echo "================================================="
 clean_all
