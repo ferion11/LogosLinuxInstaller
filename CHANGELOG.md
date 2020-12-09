@@ -90,3 +90,5 @@
   - Removed the unsupported 32bit version
   - Changed the AppImage to include one extra libjpeg8 (if you don't have on installed)
   - update to LogosBible 9.0.0.0168
+* from v2.20 to v2.21:
+  - update to LogosBible 9.1.0.0018
