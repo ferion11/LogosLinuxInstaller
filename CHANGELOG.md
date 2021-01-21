@@ -92,3 +92,5 @@
   - update to LogosBible 9.0.0.0168
 * from v2.20 to v2.21:
   - update to LogosBible 9.1.0.0018
+* from v2.21 to v2.22:
+  - update to LogosBible 9.2.0.0014
