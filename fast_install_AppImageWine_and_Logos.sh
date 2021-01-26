@@ -70,7 +70,7 @@ gtk_question() {
 	fi
 }
 gtk_continue_question() {
-	if ! gtk_question "$@"; then gtk_fatal_error "The installation is cancelled!"; fi
+	if ! gtk_question "$@"; then gtk_fatal_error "The installation was cancelled!"; fi
 }
 
 # shellcheck disable=SC2028
@@ -93,7 +93,7 @@ gtk_download() {
 	else
 		# $2 is file
 		TARGET="$2"
-		# ensure that directory, where the target file will be exists
+		# ensure that the directory where the target file will be exists
 		[ -d "${2%/*}" ] || mkdir -p "${2%/*}" || gtk_fatal_error "Cannot create directory ${2%/*}"
 	fi
 
@@ -167,14 +167,14 @@ gtk_download() {
 	fuser -TERM -k -w "${pipe_wget}"
 	rm -rf "${pipe_wget}"
 
-	# NOTE: sometimes the process finish before the wait command, giving the error code 127
+	# NOTE: sometimes the process finishes before the wait command, giving the error code 127
 	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
 		if [ "${WGET_RETURN}" != "0" ] && [ "${WGET_RETURN}" != "127" ] ; then
 			echo "ERROR: error downloading the file! WGET_RETURN: ${WGET_RETURN}"
-			gtk_fatal_error "The installation is cancelled because of error downloading the file!\n * ${FILENAME}\n  - WGET_RETURN: ${WGET_RETURN}"
+			gtk_fatal_error "The installation was cancelled because of error downloading the file!\n * ${FILENAME}\n  - WGET_RETURN: ${WGET_RETURN}"
 		fi
 	else
-		gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
+		gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 	fi
 	echo "${FILENAME} download finished!"
 }
@@ -498,7 +498,7 @@ make_skel() {
 
 	# Making the links (and dir)
 	mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
-	cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
+	cd "${APPDIR_BINDIR}" || die "ERROR: Can't open dir: ${APPDIR_BINDIR}"
 	ln -s "../${SET_APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
 	ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
 	[ "${WINE_BITS}" == "64" ] && ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine64
@@ -517,7 +517,7 @@ echo "================================================="
 echo 'Searching for dependencies:'
 
 if [ -z "${DISPLAY}" ]; then
-	echo "* You want to run without X, but it don't work."
+	echo "* You want to run without X, but it doesn't work."
 	exit 1
 fi
 
@@ -557,15 +557,15 @@ esac
 
 #======= Main =============
 if [ -d "${INSTALLDIR}" ]; then
-	echo "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
-	gtk_fatal_error "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
+	echo "A directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
+	gtk_fatal_error "A directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
 fi
 
 echo "* Script version: ${THIS_SCRIPT_VERSION}"
 installationChoice="$(zenity --width=700 --height=310 \
 	--title="Question: Install Logos Bible using script ${THIS_SCRIPT_VERSION}" \
-	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v${LOGOS_VERSION} independent of others installations.\nPlease, select the type of installation:" \
-	--list --radiolist --column "S" --column "Descrition" \
+	--text="This script will create one directory in (which can be changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be an installation of LogosBible v${LOGOS_VERSION} independent of other installations.\nPlease select the type of installation:" \
+	--list --radiolist --column "S" --column "Description" \
 	TRUE "1- Fast install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies (default)." \
 	FALSE "2- Fast install LogosBible64 using the native Wine64." )"
 
@@ -627,13 +627,13 @@ fi
 #-------------------------------------------------
 
 light_wineserver_wait() {
-	echo "* Waiting for ${WINE_EXE} to proper end..."
-	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+	echo "* Waiting for ${WINE_EXE} to end properly..."
+	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly..." --pulsate --auto-close --no-cancel
 }
 heavy_wineserver_wait() {
-	echo "* Waiting for ${WINE_EXE} to proper end..."
-	wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
-	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+	echo "* Waiting for ${WINE_EXE} to end properly..."
+	wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly..." --pulsate --auto-close --no-cancel
+	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly..." --pulsate --auto-close --no-cancel
 }
 
 echo "================================================="
@@ -653,7 +653,7 @@ echo "Extracting: ${WINE64_BOTTLE_TARGZ_NAME} into: ${APPDIR}"
 tar xzf "${WORKDIR}"/"${WINE64_BOTTLE_TARGZ_NAME}" -C "${APPDIR}"/ | zenity --progress --title="Extracting..." --text="Extracting: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 echo "================================================="
 
-gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of gecko and say No to any error. Do you wish to continue?"
+gtk_continue_question "Now the script will create and configure the Wine Bottle at ${WINEPREFIX}. You can cancel the instalation of gecko and say No to any error. Do you wish to continue?"
 echo "================================================="
 echo "${WINE_EXE} wineboot"
 if [ -z "${WINEBOOT_GUI}" ]; then
@@ -665,7 +665,7 @@ light_wineserver_wait
 echo "================================================="
 #-------------------------------------------------
 
-gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
+gtk_continue_question "Now the script will download and install Logos Bible at ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
 echo "================================================="
 # Geting and install the LogosBible:
