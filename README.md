@@ -2,23 +2,23 @@
 [![Automation testing](https://img.shields.io/badge/Automation-testing-sucess)](https://github.com/ferion11/LogosLinuxInstallTests) [![Installer LogosBible](https://img.shields.io/badge/Installer-LogosBible-blue)](https://www.logos.com) [![LastRelease](https://img.shields.io/github/v/release/ferion11/LogosLinuxInstaller)](https://github.com/ferion11/LogosLinuxInstaller/releases)
 
 # LogosLinuxInstaller
-> LogosLinuxInstaller is a bash script for installation of Logos Bible on Linux.
+> LogosLinuxInstaller is a bash script for installing Logos Bible on Linux.
 
 ### v2.x or higher  instructions:
 #### 00-  Download and execute:
-There is one small video of the installation using the `fast_install_AppImageWine_and_Logos.sh` [[by clicking here]](https://github.com/ferion11/LogosLinuxInstallTests/releases/download/release-0a/LogosBible_Install.mp4 "[by clicking here]").
-You can download the last release [[CLICK HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[CLICK HERE]"). Highlighting the main environment variables:
-- `DOWNLOADED_RESOURCES`: used to use a directory where the script will search for files by name before attempting to download from the internet (default is `${PWD}`).
-- `INSTALLDIR`: used to change the installation directory (default is `${HOME}/LogosBible_Linux_P`)
-- `WINETRICKS_URL`: to be able to change the source of winetricks.
-- `LOGOS64_URL`: to be able to change the source of the LogosBible installer.
+There is a small video of the installation using the `fast_install_AppImageWine_and_Logos.sh` [[by clicking here]](https://github.com/ferion11/LogosLinuxInstallTests/releases/download/release-0a/LogosBible_Install.mp4 "[by clicking here]").
+You can download the latest release [[CLICK HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[CLICK HERE]"). Highlighting the main environment variables:
+- `DOWNLOADED_RESOURCES`: change the directory where the script will search for files by name before attempting to download from the internet (default is `${PWD}`).
+- `INSTALLDIR`: change the installation directory (default is `${HOME}/LogosBible_Linux_P`).
+- `WINETRICKS_URL`: change the source of winetricks.
+- `LOGOS64_URL`: change the source of the LogosBible installer.
 
-0.1- After that you need to give permission to execute (You can use some graphical method too, but it will depend on your linux distribution):
+0.1- After this you need to give permission to execute. (You can use some graphical method too, but it will depend on your Linux distribution.):
 ```
 $ chmod +x install_AppImageWine_and_Logos.sh
 ```
 
-0.2- Then execute (you don't need sudo or root acess):
+0.2- Then execute the shell script. (You don't need sudo or root access.):
 ```
 $ ./install_AppImageWine_and_Logos.sh
 or with one or more environment variables like:
@@ -27,31 +27,31 @@ $ DOWNLOADED_RESOURCES=${HOME}/Downloads INSTALLDIR=/tmp/logosBibleTemp ./instal
 
 - You can get the skel with the options `skel64`. It can be useful if you want just the scripts to update one of your local installations. And you can reuse the WineBottle from others installation too.
 
-#### 01- The installation start here:
+#### 01- The installation starts here:
 
 ![Step01](/img/step_01.png)
 
-* The default is using the AppImage nodeps, that provide some isolation. But you can choose do it using your native wine 64bits WoW64 (some versions of wine will not work, so use `v5.11`, or the `fast version`). If you remove the AppImage file from the `data` dir, then it will use your native wine). Regardless of your choice, the installation will be done in isolation from the others.
+* The default uses the AppImage nodeps, which provides some isolation. But you can choose do it using your native wine 64bits WoW64. (Some versions of wine will not work, so use `v5.11`, or the `fast version`. If you remove the AppImage file from the `data` dir, then it will use your native wine). Regardless of your choice, the installation will be done in isolation from others.
 
-* Who is travis? Travis-ci is the automated system that test and generates the images, [[HERE]](https://github.com/ferion11/LogosLinuxInstallTests "[HERE]")
+* Who is travis? Travis-ci is the automated system that tests and generates the images, [[HERE]](https://github.com/ferion11/LogosLinuxInstallTests "[HERE]")
 
 #### 02- It will download the AppImage, if needed:
 
 ![Step02](/img/step_02.png)
 
-#### 03- It will ask if you wanna continue the installation knowing that it will make one isolated directory installation at the path indicated:
+#### 03- It will ask if you wanna continue the installation knowing that it will make an isolated directory installation at the path indicated:
 
 ![Step03](/img/step_03.png)
 
-#### 04- The Wine will update the Bottle:
+#### 04- Wine will update the Bottle:
 
 ![Step04](/img/step_04.png)
 
-#### 05- It will ask if you wanna continue the installation knowing that it will install the winetricks packages (it will take a while to finish):
+#### 05- It will ask if you want to continue the installation knowing that it will install the winetricks packages. (It will take a while to finish.):
 
 ![Step05](/img/step_05.png)
 
-#### 06- The first winetricks package is the corefonts (just to make sure that you have the basic fonts installed):
+#### 06- The first winetricks package is corefonts (just to make sure that you have the basic fonts installed):
 
 ![Step06](/img/step_06.png)
 
@@ -59,35 +59,35 @@ $ DOWNLOADED_RESOURCES=${HOME}/Downloads INSTALLDIR=/tmp/logosBibleTemp ./instal
 
 ![Step07](/img/step_07.png)
 
-#### 08- The next winetricks package is the MS DotNet v4.8, that will install the v4.0 first and then the update v4.8 (this will need some interaction now). Then to install MS DotNet 4.0, mark the license checkbox, then click on `Install`:
+#### 08- The next winetricks package is MS DotNet v4.8, which will install the v4.0 first and then the update to v4.8, which will need some interaction. To install MS DotNet 4.0, mark the license checkbox, then click on `Install`:
 
 ![Step08](/img/step_08.png)
 
-#### 09- After the installation of MS DotNet 4.0, just click on `Finish`:
+#### 09- After the installation of MS DotNet 4.0, click on `Finish`:
 
 ![Step09](/img/step_09.png)
 
-#### 10- For the  MS DotNet 4.8 update, there is one warning but we aren't using `Windows Installer Service`, so just click on `Continue`:
+#### 10- For the  MS DotNet 4.8 update, there is a warning but we aren't using the `Windows Installer Service`, so click on `Continue`:
 
 ![Step10](/img/step_10.png)
 
-#### 11- Then to install MS DotNet 4.8 update, mark the license checkbox, and click on `Install`:
+#### 11- Then to install the MS DotNet 4.8 update, mark the license checkbox, and click on `Install`:
 
 ![Step11](/img/step_11.png)
 
-#### 12- After the installation of the update MS DotNet 4.8, just click on `Finish`:
+#### 12- After the installation of the update to MS DotNet 4.8, click on `Finish`:
 
 ![Step12](/img/step_12.png)
 
-#### 13- Then click on `Restart Later` (to avoid deadlock on wine process):
+#### 13- Then click on `Restart Later` to avoid deadlock on the wine process:
 
 ![Step13](/img/step_13.png)
 
-#### 14- It will ask if you wanna continue the installation knowing that it will download and install the LogosBible, so just click `Yes`:
+#### 14- It will ask if you want to continue the installation knowing that it will download and install the LogosBible software. Click `Yes`:
 
 ![Step14](/img/step_14.png)
 
-Why do I need to click `Yes` here? Because it's a good stopping point to find out what's going on, and these stopping points only happen close to other mandatory interaction stops too.
+Why do I need to click `Yes` here? Because it's a good stopping point to find out what's going on, and these stopping points only happen close to other mandatory interaction stops, too.
 
 #### 15- It will download and execute the `msi` LogosBible installer file first:
 
@@ -95,19 +95,19 @@ Why do I need to click `Yes` here? Because it's a good stopping point to find ou
 
 What is an `msi`? Microsoft Windows Installer.
 
-#### 16- Then we see the first LogosBible installation screen, just click on `Next`:
+#### 16- Then we see the first LogosBible installation screen. Click on `Next`:
 
 ![Step16](/img/step_16.png)
 
-#### 17- Mark the checkbox to accept the EULA (End User License Agreement) then click `Next`:
+#### 17- Mark the checkbox to accept the EULA (End User License Agreement), then click `Next`:
 
 ![Step17](/img/step_17.png)
 
-#### 18- Choose the type of installation, it can be `Typical`, or `Custom` if you prefer it:
+#### 18- Choose the type of installation; it can be `Typical` or `Custom`:
 
 ![Step18](/img/step_18.png)
 
-I like to choose `Custom` and change the path to `c:\Logos\` (because it's easy to find), but it's my preference, any path chosen inside the Wine Bottle will work normally. Choose `Typical` for the default.
+I like to choose `Custom` and change the path to `c:\Logos\` (because it's easy to find), but that's my preference. Any path chosen inside the Wine Bottle will work normally. Choose `Typical` for the default.
 
 #### 19- Then click `Install` to begin the installation:
 
@@ -121,27 +121,27 @@ I like to choose `Custom` and change the path to `c:\Logos\` (because it's easy 
 
 ![Step21](/img/step_21.png)
 
-#### 22- Ok! If your window does not leave the screen, just login::
+#### 22- If your window does not leave the screen, login:
 
 ![Step22](/img/step_22.png)
 
-If the windows does leave the screen then just holding the `Alt` key you can move it by clicking any part and drag it, so if something similar happens to you, it will be easy to move the window down just by holding `Alt` key on the keyboard while dragging the window using the mouse.
+If the LogosBible window vanishes from the screen or you accidentally move it to some place you cannot see it, hold the `Alt` key and click and drag any part of the window until you can see it again.
 
 #### 23- You now have a `LogosBible_Linux_P` folder in your User Home:
 
-* It can be renamed and moved which should maintain functionality (with only a few limitations like changing the name of the linux user).
+* It can be renamed and moved while maintaining functionality (with only a few limitations like changing the name of the Linux user).
 
-* Inside it there are two scripts:
+* Inside the directory are two scripts:
   - `Logos.sh` : used to run the LogosBible installed in this directory.
-  - `controlPanel.sh` : used to call the Windows Control Panel of this installation, so that you can easily remove and install new versions manually without having to resort to complicated procedures.
+  - `controlPanel.sh` : used to call the Windows Control Panel of this installation. This allows you to easily remove and install new versions manually without having to resort to complicated install procedures.
 
-* You can also use the `Logos.sh` or `controlPanel.sh` to execute Wine or winetricks commands on that installation, like:
+* You can also use the `Logos.sh` or `controlPanel.sh` to execute Wine or winetricks commands for that installation, like:
   - `$ ./Logos.sh wine regedit.exe`
   - `$ ./Logos.sh wineserver -w`
   - `$ ./Logos.sh winetricks calibri`
   - if there is another version of winetricks inside `LogosBible_Linux_P`, the `Logos.sh` or `controlPanel.sh` will use it.
 
-* If, after the installation, you want to use a different version of winetricks, just copy it to the same directory that the `Logos.sh` and `controlPanel.sh`, then the 2 scripts will use it, instead of download the last git version.
+* If, after the installation, you want to use a different version of winetricks, just copy it to the same directory that the `Logos.sh` and `controlPanel.sh` scripts are, then the two scripts will use it instead of downloading the latest git version.
 
 * You can run the standalone Logos Bible indexing on the console with:
 ```
@@ -153,12 +153,12 @@ $ ./Logos.sh indexing
 $ ./Logos.sh removeAllIndex
 ```
 
-* You can create one symbolic link to the installation of LogosBible inside the Bottle, on the same dir that `Logos.sh`:
+* You can create a symbolic link to the installation of LogosBible inside the Bottle like so:
 ```
 $ ./Logos.sh dirlink
 ```
 
-* You can create/update one `LogosBible.desktop` (in `${HOME}/.local/share/applications`) that will point to the current location of `Logos.sh`:
+* You can create/update the `LogosBible.desktop` (in `${HOME}/.local/share/applications`) to will point to the current location of `Logos.sh`:
 ```
 $ ./Logos.sh shortcut
 ```
@@ -170,24 +170,24 @@ or
 $ ./Logos.sh logsOff
 ```
 
-* You can have multiples AppImages on `data` directory, then change it with:
+* You can have multiples AppImages on `data` directory and change it with:
 ```
 $ ./Logos.sh selectAppImage
 or
 $ ./controlPanel.sh selectAppImage
 ```
 
-* The `data` directory contains the Wine Bottle and possibly the AppImage, for this installation.
+* The `data` directory contains the Wine Bottle and possibly the AppImage for this installation.
 
 #### 24- To uninstall:
 
-Just remove the installation directory, everything is contained in isolation from your system.
+Just remove the installation directory. Everything is contained in isolation from your system.
 
 #### 25- To update:
 
 You can use the skel option to easily update the script version:
 
-25.1.1 - Rename/move the old installation to use like one backup:
+25.1.1 - Rename/move the old installation to use as a backup:
 ```
 $ mv LogosBible_Linux_P LogosBible_Linux_P_old
 ```
@@ -200,15 +200,15 @@ $ chmod +x install_AppImageWine_and_Logos.sh
 $ ./install_AppImageWine_and_Logos.sh skel64
 ```
 
-25.1.4 - Copy the wineBottle and if you are using AppImage then copy it too:
+25.1.4 - Copy the wineBottle and if you are using AppImage then copy it, too:
 ```
 $ rm -rf LogosBible_Linux_P/data/wine64_bottle
 $ cp -r LogosBible_Linux_P_old/data/wine64_bottle LogosBible_Linux_P/data/
 $ cp LogosBible_Linux_P_old/data/*.AppImage LogosBible_Linux_P/data/
 ```
 
-25.1.5 - Test the new version, and if work then you can remove the old `LogosBible_Linux_P_old`
+25.1.5 - Test the new version. If it works, you can remove the old `LogosBible_Linux_P_old`
 
 #### 26- Alternative Fast Installations:
-In this repository there is a version with "Fast Installations" that part of the procedures are done on the test server, and only the installation of LogosBible is done on the user's equipment: [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]")
+In this repository there is also a "Fast Installation" version in which part of the install procedures are done on the test server and only the installation of LogosBible is done on the user's equipment: [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]")
 This alternative can help anyone who is having issues with the first part of the installation.

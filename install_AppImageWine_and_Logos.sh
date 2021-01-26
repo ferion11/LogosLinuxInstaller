@@ -79,14 +79,14 @@ gtk_question() {
 	fi
 }
 gtk_continue_question() {
-	if ! gtk_question "$@"; then gtk_fatal_error "The installation is cancelled!"; fi
+	if ! gtk_question "$@"; then gtk_fatal_error "The installation was cancelled!"; fi
 }
 
 # shellcheck disable=SC2028
 gtk_download() {
 	# $1	what to download
 	# $2	where into
-	# NOTE: here must be limitation to handle it easily. $2 can be dir, if it already exists or if it ends with '/'
+	# NOTE: here must be a limitation to handle it easily. $2 can be dir if it already exists or if it ends with '/'
 
 	URI="$1"
 	# extract last field of URI as filename:
@@ -102,7 +102,7 @@ gtk_download() {
 	else
 		# $2 is file
 		TARGET="$2"
-		# ensure that directory, where the target file will be exists
+		# ensure that the directory where the target file will be exists
 		[ -d "${2%/*}" ] || mkdir -p "${2%/*}" || gtk_fatal_error "Cannot create directory ${2%/*}"
 	fi
 
@@ -176,14 +176,14 @@ gtk_download() {
 	fuser -TERM -k -w "${pipe_wget}"
 	rm -rf "${pipe_wget}"
 
-	# NOTE: sometimes the process finish before the wait command, giving the error code 127
+	# NOTE: sometimes the process finishes before the wait command, giving the error code 127
 	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
 		if [ "${WGET_RETURN}" != "0" ] && [ "${WGET_RETURN}" != "127" ] ; then
 			echo "ERROR: error downloading the file! WGET_RETURN: ${WGET_RETURN}"
-			gtk_fatal_error "The installation is cancelled because of error downloading the file!\n * ${FILENAME}\n  - WGET_RETURN: ${WGET_RETURN}"
+			gtk_fatal_error "The installation was cancelled because of error downloading the file!\n * ${FILENAME}\n  - WGET_RETURN: ${WGET_RETURN}"
 		fi
 	else
-		gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
+		gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 	fi
 	echo "${FILENAME} download finished!"
 }
@@ -213,7 +213,7 @@ check_libs() {
 #--------------
 #==========================
 
-# wait to all process that is using the ${1} directory to finish
+# wait on all processes that are using the ${1} directory to finish
 wait_process_using_dir() {
 	VERIFICATION_DIR="${1}"
 	VERIFICATION_TIME=7
@@ -526,7 +526,7 @@ echo "================================================="
 echo 'Searching for dependencies:'
 
 if [ -z "${DISPLAY}" ]; then
-	echo "* You want to run without X, but it don't work."
+	echo "* You want to run without X, but it doesn't work."
 	exit 1
 fi
 
@@ -566,14 +566,14 @@ esac
 
 #======= Main =============
 if [ -d "${INSTALLDIR}" ]; then
-	echo "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
-	gtk_fatal_error "One directory already exists in ${INSTALLDIR}, please remove/rename it or use another location by setting the INSTALLDIR variable"
+	echo "A directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
+	gtk_fatal_error "a directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
 fi
 
 echo "* Script version: ${THIS_SCRIPT_VERSION}"
 installationChoice="$(zenity --width=700 --height=310 \
 	--title="Question: Install Logos Bible using script ${THIS_SCRIPT_VERSION}" \
-	--text="This script will create one directory in (can changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be one installation of LogosBible v${LOGOS_VERSION} independent of others installations.\nPlease, select the type of installation:" \
+	--text="This script will create one directory in (which can be changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be an installation of LogosBible v${LOGOS_VERSION} independent of other installations.\nPlease select the type of installation:" \
 	--list --radiolist --column "S" --column "Descrition" \
 	TRUE "1- Install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies (default)." \
 	FALSE "2- Install LogosBible64 using the native Wine64." )"
@@ -636,16 +636,16 @@ fi
 #-------------------------------------------------
 
 light_wineserver_wait() {
-	echo "* Waiting for ${WINE_EXE} to proper end..."
-	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+	echo "* Waiting for ${WINE_EXE} to end properly..."
+	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly..." --pulsate --auto-close --no-cancel
 }
 heavy_wineserver_wait() {
-	echo "* Waiting for ${WINE_EXE} to proper end..."
-	wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
-	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to proper end..." --pulsate --auto-close --no-cancel
+	echo "* Waiting for ${WINE_EXE} to end properly..."
+	wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly..." --pulsate --auto-close --no-cancel
+	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly..." --pulsate --auto-close --no-cancel
 }
 
-gtk_continue_question "Now the script will create and configure the Wine Bottle on ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
+gtk_continue_question "Now the script will create and configure the Wine Bottle at ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
 echo "================================================="
 echo "${WINE_EXE} wineboot"
 if [ -z "${WINEBOOT_GUI}" ]; then
@@ -689,10 +689,10 @@ wine_reg_install "renderer_gdi.reg"
 echo "================================================="
 #-------------------------------------------------
 
-gtk_continue_question "Now the script will install the winetricks packages on ${WINEPREFIX}. Do you wish to continue?"
+gtk_continue_question "Now the script will install the winetricks packages at ${WINEPREFIX}. Do you wish to continue?"
 
 if [ -f "${DOWNLOADED_RESOURCES}/winetricks" ]; then
-	echo "winetricks exist. Using it..."
+	echo "winetricks exists. Using it..."
 	cp "${DOWNLOADED_RESOURCES}/winetricks" "${WORKDIR}"
 else
 	echo "winetricks does not exist. Downloading..."
@@ -721,16 +721,16 @@ winetricks_install() {
 	#fuser -TERM -k -w "${pipe_winetricks}"
 	rm -rf "${pipe_winetricks}"
 
-	# NOTE: sometimes the process finish before the wait command, giving the error code 127
+	# NOTE: sometimes the process finishes before the wait command, giving the error code 127
 	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
 		if [ "${WINETRICKS_STATUS}" != "0" ] ; then
 			wineserver -k
 			echo "ERROR on : winetricks ${*}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
-			gtk_fatal_error "The installation is cancelled because of sub-job failure!\n * winetricks ${*}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
+			gtk_fatal_error "The installation was cancelled because of sub-job failure!\n * winetricks ${*}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
 		fi
 	else
 		wineserver -k
-		gtk_fatal_error "The installation is cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
+		gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 	fi
 	echo "winetricks ${*} DONE!"
 
@@ -755,7 +755,7 @@ else
 fi
 #-------------------------------------------------
 
-gtk_continue_question "Now the script will download and install Logos Bible on ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
+gtk_continue_question "Now the script will download and install Logos Bible at ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
 echo "================================================="
 # Geting and install the LogosBible:
