@@ -94,3 +94,6 @@
   - update to LogosBible 9.1.0.0018
 * from v2.21 to v2.22:
   - update to LogosBible 9.2.0.0014
+* from v2.22 to v2.23:
+  - Typos, spelling, grammar by T. H. Wright (thw26)
+  - update to LogosBible 9.3.0.0040
