@@ -97,3 +97,6 @@
 * from v2.22 to v2.23:
   - Typos, spelling, grammar by T. H. Wright (thw26)
   - update to LogosBible 9.3.0.0040
+* from v2.23 to v2.24:
+  - update to LogosBible 9.3.0.0040 by John Goodman (jg00dman)
+  - added change to vista on winebottle by John Goodman (jg00dman)
