@@ -770,6 +770,11 @@ fi
 echo "${WINE_EXE} msiexec /i ${LOGOS64_MSI}"
 ${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
 
+echo "======= Set LogosBible Indexing to Vista Mode: ======="
+wine64 reg add "HKCU\\Software\\Wine\\AppDefaults\\LogosIndexer.exe" /v Version /t REG_SZ /d vista /f
+wineserver -w
+echo "======= LogosBible logging set to Vista mode! ======="
+
 heavy_wineserver_wait
 echo "================================================="
 clean_all
