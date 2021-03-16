@@ -4,7 +4,7 @@ export THIS_SCRIPT_VERSION="fast-v2.23"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
-if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.3.0.0040/Logos-x64.msi" ; fi
+if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.3.0.0049/Logos-x64.msi" ; fi
 
 #LOGOS_MVERSION=$(echo "${LOGOS64_URL}" | cut -d/ -f4); export LOGOS_MVERSION
 LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
@@ -679,6 +679,11 @@ else
 fi
 echo "${WINE_EXE} msiexec /i ${LOGOS64_MSI}"
 ${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
+
+echo "======= Set LogosBible Indexing to Vista Mode: ======="
+wine64 reg add "HKCU\\Software\\Wine\\AppDefaults\\LogosIndexer.exe" /v Version /t REG_SZ /d vista /f
+wineserver -w
+echo "======= LogosBible logging set to Vista mode! ======="
 
 heavy_wineserver_wait
 echo "================================================="
