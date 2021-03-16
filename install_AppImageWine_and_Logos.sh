@@ -4,7 +4,7 @@ export THIS_SCRIPT_VERSION="v2.23"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
-if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.3.0.0040/Logos-x64.msi" ; fi
+if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.3.0.0049/Logos-x64.msi" ; fi
 
 #LOGOS_MVERSION=$(echo "${LOGOS64_URL}" | cut -d/ -f4); export LOGOS_MVERSION
 LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
