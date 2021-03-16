@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.23"
+export THIS_SCRIPT_VERSION="v2.24-rc0"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
@@ -771,8 +771,7 @@ echo "${WINE_EXE} msiexec /i ${LOGOS64_MSI}"
 ${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
 
 echo "======= Set LogosBible Indexing to Vista Mode: ======="
-wine64 reg add "HKCU\\Software\\Wine\\AppDefaults\\LogosIndexer.exe" /v Version /t REG_SZ /d vista /f
-wineserver -w
+${WINE_EXE} reg add "HKCU\\Software\\Wine\\AppDefaults\\LogosIndexer.exe" /v Version /t REG_SZ /d vista /f
 echo "======= LogosBible logging set to Vista mode! ======="
 
 heavy_wineserver_wait
