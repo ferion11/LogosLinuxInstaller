@@ -100,3 +100,5 @@
 * from v2.23 to v2.24:
   - update to LogosBible 9.3.0.0049 by John Goodman (jg00dman)
   - added change to vista on winebottle by John Goodman (jg00dman)
+* from v2.24 to v2.25:
+  - update to LogosBible 9.4.0.0009
