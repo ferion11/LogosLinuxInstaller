@@ -102,3 +102,5 @@
   - added change to vista on winebottle by John Goodman (jg00dman)
 * from v2.24 to v2.25:
   - update to LogosBible 9.4.0.0009
+* from v2.25 to v2.26:
+  - update to WINE AppImage v6.5
