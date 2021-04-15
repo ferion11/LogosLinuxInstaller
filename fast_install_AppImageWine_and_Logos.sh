@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.26-rc0"
+export THIS_SCRIPT_VERSION="fast-v2.26-rc1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
@@ -12,8 +12,13 @@ LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
 #=================================================
 if [ -z "${LOGOS_ICON_URL}" ]; then export LOGOS_ICON_URL="https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/master/img/logos4-128-icon.png" ; fi
 #=================================================
+# Default AppImage FULL (with deps) to install 64bits version:
+export WINE64_APPIMAGE_FULL_VERSION="v6.5"
+if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then export WINE64_APPIMAGE_FULL_URL="https://github.com/ferion11/wine_WoW64_fulldeps_AppImage/releases/download/test-beta2/wine-staging-linux-amd64-fulldeps-v6.5-f11-x86_64.AppImage" ; fi
+WINE64_APPIMAGE_FULL_FILENAME="$(basename "${WINE64_APPIMAGE_FULL_URL}")"; export WINE64_APPIMAGE_FULL_FILENAME
+#=================================================
 # Default AppImage (without deps) to install 64bits version:
-export WINE64_APPIMAGE_VERSION="v5.11"
+export WINE64_APPIMAGE_VERSION="v6.5"
 if [ -z "${WINE64_APPIMAGE_URL}" ]; then export WINE64_APPIMAGE_URL="https://github.com/ferion11/wine_WoW64_nodeps_AppImage/releases/download/continuous-logos/wine-staging-linux-amd64-nodeps-v6.5-f11-x86_64.AppImage" ; fi
 WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_APPIMAGE_FILENAME
 #=================================================
@@ -566,11 +571,22 @@ installationChoice="$(zenity --width=700 --height=310 \
 	--title="Question: Install Logos Bible using script ${THIS_SCRIPT_VERSION}" \
 	--text="This script will create one directory in (which can be changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be an installation of LogosBible v${LOGOS_VERSION} independent of other installations.\nPlease select the type of installation:" \
 	--list --radiolist --column "S" --column "Description" \
-	TRUE "1- Fast install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies (default)." \
-	FALSE "2- Fast install LogosBible64 using the native Wine64." )"
+	TRUE "1- Fast install LogosBible64 using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage (default)." \
+	FALSE "2- Fast install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies." \
+	FALSE "3- Fast install LogosBible64 using the native Wine64." )"
 
 case "${installationChoice}" in
 	1*)
+		echo "Installing LogosBible 64bits using ${WINE64_APPIMAGE_FULL_VERSION} AppImage..."
+		export WINEARCH=win64
+		export WINEPREFIX="${APPDIR}/wine64_bottle"
+		export WINE_EXE="wine64"
+
+		make_skel "64" "${WINE_EXE}" "${WINE64_APPIMAGE_FULL_FILENAME}"
+		export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FULL_FILENAME}"
+		export SET_APPIMAGE_URL="${WINE64_APPIMAGE_FULL_URL}"
+		;;
+	2*)
 		echo "Installing LogosBible 64bits using ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies..."
 		export WINEARCH=win64
 		export WINEPREFIX="${APPDIR}/wine64_bottle"
@@ -580,7 +596,7 @@ case "${installationChoice}" in
 		export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FILENAME}"
 		export SET_APPIMAGE_URL="${WINE64_APPIMAGE_URL}"
 		;;
-	2*)
+	3*)
 		echo "Installing LogosBible 64bits using the native Wine..."
 		export NO_APPIMAGE="1"
 		export WINEARCH=win64

@@ -104,3 +104,4 @@
   - update to LogosBible 9.4.0.0009
 * from v2.25 to v2.26:
   - update to WINE AppImage v6.5
+  - added AppImage with deps and new default option
