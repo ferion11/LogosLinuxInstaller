@@ -105,3 +105,5 @@
 * from v2.25 to v2.26:
   - update to WINE AppImage v6.5
   - added AppImage with deps and new default option
+* from v2.25 to v2.27:
+  - update to WINE default AppImage
