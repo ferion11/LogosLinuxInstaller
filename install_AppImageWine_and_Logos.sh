@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.27"
+export THIS_SCRIPT_VERSION="v2.28-rc0"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
@@ -580,32 +580,12 @@ installationChoice="$(zenity --width=700 --height=310 \
 	--title="Question: Install Logos Bible using script ${THIS_SCRIPT_VERSION}" \
 	--text="This script will create one directory in (which can be changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be an installation of LogosBible v${LOGOS_VERSION} independent of other installations.\nPlease select the type of installation:" \
 	--list --radiolist --column "S" --column "Descrition" \
-	TRUE "1- Install LogosBible64 using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage (default)." \
-	FALSE "2- Install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies." \
-	FALSE "3- Install LogosBible64 using the native Wine64." )"
+	TRUE "1- Install LogosBible64 using the native Wine64 (default)." \
+	FALSE "2- Install LogosBible64 using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage." \
+	FALSE "3- Install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies." )"
 
 case "${installationChoice}" in
 	1*)
-		echo "Installing LogosBible 64bits using ${WINE64_APPIMAGE_FULL_VERSION} AppImage..."
-		export WINEARCH=win64
-		export WINEPREFIX="${APPDIR}/wine64_bottle"
-		export WINE_EXE="wine64"
-
-		make_skel "64" "${WINE_EXE}" "${WINE64_APPIMAGE_FULL_FILENAME}"
-		export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FULL_FILENAME}"
-		export SET_APPIMAGE_URL="${WINE64_APPIMAGE_FULL_URL}"
-		;;
-	2*)
-		echo "Installing LogosBible 64bits using ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies..."
-		export WINEARCH=win64
-		export WINEPREFIX="${APPDIR}/wine64_bottle"
-		export WINE_EXE="wine64"
-
-		make_skel "64" "${WINE_EXE}" "${WINE64_APPIMAGE_FILENAME}"
-		export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FILENAME}"
-		export SET_APPIMAGE_URL="${WINE64_APPIMAGE_URL}"
-		;;
-	3*)
 		echo "Installing LogosBible 64bits using the native Wine..."
 		export NO_APPIMAGE="1"
 		export WINEARCH=win64
@@ -618,6 +598,26 @@ case "${installationChoice}" in
 		echo "Using: ${WINE_VERSION_CHECK}"
 
 		make_skel "64" "${WINE_EXE}" "none.AppImage"
+		;;
+	2*)
+		echo "Installing LogosBible 64bits using ${WINE64_APPIMAGE_FULL_VERSION} AppImage..."
+		export WINEARCH=win64
+		export WINEPREFIX="${APPDIR}/wine64_bottle"
+		export WINE_EXE="wine64"
+
+		make_skel "64" "${WINE_EXE}" "${WINE64_APPIMAGE_FULL_FILENAME}"
+		export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FULL_FILENAME}"
+		export SET_APPIMAGE_URL="${WINE64_APPIMAGE_FULL_URL}"
+		;;
+	3*)
+		echo "Installing LogosBible 64bits using ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies..."
+		export WINEARCH=win64
+		export WINEPREFIX="${APPDIR}/wine64_bottle"
+		export WINE_EXE="wine64"
+
+		make_skel "64" "${WINE_EXE}" "${WINE64_APPIMAGE_FILENAME}"
+		export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FILENAME}"
+		export SET_APPIMAGE_URL="${WINE64_APPIMAGE_URL}"
 		;;
 	*)
 		gtk_fatal_error "Installation canceled!"
