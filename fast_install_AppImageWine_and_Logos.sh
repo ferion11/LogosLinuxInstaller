@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.28-rc0"
+export THIS_SCRIPT_VERSION="fast-v2.28-rc1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
@@ -572,8 +572,8 @@ installationChoice="$(zenity --width=700 --height=310 \
 	--text="This script will create one directory in (which can be changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be an installation of LogosBible v${LOGOS_VERSION} independent of other installations.\nPlease select the type of installation:" \
 	--list --radiolist --column "S" --column "Description" \
 	TRUE "1- Fast install LogosBible64 using the native Wine64 (default)." \
-	FALSE "2- Fast install LogosBible64 using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage." \
-	FALSE "3- Fast install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies." )"
+	FALSE "2- Fast install LogosBible64 using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage." )"
+# FALSE "3- Fast install LogosBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies."
 
 case "${installationChoice}" in
 	1*)
