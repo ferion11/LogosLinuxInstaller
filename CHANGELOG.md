@@ -111,3 +111,5 @@
   - default option to be the WINE native
   - removed nodeps AppImage option
   - update to LogosBible 9.5.0.0014
+* from v2.28 to v2.29:
+  - update to LogosBible 9.5.0.0019
