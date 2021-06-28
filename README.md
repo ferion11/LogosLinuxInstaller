@@ -212,3 +212,17 @@ $ cp LogosBible_Linux_P_old/data/*.AppImage LogosBible_Linux_P/data/
 #### 26- Alternative Fast Installations:
 In this repository there is also a "Fast Installation" version in which part of the install procedures are done on the test server and only the installation of LogosBible is done on the user's equipment: [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]")
 This alternative can help anyone who is having issues with the first part of the installation.
+
+25.1.6 - Extra information:
+
+1- For installing LogosBible using fast_install_AppImageWine_and_Logos.sh, you can keep in the same directory (${PWD}) the file https://github.com/ferion11/wine64_bottle_dotnet/releases/download/v5.11/wine64_bottle.tar.gz, as the script will use it, instead of download every time you install using a newer version of the script. With this you save some bandwidth in the installation.
+
+2- After completing the installation you can use the files (books) from the old installation (so remember to backup) to save more bandwidth. The directories to be copied are (the default):
+
+* remember that you can move and/or rename (or backup) the LogosBible64_Linux_P directory.
+```
+* LogosBible64_Linux_P/data/wine64_bottle/drive_c/users/${USER}/Local\ Settings/Application\ Data/Logos/Data
+* LogosBible64_Linux_P/data/wine64_bottle/drive_c/users/${USER}/Local\ Settings/Application\ Data/Logos/Documents
+* LogosBible64_Linux_P/data/wine64_bottle/drive_c/users/${USER}/Local\ Settings/Application\ Data/Logos/Users
+```
+So, theoretically, if before the first run, you copy the files from these directories (from the old and functional to the new installation), LogosBible will not download them again, saving bandwidth. But again, remember to make sure the new version is working before deleting the old one (which will serve as a working backup too).
