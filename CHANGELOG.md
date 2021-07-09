@@ -115,3 +115,5 @@
   - update to LogosBible 9.5.0.0019
 * from v2.29 to v2.30:
   - update to LogosBible 9.6.0.0020
+* from v2.30 to v2.31:
+  - update to LogosBible 9.6.0.0023
