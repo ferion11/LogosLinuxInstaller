@@ -756,6 +756,8 @@ if [ -z "${WINETRICKS_UNATTENDED}" ]; then
 	echo "================================================="
 	winetricks_install corefonts
 	echo "================================================="
+	winetricks_install tahoma
+	echo "================================================="
 	winetricks_install settings fontsmooth=rgb
 	echo "================================================="
 	winetricks_install dotnet48
@@ -763,6 +765,8 @@ if [ -z "${WINETRICKS_UNATTENDED}" ]; then
 else
 	echo "================================================="
 	winetricks_install -q corefonts
+	echo "================================================="
+	winetricks_install -q tahoma
 	echo "================================================="
 	winetricks_install -q settings fontsmooth=rgb
 	echo "================================================="
