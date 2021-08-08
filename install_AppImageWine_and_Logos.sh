@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.32"
+export THIS_SCRIPT_VERSION="v2.33-rc1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
