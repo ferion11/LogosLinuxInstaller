@@ -119,4 +119,5 @@
   - update to LogosBible 9.6.0.0023
 * from v2.31 to v2.32:
   - update to LogosBible 9.6.0.0024
-
+* from v2.32 to v2.33:
+  - added Tahoma
