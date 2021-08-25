@@ -1,10 +1,10 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.33"
+export THIS_SCRIPT_VERSION="fast-v2.34"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
-if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.7.0.0020/Logos-x64.msi" ; fi
+if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.7.0.0025/Logos-x64.msi" ; fi
 
 #LOGOS_MVERSION=$(echo "${LOGOS64_URL}" | cut -d/ -f4); export LOGOS_MVERSION
 LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
