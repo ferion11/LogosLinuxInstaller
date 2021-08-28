@@ -275,6 +275,8 @@ IFS=$'\n'
 [ -x "\${HERE}/data/bin/${WINE_EXE}" ] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win${WINE_BITS}
 export WINEPREFIX="\${HERE}/data/wine${WINE_BITS}_bottle"
+export LOGOS_WINE_BIN_PATH="$(which wine64 | awk -F'/' 'BEGIN {OFS = FS} $NF=""; {print $0}')"
+export LOGOS_WINESERVER_BIN_PATH="$(which wineserver | awk -F'/' 'BEGIN {OFS = FS} $NF=""; {print $0}')"
 #-------
 [ -z "\${LOGOS_ICON_URL}" ] && export LOGOS_ICON_URL="${LOGOS_ICON_URL}"
 LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILENAME
@@ -399,6 +401,8 @@ IFS=$'\n'
 [ -x "\${HERE}/data/bin/${WINE_EXE}" ] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win${WINE_BITS}
 export WINEPREFIX="\${HERE}/data/wine${WINE_BITS}_bottle"
+export LOGOS_WINE_BIN_PATH="$(which wine64 | awk -F'/' 'BEGIN {OFS = FS} $NF=""; {print $0}')"
+export LOGOS_WINESERVER_BIN_PATH="$(which wineserver | awk -F'/' 'BEGIN {OFS = FS} $NF=""; {print $0}')"
 #-------
 [ -z "\${WINETRICKS_URL}" ] && export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
 [ -z "\${WINETRICKS_DOWNLOADER+x}" ] && export WINETRICKS_DOWNLOADER="wget"
