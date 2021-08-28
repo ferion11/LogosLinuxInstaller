@@ -416,7 +416,7 @@ case "\${1}" in
 		shift
 		\${LOGOS_WINE_BIN_PATH}${WINE_EXE} "\$@"
 		\${LOGOS_WINESERVER_BIN_PATH}wineserver -w
-		echo "======= ${WINE_EXE} run done! ======="
+		echo "======= $\${LOGOS_WINE_BIN_PATH}{WINE_EXE} run done! ======="
 		exit 0
 		;;
 	"wineserver")
@@ -469,7 +469,7 @@ case "\${1}" in
 				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-				(DISPLAY="" "\${HERE}/controlPanel.sh" \${LOGOS_WINE_BIN_PATH}${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle..." --pulsate --auto-close --no-cancel
+				(DISPLAY="" "\${HERE}/controlPanel.sh" ${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle..." --pulsate --auto-close --no-cancel
 				echo "======= AppImage Selection run done with external link! ======="
 				exit 0
 			fi
@@ -480,7 +480,7 @@ case "\${1}" in
 		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-		(DISPLAY="" "\${HERE}/controlPanel.sh" \${LOGOS_WINE_BIN_PATH}${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle..." --pulsate --auto-close --no-cancel
+		(DISPLAY="" "\${HERE}/controlPanel.sh" ${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle..." --pulsate --auto-close --no-cancel
 		echo "======= AppImage Selection run done! ======="
 		exit 0
 		;;
