@@ -297,10 +297,10 @@ case "\${1}" in
 			exit 1
 		fi
 		echo "* Closing anything running in this wine bottle:"
-		wineserver -k
+		\${LOGOS_WINESERVER_BIN_PATH}wineserver -k
 		echo "* Running the indexer:"
-		${WINE_EXE} "\${LOGOS_INDEXER_EXE}"
-		wineserver -w
+		\${LOGOS_WINE_BIN_PATH}${WINE_EXE} "\${LOGOS_INDEXER_EXE}"
+		\${LOGOS_WINESERVER_BIN_PATH}wineserver -w
 		echo "======= indexing of LogosBible run done! ======="
 		exit 0
 		;;
@@ -317,15 +317,15 @@ case "\${1}" in
 		;;
 	"logsOn")
 		echo "======= enable LogosBible logging only: ======="
-		${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
-		wineserver -w
+		\${LOGOS_WINE_BIN_PATH}${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
+		\${LOGOS_WINESERVER_BIN_PATH}wineserver -w
 		echo "======= enable LogosBible logging done! ======="
 		exit 0
 		;;
 	"logsOff")
 		echo "======= disable LogosBible logging only: ======="
-		${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0000 /f
-		wineserver -w
+		\${LOGOS_WINE_BIN_PATH}${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0000 /f
+		\${LOGOS_WINESERVER_BIN_PATH}wineserver -w
 		echo "======= disable LogosBible logging done! ======="
 		exit 0
 		;;
@@ -371,8 +371,8 @@ if [ -z "\${LOGOS_EXE}" ] ; then
 	exit 0
 fi
 
-${WINE_EXE} "\${LOGOS_EXE}"
-wineserver -w
+\${LOGOS_WINE_BIN_PATH}${WINE_EXE} "\${LOGOS_EXE}"
+\${LOGOS_WINESERVER_BIN_PATH}wineserver -w
 #-------------------------------------------------
 
 #------------- Ending block ----------------------
@@ -411,20 +411,20 @@ export LOGOS_WINESERVER_BIN_PATH="$(which wineserver | awk -F'/' 'BEGIN {OFS = F
 #-------------------------------------------------
 case "\${1}" in
 	"${WINE_EXE}")
-		# ${WINE_EXE} Run:
+		# \${LOGOS_WINE_BIN_PATH}${WINE_EXE} Run:
 		echo "======= Running ${WINE_EXE} only: ======="
 		shift
-		${WINE_EXE} "\$@"
-		wineserver -w
+		\${LOGOS_WINE_BIN_PATH}${WINE_EXE} "\$@"
+		\${LOGOS_WINESERVER_BIN_PATH}wineserver -w
 		echo "======= ${WINE_EXE} run done! ======="
 		exit 0
 		;;
 	"wineserver")
-		# wineserver Run:
-		echo "======= Running wineserver only: ======="
+		# \${LOGOS_WINE_BIN_PATH}wineserver Run:
+		echo "======= Running \${LOGOS_WINE_BIN_PATH}wineserver only: ======="
 		shift
-		wineserver "\$@"
-		echo "======= wineserver run done! ======="
+		\${LOGOS_WINE_BIN_PATH}wineserver "\$@"
+		echo "======= \${LOGOS_WINE_BIN_PATH}wineserver run done! ======="
 		exit 0
 		;;
 	"winetricks")
@@ -438,7 +438,7 @@ case "\${1}" in
 		shift
 		"\${WORKDIR}"/winetricks "\$@"
 		rm -rf "\${WORKDIR}"
-		wineserver -w
+		\${LOGOS_WINE_BIN_PATH}wineserver -w
 		echo "======= winetricks run done! ======="
 		exit 0
 		;;
@@ -469,7 +469,7 @@ case "\${1}" in
 				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-				(DISPLAY="" "\${HERE}/controlPanel.sh" ${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle..." --pulsate --auto-close --no-cancel
+				(DISPLAY="" "\${HERE}/controlPanel.sh" \${LOGOS_WINE_BIN_PATH}${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle..." --pulsate --auto-close --no-cancel
 				echo "======= AppImage Selection run done with external link! ======="
 				exit 0
 			fi
@@ -480,7 +480,7 @@ case "\${1}" in
 		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-		(DISPLAY="" "\${HERE}/controlPanel.sh" ${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle..." --pulsate --auto-close --no-cancel
+		(DISPLAY="" "\${HERE}/controlPanel.sh" \${LOGOS_WINE_BIN_PATH}${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle..." --pulsate --auto-close --no-cancel
 		echo "======= AppImage Selection run done! ======="
 		exit 0
 		;;
@@ -488,8 +488,8 @@ case "\${1}" in
 		echo "No arguments parsed."
 esac
 
-${WINE_EXE} control
-wineserver -w
+\${LOGOS_WINE_BIN_PATH}${WINE_EXE} control
+\${LOGOS_WINE_BIN_PATH}wineserver -w
 #-------------------------------------------------
 
 #------------- Ending block ----------------------
