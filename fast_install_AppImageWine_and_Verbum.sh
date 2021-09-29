@@ -10,7 +10,7 @@ if [ -z "${VERBUM64_URL}" ]; then export VERBUM64_URL="https://downloads.logoscd
 VERBUM_VERSION="$(echo "${VERBUM64_URL}" | cut -d/ -f6)"; export VERBUM_VERSION
 VERBUM64_MSI="$(basename "${VERBUM64_URL}")"; export VERBUM64_MSI
 #=================================================
-if [ -z "${VERBUM_ICON_URL}" ]; then export VERBUM_ICON_URL="https://github.com/jg00dman/LogosLinuxInstaller/raw/master/img/verbum-128-icon.png" ; fi
+if [ -z "${VERBUM_ICON_URL}" ]; then export VERBUM_ICON_URL="https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/master/img/verbum-128-icon.png" ; fi
 #=================================================
 # Default AppImage FULL (with deps) to install 64bits version:
 export WINE64_APPIMAGE_FULL_VERSION="v6.5"
