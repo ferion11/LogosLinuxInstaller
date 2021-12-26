@@ -128,3 +128,5 @@
   - update to LogosBible 9.8.0.0004
 * from v2.35 to v2.36:
   - update to LogosBible 9.9.0.0011
+* from v2.36 to v2.37:
+  - update to LogosBible 9.10.0.0017
