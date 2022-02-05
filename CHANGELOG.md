@@ -130,3 +130,5 @@
   - update to LogosBible 9.9.0.0011
 * from v2.36 to v2.37:
   - update to LogosBible 9.10.0.0017
+* from v2.37 to v2.38:
+  - update to LogosBible 9.11.0.0022
