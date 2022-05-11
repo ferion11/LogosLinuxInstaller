@@ -294,7 +294,7 @@ case "\${1}" in
 		exit 0
 		;;
 	"removeAllIndex")
-		echo "======= removing all LogosBible index and librarycatalog files: ======="
+		echo "======= removing all LogosBible BibleIndex, LibraryIbdex, PersonalBookIndex, and LibraryCatalog files: ======="
 		LOGOS_EXE="\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")"
 		LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
 		rm -fv "\${LOGOS_DIR}"/Data/*/BibleIndex/*
