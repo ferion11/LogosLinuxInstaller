@@ -1,10 +1,10 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="fast-v2.34"
+export THIS_SCRIPT_VERSION="fast-v2.39"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
-if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.7.0.0025/Logos-x64.msi" ; fi
+if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.13.0.0018/Logos-x64.msi" ; fi
 
 #LOGOS_MVERSION=$(echo "${LOGOS64_URL}" | cut -d/ -f4); export LOGOS_MVERSION
 LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
@@ -294,12 +294,20 @@ case "\${1}" in
 		exit 0
 		;;
 	"removeAllIndex")
-		echo "======= removing all LogosBible index files only: ======="
+		echo "======= removing all LogosBible BibleIndex, LibraryIbdex, PersonalBookIndex, and LibraryCatalog files: ======="
 		LOGOS_EXE="\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")"
 		LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
 		rm -fv "\${LOGOS_DIR}"/Data/*/BibleIndex/*
 		rm -fv "\${LOGOS_DIR}"/Data/*/LibraryIndex/*
 		rm -fv "\${LOGOS_DIR}"/Data/*/PersonalBookIndex/*
+		rm -fv "\${LOGOS_DIR}"/Data/*/LibraryCatalog/*
+		echo "======= removing all LogosBible index files done! ======="
+		exit 0
+		;;
+	"removeLibraryCatalog")
+		echo "======= removing LogosBible LibraryCatalog files only: ======="
+		LOGOS_EXE="\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")"
+		LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
 		rm -fv "\${LOGOS_DIR}"/Data/*/LibraryCatalog/*
 		echo "======= removing all LogosBible index files done! ======="
 		exit 0

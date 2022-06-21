@@ -124,3 +124,14 @@
   - update to LogosBible 9.7.0.0020
 * from v2.33 to v2.34:
   - update to LogosBible 9.7.0.0025
+* from v2.34 to v2.35:
+  - update to LogosBible 9.8.0.0004
+* from v2.35 to v2.36:
+  - update to LogosBible 9.9.0.0011
+* from v2.36 to v2.37:
+  - update to LogosBible 9.10.0.0017
+* from v2.37 to v2.38:
+  - update to LogosBible 9.11.0.0022
+* from v2.38 to v2.39:
+  - added `removeLibraryCatalog` option (thw26)
+  - update to LogosBible 9.13.0.0018 (thw26)
