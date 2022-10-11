@@ -21,7 +21,7 @@ if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then export WINE64_APPIMAGE_FULL_URL="h
 WINE64_APPIMAGE_FULL_FILENAME="$(basename "${WINE64_APPIMAGE_FULL_URL}")"; export WINE64_APPIMAGE_FULL_FILENAME
 #=================================================
 # Default AppImage (without deps) to install 64bits version:
-export WINE64_APPIMAGE_VERSION="v6.5"
+export WINE64_APPIMAGE_VERSION="v7.18-staging"
 if [ -z "${WINE64_APPIMAGE_URL}" ]; then export WINE64_APPIMAGE_URL="https://github.com/mmtrt/WINE_AppImage/releases/download/continuous-staging/wine-staging_7.18-x86_64.AppImage" ; fi
 WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_APPIMAGE_FILENAME
 #=================================================
