@@ -778,16 +778,17 @@ else
 fi
 #-------------------------------------------------
 
-gtk_continue_question "Now the script will use your downloaded installer and install Logos Bible at ${WINEPREFIX}. You download the installer from https://www.logos.com/get-started and place the installer in ${INSTALLDIR}. Logos 10 is currently only available to those who have a license. In previous years the free engine is made available to everyone a few months later. You will need to interact with the installer. The progress slider does not show progress but it is working. Do you wish to continue?"
+gtk_continue_question "You need to supply the installer, download from https://www.logos.com/get-started and place the installer in ${INSTALLDIR}. Logos 10 is currently only available to those who have a license. In previous years the free engine is made available to everyone a few months later. You will need to interact with the installer. The progress slider does not show progress but it is working. I HAVE PLACED THE INSTALLER IN THE CORRECT DIR AND WISH TO CONTINUE..."
 
 echo "================================================="
 # Geting and install the LogosBible:
 echo "Installing LogosBible 64bits..."
-if [ -f "${WORKDIR}/${LOGOS64_MSI}" ]; then
+if [ -f "${INSTALLDIR}/${LOGOS64_MSI}" ]; then
 	echo "${LOGOS64_MSI} exist. Using it..."
-	cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+#	cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 else
-	echo "${LOGOS64_MSI} does not exist. You must place the installer in the same directory as this script. You will need to interact with the installer. The progress slider does not show progress but it is working. Do you wish to try again?"
+	echo "${LOGOS64_MSI} was not found. This installer is exiting. All files created are in ${INSTALLDIR} and you may delete them. Please try again and ensure the installer is placed in the correct directory."
+	exit 1
 #	gtk_download "${LOGOS64_URL}" "${WORKDIR}"
 fi
 echo "${WINE_EXE} ${LOGOS64_MSI}"
