@@ -546,7 +546,7 @@ else
 	exit 1
 fi
 
-check_commands mktemp patch lsof wget xwd find sed grep cabextract ntlm_auth
+#check_commands mktemp patch lsof wget xwd find sed grep cabextract ntlm_auth
 #check_libs libjpeg.so.8
 
 if [ "$(id -u)" = 0 ] && [ -z "${FORCE_ROOT}" ]; then
