@@ -33,6 +33,7 @@ WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_A
 if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://github.com/ferion11/libsutil/releases/download/winetricks/winetricks" ; fi
 if [ -z "${WINETRICKS_DOWNLOADER+x}" ]; then export WINETRICKS_DOWNLOADER="wget" ; fi
 if [ -z "${WINETRICKS_UNATTENDED+x}" ]; then export WINETRICKS_UNATTENDED="" ; fi
+
 #=================================================
 if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
 if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/LogosBible10" ; fi
@@ -762,8 +763,8 @@ if [ -z "${WINETRICKS_UNATTENDED}" ]; then
 #	winetricks_install tahoma
 	echo "================================================="
 	winetricks_install settings fontsmooth=rgb
-#	echo "================================================="
-#	winetricks_install dotnet48
+	echo "================================================="
+	winetricks_install -q settings win10
 	echo "================================================="
 else
 #	echo "================================================="
@@ -773,26 +774,26 @@ else
 	echo "================================================="
 	winetricks_install -q settings fontsmooth=rgb
 	echo "================================================="
-#	winetricks_install -q dotnet48
-#	echo "================================================="
+	winetricks_install -q settings win10
+	echo "================================================="
 fi
 #-------------------------------------------------
 
-gtk_continue_question "You need to supply the installer, download from https://www.logos.com/get-started and place the installer in ${INSTALLDIR}. Logos 10 is currently only available to those who have a license. In previous years the free engine is made available to everyone a few months later. You will need to interact with the installer. The progress slider does not show progress but it is working. I HAVE PLACED THE INSTALLER IN THE CORRECT DIR AND WISH TO CONTINUE..."
+gtk_continue_question "You need to supply the installer, download from https://www.logos.com/get-started and place the installer in ${INSTALLDIR}.\nLogos 10 is currently only available to those who have a license.\nIn previous years the free engine is made available to everyone a few months later.\nYou will need to interact with the installer. The progress slider does not show progress but it is working.\n\nI HAVE PLACED THE INSTALLER IN THE CORRECT DIR AND WISH TO CONTINUE..."
 
 echo "================================================="
 # Geting and install the LogosBible:
 echo "Installing LogosBible 64bits..."
 if [ -f "${INSTALLDIR}/${LOGOS64_MSI}" ]; then
 	echo "${LOGOS64_MSI} exist. Using it..."
-	cp "${INSTALLDIR}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+#	cp "${INSTALLDIR}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 else
 	echo "${LOGOS64_MSI} was not found. This installer is exiting. All files created are in ${INSTALLDIR} and you may delete them. Please try again and ensure the installer is placed in the correct directory."
 	exit 1
 #	gtk_download "${LOGOS64_URL}" "${WORKDIR}"
 fi
 echo "${WINE_EXE} ${LOGOS64_MSI}"
-${WINE_EXE} "${WINEPREFIX}"/"${LOGOS64_MSI}"
+${WINE_EXE} "${INSTALLDIR}"/"${LOGOS64_MSI}"
 
 #echo "======= Set LogosBible Indexing to Vista Mode: ======="
 #${WINE_EXE} reg add "HKCU\\Software\\Wine\\AppDefaults\\LogosIndexer.exe" /v Version /t #REG_SZ /d vista /f
