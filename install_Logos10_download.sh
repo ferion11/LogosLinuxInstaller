@@ -785,7 +785,7 @@ echo "================================================="
 echo "Installing LogosBible 64bits..."
 if [ -f "${INSTALLDIR}/${LOGOS64_MSI}" ]; then
 	echo "${LOGOS64_MSI} exist. Using it..."
-#	cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+	cp "${INSTALLDIR}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 else
 	echo "${LOGOS64_MSI} was not found. This installer is exiting. All files created are in ${INSTALLDIR} and you may delete them. Please try again and ensure the installer is placed in the correct directory."
 	exit 1
