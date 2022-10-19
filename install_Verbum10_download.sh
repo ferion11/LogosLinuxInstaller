@@ -48,6 +48,10 @@ export EXTRA_INFO="Usually is necessary: winbind cabextract libjpeg8."
 #=================================================
 
 #======= Aux =============
+if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
+        echo "The Verbum Installer should not be run as root." && exit 1;
+fi
+
 die() { echo >&2 "$*"; exit 1; };
 
 have_dep() {
