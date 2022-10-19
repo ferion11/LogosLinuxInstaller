@@ -768,6 +768,8 @@ if [ -z "${WINETRICKS_UNATTENDED}" ]; then
 	echo "================================================="
 	winetricks_install -q settings win10
 	echo "================================================="
+	winetricks_install -q d3dcompiler_47
+	echo "================================================="
 else
 #	echo "================================================="
 #	winetricks_install -q corefonts
@@ -777,6 +779,8 @@ else
 	winetricks_install -q settings fontsmooth=rgb
 	echo "================================================="
 	winetricks_install -q settings win10
+	echo "================================================="
+	winetricks_install -q d3dcompiler_47
 	echo "================================================="
 fi
 #-------------------------------------------------
