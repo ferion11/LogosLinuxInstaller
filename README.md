@@ -1,28 +1,28 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f730f74748c348cb9b3ff2fa1654c84b)](https://app.codacy.com/manual/ferion11/LogosLinuxInstaller?utm_source=github.com&utm_medium=referral&utm_content=ferion11/LogosLinuxInstaller&utm_campaign=Badge_Grade_Dashboard)
 [![Automation testing](https://img.shields.io/badge/Automation-testing-sucess)](https://github.com/ferion11/LogosLinuxInstallTests) [![Installer LogosBible](https://img.shields.io/badge/Installer-LogosBible-blue)](https://www.logos.com) [![LastRelease](https://img.shields.io/github/v/release/ferion11/LogosLinuxInstaller)](https://github.com/ferion11/LogosLinuxInstaller/releases)
 
-# LogosLinuxInstaller
-> LogosLinuxInstaller is a bash script for installing Logos Bible on Linux.
+# Logos Bible Software on Linux Install Scripts
+>This repository contains a set of bash scripts for installing Logos Bible (Verbum) Software on Linux.
 
 ### v2.x or higher  instructions:
 #### 00-  Download and execute:
-There is a small video of the installation using the `fast_install_AppImageWine_and_Logos.sh` [[by clicking here]](https://github.com/ferion11/LogosLinuxInstallTests/releases/download/release-0a/LogosBible_Install.mp4 "[by clicking here]").
+You can watch a small video on how to use the setup scripts [[by clicking here]](https://github.com/ferion11/LogosLinuxInstallTests/releases/download/release-0a/LogosBible_Install.mp4 "[by clicking here]").
 You can download the latest release [[CLICK HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[CLICK HERE]"). Highlighting the main environment variables:
 - `DOWNLOADED_RESOURCES`: change the directory where the script will search for files by name before attempting to download from the internet (default is `${PWD}`).
-- `INSTALLDIR`: change the installation directory (default is `${HOME}/LogosBible_Linux_P`).
+- `INSTALLDIR`: change the installation directory (default is `${HOME}/Logos10`).
 - `WINETRICKS_URL`: change the source of winetricks.
 - `LOGOS64_URL`: change the source of the LogosBible installer.
 
 0.1- After this you need to give permission to execute. (You can use some graphical method too, but it will depend on your Linux distribution.):
 ```
-$ chmod +x install_AppImageWine_and_Logos.sh
+$ chmod +x Logos10_Setup.sh
 ```
 
 0.2- Then execute the shell script. (You don't need sudo or root access.):
 ```
-$ ./install_AppImageWine_and_Logos.sh
+$ ./Logos10_Setup.sh
 or with one or more environment variables like:
-$ DOWNLOADED_RESOURCES=${HOME}/Downloads INSTALLDIR=/tmp/logosBibleTemp ./install_AppImageWine_and_Logos.sh
+$ DOWNLOADED_RESOURCES=${HOME}/Downloads INSTALLDIR=/tmp/logosBibleTemp ./Logos10_Setup.sh
 ```
 
 - You can get the skel with the options `skel64`. It can be useful if you want just the scripts to update one of your local installations. And you can reuse the WineBottle from others installation too.
@@ -127,7 +127,7 @@ I like to choose `Custom` and change the path to `c:\Logos\` (because it's easy 
 
 If the LogosBible window vanishes from the screen or you accidentally move it to some place you cannot see it, hold the `Alt` key and click and drag any part of the window until you can see it again.
 
-#### 23- You now have a `LogosBible_Linux_P` folder in your User Home:
+#### 23- You now have a `Logos10` folder in your User's Home Directory:
 
 * It can be renamed and moved while maintaining functionality (with only a few limitations like changing the name of the Linux user).
 
@@ -139,7 +139,7 @@ If the LogosBible window vanishes from the screen or you accidentally move it to
   - `$ ./Logos.sh wine regedit.exe`
   - `$ ./Logos.sh wineserver -w`
   - `$ ./Logos.sh winetricks calibri`
-  - if there is another version of winetricks inside `LogosBible_Linux_P`, the `Logos.sh` or `controlPanel.sh` will use it.
+  - if there is another version of winetricks inside `Logos10`, the `Logos.sh` or `controlPanel.sh` will use it.
 
 * If, after the installation, you want to use a different version of winetricks, just copy it to the same directory that the `Logos.sh` and `controlPanel.sh` scripts are, then the two scripts will use it instead of downloading the latest git version.
 
@@ -189,25 +189,25 @@ You can use the skel option to easily update the script version:
 
 25.1.1 - Rename/move the old installation to use as a backup:
 ```
-$ mv LogosBible_Linux_P LogosBible_Linux_P_old
+$ mv Logos10 Logos10_old
 ```
 
 25.1.2 - Download the last script [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]")
 
 25.1.3 - Make it executable and execute with the option `skel64`, like:
 ```
-$ chmod +x install_AppImageWine_and_Logos.sh
-$ ./install_AppImageWine_and_Logos.sh skel64
+$ chmod +x Logos10_Setup.sh
+$ ./Logos10_Setup.sh skel64
 ```
 
 25.1.4 - Copy the wineBottle and if you are using AppImage then copy it, too:
 ```
-$ rm -rf LogosBible_Linux_P/data/wine64_bottle
-$ cp -r LogosBible_Linux_P_old/data/wine64_bottle LogosBible_Linux_P/data/
-$ cp LogosBible_Linux_P_old/data/*.AppImage LogosBible_Linux_P/data/
+$ rm -rf Logos10/data/wine64_bottle
+$ cp -r Logos10_old/data/wine64_bottle Logos10/data/
+$ cp Logos10_old/data/*.AppImage Logos10/data/
 ```
 
-25.1.5 - Test the new version. If it works, you can remove the old `LogosBible_Linux_P_old`
+25.1.5 - Test the new version. If it works, you can remove the old `Logos10_old`
 
 #### 26- Alternative Fast Installations:
 In this repository there is also a "Fast Installation" version in which part of the install procedures are done on the test server and only the installation of LogosBible is done on the user's equipment: [[HERE]](https://github.com/ferion11/LogosLinuxInstaller/releases "[HERE]")
@@ -221,8 +221,8 @@ This alternative can help anyone who is having issues with the first part of the
 
 * remember that you can move and/or rename (or backup) the LogosBible64_Linux_P directory.
 ```
-* LogosBible64_Linux_P/data/wine64_bottle/drive_c/users/${USER}/Local\ Settings/Application\ Data/Logos/Data
-* LogosBible64_Linux_P/data/wine64_bottle/drive_c/users/${USER}/Local\ Settings/Application\ Data/Logos/Documents
-* LogosBible64_Linux_P/data/wine64_bottle/drive_c/users/${USER}/Local\ Settings/Application\ Data/Logos/Users
+* Logos10/data/wine64_bottle/drive_c/users/$USER/Local\ Settings/Application\ Data/Logos/Data
+* Logos10/data/wine64_bottle/drive_c/users/$USER/Local\ Settings/Application\ Data/Logos/Documents
+* Logos10/data/wine64_bottle/drive_c/users/$USER/Local\ Settings/Application\ Data/Logos/Users
 ```
 So, theoretically, if before the first run, you copy the files from these directories (from the old and functional to the new installation), LogosBible will not download them again, saving bandwidth. But again, remember to make sure the new version is working before deleting the old one (which will serve as a working backup too).
