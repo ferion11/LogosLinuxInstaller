@@ -1,6 +1,6 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-LOGOS_SCRIPT_TITLE="fast_install_AppImageWine_and_Logos"
+LOGOS_SCRIPT_TITLE="fast_install_AppImageWine_and_Verbum9"
 LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman"
 LOGOS_SCRIPT_VERSION="9.8"
 

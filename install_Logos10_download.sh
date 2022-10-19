@@ -2,7 +2,7 @@
 # From https://github.com/ferion11/LogosLinuxInstaller
 # Modified to install Logoos 10 by Revd. John Goodman M0RVJ
 # Script version to match Logos version.
-LOGOS_SCRIPT_TITLE="fast_install_AppImageWine_and_Logos"
+LOGOS_SCRIPT_TITLE="Install_Logos10_Download"
 LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman"
 LOGOS_SCRIPT_VERSION="v10.0"
 
