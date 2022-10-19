@@ -1,6 +1,8 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-export THIS_SCRIPT_VERSION="v2.41"
+LOGOS_SCRIPT_TITLE="fast_install_AppImageWine_and_Logos"
+LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman"
+LOGOS_SCRIPT_VERSION="v9.17"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
