@@ -1,5 +1,10 @@
 # Changelog
 
+* from v2.41 to 10.0:
+  - Refactoring and renaming of scripts, updates to README, by T. H. Wright (thw26)
+  - Logos 10 and Verbum 10 install scripts by John Goodman (jg00dman)
+    - NOTE: Scripts are now numbered by Logos version.
+  - Removal of broken Logos 9 AppImage script by T. H. Wright (thw26)
 * from v2.40 to v2.41:
   - update to LogosBible 9.17.0.0010
 * from v2.39 to v2.40:
