@@ -49,7 +49,9 @@ export EXTRA_INFO="Usually is necessary: winbind cabextract libjpeg8."
 
 #======= Aux =============
 if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
-        echo "The Logos Installer should not be run as root." && exit 1;
+		echo "* Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+		gtk_fatal_error "Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+        exit 1;
 fi
 
 die() { echo >&2 "$*"; exit 1; };
@@ -553,11 +555,6 @@ fi
 #check_commands mktemp patch lsof wget xwd find sed grep cabextract ntlm_auth
 check_commands mktemp patch lsof wget find sed grep ntlm_auth
 #check_libs libjpeg.so.8
-
-if [ "$(id -u)" = 0 ] && [ -z "${FORCE_ROOT}" ]; then
-	echo "* Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-	gtk_fatal_error "Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-fi
 
 echo "================================================="
 echo "Starting Zenity GUI..."
