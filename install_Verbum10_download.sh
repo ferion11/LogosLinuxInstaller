@@ -759,20 +759,24 @@ winetricks_install() {
 	heavy_wineserver_wait
 }
 if [ -z "${WINETRICKS_UNATTENDED}" ]; then
-#	echo "================================================="
-#	winetricks_install corefonts
-#	echo "================================================="
-#	winetricks_install tahoma
+	echo "================================================="
+	winetricks_install corefonts
+	echo "================================================="
+	winetricks_install tahoma
+	echo "================================================="
+	winetricks_install d3dcompiler_47
 	echo "================================================="
 	winetricks_install settings fontsmooth=rgb
 	echo "================================================="
 	winetricks_install -q settings win10
 	echo "================================================="
 else
-#	echo "================================================="
-#	winetricks_install -q corefonts
-#	echo "================================================="
-#	winetricks_install -q tahoma
+	echo "================================================="
+	winetricks_install -q corefonts
+	echo "================================================="
+	winetricks_install -q tahoma
+	echo "================================================="
+	winetricks_install -q d3dcompiler_47
 	echo "================================================="
 	winetricks_install -q settings fontsmooth=rgb
 	echo "================================================="
