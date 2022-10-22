@@ -56,6 +56,27 @@ if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
         exit 1;
 fi
 
+usage() {
+cat << EOF
+LogosLinuxInstaller $LOGOS_SCRIPT_TITLE $LOGOS_SCRIPT_VERSION.
+
+Usage: ./install_AppImageWine_and_Logos.sh
+Installs Logos Bible Software with Wine in an AppImage on Linux.
+
+Options:
+    -h   --help         Prints this help message and exit.
+    -v   --version      Prints version information and exit.
+    -q   --quiet        Disables the script's CLI output. The installer will
+                        quietly fail if it hits an error. If successful, Logos
+                        will not automatically run.
+    -Z   --no-zenity    Disables Zenity. Install still requires X for install.
+                        Pair with -q|--quiet for an automated and non-interactive
+                        install. Defaults to an install using native wine.
+    -v   --version      Prints version information and exit.
+    -q   --quiet      Makes the script output to the terminal. [WIP]
+EOF
+}
+
 die() { echo >&2 "$*"; exit 1; };
 
 have_dep() {
