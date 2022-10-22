@@ -1,42 +1,31 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-# Modified to install Logoos 10 by Revd. John Goodman M0RVJ
-# Script version to match Verbum version.
-export THIS_SCRIPT_VERSION="v10.0"
+LOGOS_SCRIPT_TITLE="fast_install_AppImageWine_and_Verbum9"
+LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman"
+LOGOS_SCRIPT_VERSION="9.8"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
-#if [ -z "${VERBUM64_URL}" ]; then export VERBUM64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.15.0.0005/Logos-x64.msi" ; fi
+if [ -z "${VERBUM64_URL}" ]; then export VERBUM64_URL="https://downloads.logoscdn.com/LBS9/Verbum/Installer/9.8.0.0004/Verbum-x64.msi" ; fi
 
 #VERBUM_MVERSION=$(echo "${VERBUM64_URL}" | cut -d/ -f4); export VERBUM_MVERSION
-#VERBUM_VERSION="$(echo "${VERBUM64_URL}" | cut -d/ -f6)"; export VERBUM_VERSION
-#VERBUM64_MSI="$(basename "${VERBUM64_URL}")"; export VERBUM64_MSI
-VERBUM64_MSI="VerbumSetup.exe"
+VERBUM_VERSION="$(echo "${VERBUM64_URL}" | cut -d/ -f6)"; export VERBUM_VERSION
+VERBUM64_MSI="$(basename "${VERBUM64_URL}")"; export VERBUM64_MSI
 #=================================================
-if [ -z "${VERBUM_ICON_URL}" ]; then export VERBUM_ICON_URL="https://github.com/jg00dman/LogosLinuxInstaller/raw/Verbum-10/img/verbum-128-icon.png" ; fi
+if [ -z "${VERBUM_ICON_URL}" ]; then export VERBUM_ICON_URL="https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/master/img/verbum-128-icon.png" ; fi
 #=================================================
 # Default AppImage FULL (with deps) to install 64bits version:
-export WINE64_APPIMAGE_FULL_VERSION="v7.18-staging"
-if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then export WINE64_APPIMAGE_FULL_URL="https://github.com/mmtrt/WINE_AppImage/releases/download/continuous-staging/wine-staging_7.18-x86_64.AppImage" ; fi
+export WINE64_APPIMAGE_FULL_VERSION="v6.5"
+if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then export WINE64_APPIMAGE_FULL_URL="https://github.com/ferion11/wine_WoW64_fulldeps_AppImage/releases/download/test-beta3/wine-staging-linux-amd64-fulldeps-v6.5-f11-x86_64.AppImage" ; fi
 WINE64_APPIMAGE_FULL_FILENAME="$(basename "${WINE64_APPIMAGE_FULL_URL}")"; export WINE64_APPIMAGE_FULL_FILENAME
 #=================================================
 # Default AppImage (without deps) to install 64bits version:
-export WINE64_APPIMAGE_VERSION="v7.18-staging"
-if [ -z "${WINE64_APPIMAGE_URL}" ]; then export WINE64_APPIMAGE_URL="https://github.com/mmtrt/WINE_AppImage/releases/download/continuous-staging/wine-staging_7.18-x86_64.AppImage" ; fi
+export WINE64_APPIMAGE_VERSION="v6.5"
+if [ -z "${WINE64_APPIMAGE_URL}" ]; then export WINE64_APPIMAGE_URL="https://github.com/ferion11/wine_WoW64_nodeps_AppImage/releases/download/continuous-logos/wine-staging-linux-amd64-nodeps-v6.5-f11-x86_64.AppImage" ; fi
 WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_APPIMAGE_FILENAME
 #=================================================
-# winetricks version in use (and downloader option set):
-#if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" ; fi
-# back to Jul 23, 2020 release of winetricks, not more of the last git random broken fun:
-#if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks" ; fi
-# trying one customized version of winetricks, of the link above:
-if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://github.com/ferion11/libsutil/releases/download/winetricks/winetricks" ; fi
-if [ -z "${WINETRICKS_DOWNLOADER+x}" ]; then export WINETRICKS_DOWNLOADER="wget" ; fi
-if [ -z "${WINETRICKS_UNATTENDED+x}" ]; then export WINETRICKS_UNATTENDED="" ; fi
-
-#=================================================
 if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
-if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/VerbumBible10" ; fi
+if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/VerbumBible_Linux_P" ; fi
 export APPDIR="${INSTALLDIR}/data"
 export APPDIR_BINDIR="${APPDIR}/bin"
 export APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"
@@ -49,10 +38,31 @@ export EXTRA_INFO="Usually is necessary: winbind cabextract libjpeg8."
 
 #======= Aux =============
 if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
-		echo "* Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-		gtk_fatal_error "Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+		echo "* Running Wine/winetricks as root is highly discouraged (you can set LOGOS_FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+		gtk_fatal_error "Running Wine/winetricks as root is highly discouraged (you can set LOGOS_FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
         exit 1;
 fi
+
+usage() {
+cat << EOF
+LogosLinuxInstaller $LOGOS_SCRIPT_TITLE $LOGOS_SCRIPT_VERSION.
+
+Usage: ./install_AppImageWine_and_Logos.sh
+Installs Logos Bible Software with Wine in an AppImage on Linux.
+
+Options:
+    -h   --help         Prints this help message and exit.
+    -v   --version      Prints version information and exit.
+    -q   --quiet        Disables the script's CLI output. The installer will
+                        quietly fail if it hits an error. If successful, Logos
+                        will not automatically run.
+    -Z   --no-zenity    Disables Zenity. Install still requires X for install.
+                        Pair with -q|--quiet for an automated and non-interactive
+                        install. Defaults to an install using native wine.
+    -v   --version      Prints version information and exit.
+    -q   --quiet      Makes the script output to the terminal. [WIP]
+EOF
+}
 
 die() { echo >&2 "$*"; exit 1; };
 
@@ -101,7 +111,7 @@ gtk_continue_question() {
 gtk_download() {
 	# $1	what to download
 	# $2	where into
-	# NOTE: here must be a limitation to handle it easily. $2 can be dir if it already exists or if it ends with '/'
+	# NOTE: here must be limitation to handle it easily. $2 can be dir, if it already exists or if it ends with '/'
 
 	URI="$1"
 	# extract last field of URI as filename:
@@ -228,7 +238,7 @@ check_libs() {
 #--------------
 #==========================
 
-# wait on all processes that are using the ${1} directory to finish
+# wait to all process that is using the ${1} directory to finish
 wait_process_using_dir() {
 	VERIFICATION_DIR="${1}"
 	VERIFICATION_TIME=7
@@ -271,7 +281,7 @@ create_starting_scripts() {
 	#------- Verbum.sh -------------
 	cat > "${WORKDIR}"/Verbum.sh << EOF
 #!/bin/bash
-# generated by "${THIS_SCRIPT_VERSION}" script from https://github.com/ferion11/LogosLinuxInstaller
+# generated by "${LOGOS_SCRIPT_VERSION}" script from https://github.com/ferion11/LogosLinuxInstaller
 
 #------------- Starting block --------------------
 HERE="\$(dirname "\$(readlink -f "\${0}")")"
@@ -395,7 +405,7 @@ EOF
 	#------- controlPanel.sh ------
 	cat > "${WORKDIR}"/controlPanel.sh << EOF
 #!/bin/bash
-# generated by "${THIS_SCRIPT_VERSION}" script from https://github.com/ferion11/VerbumLinuxInstaller
+# generated by "${LOGOS_SCRIPT_VERSION}" script from https://github.com/ferion11/VerbumLinuxInstaller
 
 #------------- Starting block --------------------
 HERE="\$(dirname "\$(readlink -f "\${0}")")"
@@ -522,7 +532,7 @@ make_skel() {
 
 	# Making the links (and dir)
 	mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
-	cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
+	cd "${APPDIR_BINDIR}" || die "ERROR: Can't open dir: ${APPDIR_BINDIR}"
 	ln -s "../${SET_APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
 	ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
 	[ "${WINE_BITS}" == "64" ] && ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine64
@@ -552,8 +562,7 @@ else
 	exit 1
 fi
 
-#check_commands mktemp patch lsof wget xwd find sed grep cabextract ntlm_auth
-check_commands mktemp patch lsof wget find sed grep ntlm_auth
+check_commands mktemp patch lsof wget xwd find sed grep cabextract ntlm_auth
 #check_libs libjpeg.so.8
 
 echo "================================================="
@@ -578,17 +587,17 @@ esac
 #======= Main =============
 if [ -d "${INSTALLDIR}" ]; then
 	echo "A directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
-	gtk_fatal_error "a directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
+	gtk_fatal_error "A directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
 fi
 
-echo "* Script version: ${THIS_SCRIPT_VERSION}"
+echo "* Script version: ${LOGOS_SCRIPT_VERSION}"
 installationChoice="$(zenity --width=700 --height=310 \
-	--title="Question: Install Verbum Bible using script ${THIS_SCRIPT_VERSION}" \
+	--title="Question: Install Verbum Bible using script ${LOGOS_SCRIPT_VERSION}" \
 	--text="This script will create one directory in (which can be changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be an installation of VerbumBible v${VERBUM_VERSION} independent of other installations.\nPlease select the type of installation:" \
-	--list --radiolist --column "S" --column "Descrition" \
-	TRUE "1- Install VerbumBible64 using the native Wine64 (default) Which must be 7.18-staging or later. Stable or Devel do not work." \
-	FALSE "2- Install VerbumBible64 using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage." )"
-# FALSE "3- Install VerbumBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies."
+	--list --radiolist --column "S" --column "Description" \
+	TRUE "1- Fast install VerbumBible64 using the native Wine64 (default)." \
+	FALSE "2- Fast install VerbumBible64 using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage." )"
+# FALSE "3- Fast install VerbumBible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies."
 
 case "${installationChoice}" in
 	1*)
@@ -667,7 +676,25 @@ heavy_wineserver_wait() {
 	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly..." --pulsate --auto-close --no-cancel
 }
 
-gtk_continue_question "Now the script will create and configure the Wine Bottle at ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
+echo "================================================="
+# get and install pre-made wineBottle
+#WINE64_BOTTLE_TARGZ_URL="https://github.com/ferion11/wine64_bottle_dotnet/releases/download/v5.11/wine64_bottle.tar.gz"
+WINE64_BOTTLE_TARGZ_URL="https://github.com/ferion11/wine64_bottle_dotnet/releases/download/v5.11b/wine64_bottle.tar.gz"
+WINE64_BOTTLE_TARGZ_NAME="wine64_bottle.tar.gz"
+echo "Installing pre-made wineBottle 64bits..."
+if [ -f "${DOWNLOADED_RESOURCES}/${WINE64_BOTTLE_TARGZ_NAME}" ]; then
+	echo "${WINE64_BOTTLE_TARGZ_NAME} exist. Using it..."
+	cp "${DOWNLOADED_RESOURCES}/${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+else
+	echo "${WINE64_BOTTLE_TARGZ_NAME} does not exist. Downloading..."
+	gtk_download "${WINE64_BOTTLE_TARGZ_URL}" "${WORKDIR}"
+fi
+
+echo "Extracting: ${WINE64_BOTTLE_TARGZ_NAME} into: ${APPDIR}"
+tar xzf "${WORKDIR}"/"${WINE64_BOTTLE_TARGZ_NAME}" -C "${APPDIR}"/ | zenity --progress --title="Extracting..." --text="Extracting: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+echo "================================================="
+
+gtk_continue_question "Now the script will create and configure the Wine Bottle at ${WINEPREFIX}. You can cancel the instalation of gecko and say No to any error. Do you wish to continue?"
 echo "================================================="
 echo "${WINE_EXE} wineboot"
 if [ -z "${WINEBOOT_GUI}" ]; then
@@ -677,133 +704,26 @@ else
 fi
 light_wineserver_wait
 echo "================================================="
-
-#-------------------------------------------------
-cat > "${WORKDIR}"/disable-winemenubuilder.reg << EOF
-REGEDIT4
-
-[HKEY_CURRENT_USER\Software\Wine\DllOverrides]
-"winemenubuilder.exe"=""
-
-EOF
-
-cat > "${WORKDIR}"/renderer_gdi.reg << EOF
-REGEDIT4
-
-[HKEY_CURRENT_USER\Software\Wine\Direct3D]
-"DirectDrawRenderer"="gdi"
-"renderer"="gdi"
-
-EOF
-
-wine_reg_install() {
-	REG_FILENAME="${1}"
-	echo "${WINE_EXE} regedit.exe ${REG_FILENAME}"
-	${WINE_EXE} regedit.exe "${WORKDIR}"/"${REG_FILENAME}" | zenity --progress --title="Wine regedit" --text="Wine is installing ${REG_FILENAME} in ${WINEPREFIX}" --pulsate --auto-close --no-cancel
-
-	light_wineserver_wait
-	echo "${WINE_EXE} regedit.exe ${REG_FILENAME} DONE!"
-}
-echo "================================================="
-wine_reg_install "disable-winemenubuilder.reg"
-echo "================================================="
-wine_reg_install "renderer_gdi.reg"
-echo "================================================="
 #-------------------------------------------------
 
-gtk_continue_question "Now the script will install the winetricks packages at ${WINEPREFIX}. Do you wish to continue?"
-
-if [ -f "${DOWNLOADED_RESOURCES}/winetricks" ]; then
-	echo "winetricks exists. Using it..."
-	cp "${DOWNLOADED_RESOURCES}/winetricks" "${WORKDIR}"
-else
-	echo "winetricks does not exist. Downloading..."
-	gtk_download "${WINETRICKS_URL}" "${WORKDIR}"
-fi
-chmod +x "${WORKDIR}/winetricks"
-
-#-------------------------------------------------
-winetricks_install() {
-	echo "winetricks ${*}"
-	pipe_winetricks="$(mktemp)"
-	rm -rf "${pipe_winetricks}"
-	mkfifo "${pipe_winetricks}"
-
-	# zenity GUI feedback
-	zenity --progress --title="Winetricks ${*}" --text="Winetricks installing ${*}" --pulsate --auto-close < "${pipe_winetricks}" &
-	ZENITY_PID="${!}"
-
-	#"${WORKDIR}"/winetricks "${@}" > "${pipe_winetricks}"
-	"${WORKDIR}"/winetricks "${@}" | tee "${pipe_winetricks}"
-	WINETRICKS_STATUS="${?}"
-
-	wait "${ZENITY_PID}"
-	ZENITY_RETURN="${?}"
-
-	#fuser -TERM -k -w "${pipe_winetricks}"
-	rm -rf "${pipe_winetricks}"
-
-	# NOTE: sometimes the process finishes before the wait command, giving the error code 127
-	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
-		if [ "${WINETRICKS_STATUS}" != "0" ] ; then
-			wineserver -k
-			echo "ERROR on : winetricks ${*}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
-			gtk_fatal_error "The installation was cancelled because of sub-job failure!\n * winetricks ${*}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
-		fi
-	else
-		wineserver -k
-		gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
-	fi
-	echo "winetricks ${*} DONE!"
-
-	heavy_wineserver_wait
-}
-if [ -z "${WINETRICKS_UNATTENDED}" ]; then
-	echo "================================================="
-	winetricks_install corefonts
-	echo "================================================="
-	winetricks_install tahoma
-	echo "================================================="
-	winetricks_install d3dcompiler_47
-	echo "================================================="
-	winetricks_install settings fontsmooth=rgb
-	echo "================================================="
-	winetricks_install -q settings win10
-	echo "================================================="
-else
-	echo "================================================="
-	winetricks_install -q corefonts
-	echo "================================================="
-	winetricks_install -q tahoma
-	echo "================================================="
-	winetricks_install -q d3dcompiler_47
-	echo "================================================="
-	winetricks_install -q settings fontsmooth=rgb
-	echo "================================================="
-	winetricks_install -q settings win10
-	echo "================================================="
-fi
-#-------------------------------------------------
-
-gtk_continue_question "You need to supply the installer, download from https://www.logos.com/get-started and place the installer in ${INSTALLDIR}.\nVerbum 10 is currently only available to those who have a license.\nIn previous years the free engine is made available to everyone a few months later.\nYou will need to interact with the installer. The progress slider does not show progress but it is working.\n\nI HAVE PLACED THE INSTALLER IN THE CORRECT DIR AND WISH TO CONTINUE..."
+gtk_continue_question "Now the script will download and install Verbum Bible at ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
 echo "================================================="
 # Geting and install the VerbumBible:
 echo "Installing VerbumBible 64bits..."
-if [ -f "${INSTALLDIR}/${VERBUM64_MSI}" ]; then
+if [ -f "${DOWNLOADED_RESOURCES}/${VERBUM64_MSI}" ]; then
 	echo "${VERBUM64_MSI} exist. Using it..."
-#	cp "${INSTALLDIR}/${VERBUM64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${VERBUM64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+	cp "${DOWNLOADED_RESOURCES}/${VERBUM64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying..." --text="Copying: ${VERBUM64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 else
-	echo "${VERBUM64_MSI} was not found. This installer is exiting. All files created are in ${INSTALLDIR} and you may delete them. Please try again and ensure the installer is placed in the correct directory."
-	exit 1
-#	gtk_download "${VERBUM64_URL}" "${WORKDIR}"
+	echo "${VERBUM64_MSI} does not exist. Downloading..."
+	gtk_download "${VERBUM64_URL}" "${WORKDIR}"
 fi
-echo "${WINE_EXE} ${VERBUM64_MSI}"
-${WINE_EXE} "${INSTALLDIR}"/"${VERBUM64_MSI}"
+echo "${WINE_EXE} msiexec /i ${VERBUM64_MSI}"
+${WINE_EXE} msiexec /i "${WORKDIR}"/"${VERBUM64_MSI}"
 
-#echo "======= Set VerbumBible Indexing to Vista Mode: ======="
-#${WINE_EXE} reg add "HKCU\\Software\\Wine\\AppDefaults\\VerbumIndexer.exe" /v Version /t #REG_SZ /d vista /f
-#echo "======= VerbumBible logging set to Vista mode! ======="
+echo "======= Set VerbumBible Indexing to Vista Mode: ======="
+${WINE_EXE} reg add "HKCU\\Software\\Wine\\AppDefaults\\VerbumIndexer.exe" /v Version /t REG_SZ /d vista /f
+echo "======= VerbumBible logging set to Vista mode! ======="
 
 heavy_wineserver_wait
 echo "================================================="
