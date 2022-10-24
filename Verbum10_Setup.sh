@@ -789,15 +789,15 @@ if [ -z "${WINETRICKS_UNATTENDED}" ]; then
     winetricks_install -q settings win10
 else
 	echo "================================================="
-	winetricks_install -q corefonts
+	winetricks_install corefonts
 	echo "================================================="
-	winetricks_install -q tahoma
+	winetricks_install tahoma
 	echo "================================================="
-	winetricks_install -q d3dcompiler_47
+	winetricks_install d3dcompiler_47
 	echo "================================================="
-	winetricks_install -q settings fontsmooth=rgb
+	winetricks_install settings fontsmooth=rgb
 	echo "================================================="
-	winetricks_install -q settings win10
+	winetricks_install settings win10
 	echo "================================================="
 fi
 #-------------------------------------------------
