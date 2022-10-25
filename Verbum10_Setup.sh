@@ -96,7 +96,7 @@ OPTIND=1 # Reset the index.
 while getopts "$OPTSTRING" opt; do
     case $opt in
         h)  usage && exit ;;
-        v)  echo "$LOGOS_SCRIPT_TITLE, $THIS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR." &&     exit;;
+        v)  echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR." &&     exit;;
         \?) echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 &&      exit ;;
         :)  echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 &&      exit ;;
     esac
