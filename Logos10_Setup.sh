@@ -32,7 +32,7 @@ WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_A
 # back to Jul 23, 2020 release of winetricks, not more of the last git random broken fun:
 #if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks" ; fi
 # trying one customized version of winetricks, of the link above:
-if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://github.com/ferion11/libsutil/releases/download/winetricks/winetricks" ; fi
+if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" ; fi
 if [ -z "${WINETRICKS_DOWNLOADER+x}" ]; then export WINETRICKS_DOWNLOADER="wget" ; fi
 if [ -z "${WINETRICKS_UNATTENDED+x}" ]; then export WINETRICKS_UNATTENDED="" ; fi
 
