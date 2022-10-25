@@ -2,8 +2,8 @@
 # From https://github.com/ferion11/LogosLinuxInstaller
 # Modified to install Logoos 10 by Revd. John Goodman M0RVJ
 # Script version to match Logos version.
-LOGOS_SCRIPT_TITLE="Install_Logos10_Download"
-LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman"
+LOGOS_SCRIPT_TITLE="Logos10_Setup"
+LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
 LOGOS_SCRIPT_VERSION="v10.0"
 
 #=================================================
@@ -58,24 +58,54 @@ fi
 
 usage() {
 cat << EOF
-LogosLinuxInstaller $LOGOS_SCRIPT_TITLE $LOGOS_SCRIPT_VERSION.
+LogosLinuxInstaller, by $LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION.
 
-Usage: ./install_AppImageWine_and_Logos.sh
+Usage: ./$LOGOS_SCRIPT_TITLE.sh
 Installs Logos Bible Software with Wine in an AppImage on Linux.
 
 Options:
     -h   --help         Prints this help message and exit.
     -v   --version      Prints version information and exit.
-    -q   --quiet        Disables the script's CLI output. The installer will
-                        quietly fail if it hits an error. If successful, Logos
-                        will not automatically run.
-    -Z   --no-zenity    Disables Zenity. Install still requires X for install.
-                        Pair with -q|--quiet for an automated and non-interactive
-                        install. Defaults to an install using native wine.
-    -v   --version      Prints version information and exit.
-    -q   --quiet      Makes the script output to the terminal. [WIP]
 EOF
 }
+
+# BEGIN OPTARGS
+RESET_OPTARGS=true
+for arg in "$@"
+do
+    if [ -n "$RESET_OPTARGS" ]; then
+      unset RESET_OPTARGS
+      set -- 
+    fi
+    case "$arg" in
+        --help)      set -- "$@" -h ;;
+        --version)   set -- "$@" -V ;;
+        *)           set -- "$@" "$arg" ;;
+    esac
+done
+OPTSTRING=':hv' # Available options
+
+# First loop: set variable options
+while getopts "$OPTSTRING" opt; do
+        case $opt in
+        esac
+done
+OPTIND=1 # Reset the index.
+
+# Second loop: determine user action
+while getopts "$OPTSTRING" opt; do
+    case $opt in
+        h)  usage && exit ;;
+        v)  echo "$LOGOS_SCRIPT_TITLE, $THIS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR." &&     exit;;
+        \?) echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 &&      exit ;;
+        :)  echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 &&      exit ;;
+    esac
+done
+if [ "$OPTIND" -eq '1' ]; then
+        echo "No options were passed.";
+fi
+shift $((OPTIND-1))
+# END OPTARGS
 
 die() { echo >&2 "$*"; exit 1; };
 
