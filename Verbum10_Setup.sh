@@ -32,7 +32,7 @@ WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_A
 # back to Jul 23, 2020 release of winetricks, not more of the last git random broken fun:
 #if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks" ; fi
 # trying one customized version of winetricks, of the link above:
-if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://github.com/ferion11/libsutil/releases/download/winetricks/winetricks" ; fi
+if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" ; fi
 if [ -z "${WINETRICKS_DOWNLOADER+x}" ]; then export WINETRICKS_DOWNLOADER="wget" ; fi
 if [ -z "${WINETRICKS_UNATTENDED+x}" ]; then export WINETRICKS_UNATTENDED="" ; fi
 
@@ -762,72 +762,112 @@ wine_reg_install "disable-winemenubuilder.reg"
 echo "================================================="
 wine_reg_install "renderer_gdi.reg"
 echo "================================================="
-#-------------------------------------------------
 
-gtk_continue_question "Now the script will install the winetricks packages at ${WINEPREFIX}. Do you wish to continue?"
+downloadWinetricks() {
+	echo "Downloading winetricks from the Internet…"
+	if [ -f "${DOWNLOADED_RESOURCES}/winetricks" ]; then
+		echo "A winetricks binary has already been downloaded. Using it..."
+		cp "${DOWNLOADED_RESOURCES}/winetricks" "${WORKDIR}"
+	else
+		echo "winetricks does not exist. Downloading..."
+		gtk_download "${WINETRICKS_URL}" "${WORKDIR}"
+	fi
+	chmod +x "${WORKDIR}/winetricks"
+}
 
-if [ -f "${DOWNLOADED_RESOURCES}/winetricks" ]; then
-	echo "winetricks exists. Using it..."
-	cp "${DOWNLOADED_RESOURCES}/winetricks" "${WORKDIR}"
+if [ "$(which winetricks)" ]; then
+	winetricksChoice="$(zenity --width=700 --height=310 \
+    --title="Question: Should the script use local winetricks or download winetricks fresh?" \
+    --text="This script needs to set some Wine options that help or make Verbum run on Linux. Please select whether to use your local winetricks version or a fresh install." \
+    --list --radiolist --column "S" --column "Description" \
+    TRUE "1- Use local winetricks." \
+    FALSE "2- Download winetricks from the Internet." )"
+
+	case "${winetricksChoice}" in
+    	1*)
+    	    echo "Setting winetricks to the local binary..."
+			if [ -z "${WINETRICKSBIN}" ]; then WINETRICKSBIN="$(which winetricks)"; fi
+    	    ;;
+    	2*)
+			downloadWinetricks;
+			if [ -z "${WINETRICKSBIN}" ]; then WINETRICKSBIN="${WORKDIR}/winetricks"; fi
+    	    ;;
+    	*)
+    	    gtk_fatal_error "Installation canceled!"
+	esac
 else
-	echo "winetricks does not exist. Downloading..."
-	gtk_download "${WINETRICKS_URL}" "${WORKDIR}"
+	echo "Local winetricks not found. Downloading winetricks from the Internet…"
+	downloadWinetricks;
+	export WINETRICKSBIN="${WORKDIR}/winetricks"
 fi
-chmod +x "${WORKDIR}/winetricks"
+
+echo "Winetricks is ready to be used."
 
 #-------------------------------------------------
 winetricks_install() {
-	echo "winetricks ${*}"
-	pipe_winetricks="$(mktemp)"
-	rm -rf "${pipe_winetricks}"
-	mkfifo "${pipe_winetricks}"
+    echo "winetricks ${*}"
+    pipe_winetricks="$(mktemp)"
+    rm -rf "${pipe_winetricks}"
+    mkfifo "${pipe_winetricks}"
 
-	# zenity GUI feedback
-	zenity --progress --title="Winetricks ${*}" --text="Winetricks installing ${*}" --pulsate --auto-close < "${pipe_winetricks}" &
-	ZENITY_PID="${!}"
+    # zenity GUI feedback
+    zenity --progress --title="Winetricks ${*}" --text="Winetricks installing ${*}" --pulsate --auto-close <         "${pipe_winetricks}" &
+    ZENITY_PID="${!}"
 
-	#"${WORKDIR}"/winetricks "${@}" > "${pipe_winetricks}"
-	"${WORKDIR}"/winetricks "${@}" | tee "${pipe_winetricks}"
-	WINETRICKS_STATUS="${?}"
+    "$WINETRICKSBIN" "${@}" | tee "${pipe_winetricks}";
+    WINETRICKS_STATUS="${?}";
 
-	wait "${ZENITY_PID}"
-	ZENITY_RETURN="${?}"
+    wait "${ZENITY_PID}";
+    ZENITY_RETURN="${?}";
 
-	#fuser -TERM -k -w "${pipe_winetricks}"
-	rm -rf "${pipe_winetricks}"
+    rm -rf "${pipe_winetricks}";
 
-	# NOTE: sometimes the process finishes before the wait command, giving the error code 127
-	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
-		if [ "${WINETRICKS_STATUS}" != "0" ] ; then
-			wineserver -k
-			echo "ERROR on : winetricks ${*}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
-			gtk_fatal_error "The installation was cancelled because of sub-job failure!\n * winetricks ${*}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}"
-		fi
-	else
-		wineserver -k
-		gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
-	fi
-	echo "winetricks ${*} DONE!"
+    # NOTE: sometimes the process finishes before the wait command, giving the error code 127
+    if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
+        if [ "${WINETRICKS_STATUS}" != "0" ] ; then
+            wineserver -k;
+            echo "ERROR on : winetricks ${*}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
+            gtk_fatal_error "The installation was cancelled because of sub-job failure!\n * winetricks ${*}\n  -     WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
+        fi
+    else
+        wineserver -k;
+        gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}";
+    fi
+    echo "winetricks ${*} DONE!";
 
-	heavy_wineserver_wait
+    heavy_wineserver_wait;
 }
+
+winetricks_dll_install() {
+    echo "winetricks ${*}"
+
+    gtk_continue_question "Now the script will install the DLL ${*}. Continue?"
+
+    "$WINETRICKSBIN" "${@}"
+
+    echo "winetricks ${*} DONE!";
+
+    heavy_wineserver_wait;
+
+}
+
 if [ -z "${WINETRICKS_UNATTENDED}" ]; then
     winetricks_install -q corefonts
     winetricks_install -q tahoma
-    winetricks_install -q d3dcompiler_47
     winetricks_install -q settings fontsmooth=rgb
     winetricks_install -q settings win10
+    winetricks_dll_install -q d3dcompiler_47;
 else
 	echo "================================================="
 	winetricks_install corefonts
 	echo "================================================="
 	winetricks_install tahoma
 	echo "================================================="
-	winetricks_install d3dcompiler_47
-	echo "================================================="
 	winetricks_install settings fontsmooth=rgb
 	echo "================================================="
 	winetricks_install settings win10
+	echo "================================================="
+	winetricks_dll_install d3dcompiler_47
 	echo "================================================="
 fi
 #-------------------------------------------------
