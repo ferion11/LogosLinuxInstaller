@@ -2,11 +2,11 @@
 # From https://github.com/ferion11/LogosLinuxInstaller
 LOGOS_SCRIPT_TITLE="Verbum9_Setup"
 LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
-LOGOS_SCRIPT_VERSION="9.8"
+LOGOS_SCRIPT_VERSION="9.17-1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
-if [ -z "${VERBUM64_URL}" ]; then export VERBUM64_URL="https://downloads.logoscdn.com/LBS9/Verbum/Installer/9.8.0.0004/Verbum-x64.msi" ; fi
+if [ -z "${VERBUM64_URL}" ]; then export VERBUM64_URL="https://downloads.logoscdn.com/LBS9/Verbum/Installer/9.8.0.0010/Verbum-x64.msi" ; fi
 
 #VERBUM_MVERSION=$(echo "${VERBUM64_URL}" | cut -d/ -f4); export VERBUM_MVERSION
 VERBUM_VERSION="$(echo "${VERBUM64_URL}" | cut -d/ -f6)"; export VERBUM_VERSION
