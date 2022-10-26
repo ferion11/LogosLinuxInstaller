@@ -1,18 +1,19 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
+# Script version to match FaithLife Product version.
 LOGOS_SCRIPT_TITLE="LogosLinuxInstaller"
 LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
 LOGOS_SCRIPT_VERSION="9.17-1"
+# Modified by T. H. Wright for optargs and to be FaithLife-product-agnostic.
 
-#=================================================
 # Default AppImage FULL (with deps) to install 64bits version:
-export WINE64_APPIMAGE_FULL_VERSION="v6.5"
-if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then export WINE64_APPIMAGE_FULL_URL="https://github.com/ferion11/wine_WoW64_fulldeps_AppImage/releases/download/test-beta3/wine-staging-linux-amd64-fulldeps-v6.5-f11-x86_64.AppImage" ; fi
+export WINE64_APPIMAGE_FULL_VERSION="v7.18-staging"
+if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then export WINE64_APPIMAGE_FULL_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/v10.0-1/wine-staging_7.18-x86_64.AppImage" ; fi
 WINE64_APPIMAGE_FULL_FILENAME="$(basename "${WINE64_APPIMAGE_FULL_URL}")"; export WINE64_APPIMAGE_FULL_FILENAME
 #=================================================
 # Default AppImage (without deps) to install 64bits version:
-export WINE64_APPIMAGE_VERSION="v6.5"
-if [ -z "${WINE64_APPIMAGE_URL}" ]; then export WINE64_APPIMAGE_URL="https://github.com/ferion11/wine_WoW64_nodeps_AppImage/releases/download/continuous-logos/wine-staging-linux-amd64-nodeps-v6.5-f11-x86_64.AppImage" ; fi
+export WINE64_APPIMAGE_VERSION="v7.18-staging"
+if [ -z "${WINE64_APPIMAGE_URL}" ]; then export WINE64_APPIMAGE_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/v10.0-1/wine-staging_7.18-x86_64.AppImage" ; fi
 WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_APPIMAGE_FILENAME
 #=================================================
 if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
@@ -129,7 +130,7 @@ gtk_continue_question() {
 gtk_download() {
 	# $1	what to download
 	# $2	where into
-	# NOTE: here must be limitation to handle it easily. $2 can be dir, if it already exists or if it ends with '/'
+	# NOTE: here must be a limitation to handle it easily. $2 can be dir if it already exists or if it ends with '/'
 
 	URI="$1"
 	# extract last field of URI as filename:
@@ -256,7 +257,7 @@ check_libs() {
 #--------------
 #==========================
 
-# wait to all process that is using the ${1} directory to finish
+# wait on all processes that are using the ${1} directory to finish
 wait_process_using_dir() {
 	VERIFICATION_DIR="${1}"
 	VERIFICATION_TIME=7
@@ -627,8 +628,8 @@ productChoice="$(zenity --width=700 --height=310 \
 case "${productChoice}" in
     1*)
         echo "Installing Logos Bible Software"
-        FLPRODUCT="Logos"
-        FLPRODUCTi="logos4"
+	FLPRODUCT="Logos"
+	FLPRODUCTi="logos4"
 	if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.17.0.0010/${FLPRODUCT}-x64.msi" ; fi
         ;;
     2*)
@@ -652,6 +653,11 @@ if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/${FLPRODUCT}Bible9" ;
 export APPDIR="${INSTALLDIR}/data"
 export APPDIR_BINDIR="${APPDIR}/bin"
 
+if [ -d "${INSTALLDIR}" ]; then
+	echo "A directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
+	gtk_fatal_error "a directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
+fi
+
 echo "* Script version: ${LOGOS_SCRIPT_VERSION}"
 installationChoice="$(zenity --width=700 --height=310 \
 	--title="Question: Install ${FLPRODUCT} Bible using script ${LOGOS_SCRIPT_VERSION}" \
@@ -659,7 +665,7 @@ installationChoice="$(zenity --width=700 --height=310 \
 	--list --radiolist --column "S" --column "Description" \
 	TRUE "1- Fast install ${FLPRODUCT}Bible64 using the native Wine64 (default)." \
 	FALSE "2- Fast install ${FLPRODUCT}Bible64 using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage." )"
-# FALSE "3- Fast install ${FLPRODUCT}Bible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies."
+	# FALSE "3- Fast install ${FLPRODUCT}Bible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies."
 
 case "${installationChoice}" in
 	1*)
