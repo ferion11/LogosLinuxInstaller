@@ -805,49 +805,58 @@ echo "Winetricks is ready to be used."
 
 #-------------------------------------------------
 winetricks_install() {
-	echo "winetricks ${*}"
-	pipe_winetricks="$(mktemp)"
-	rm -rf "${pipe_winetricks}"
-	mkfifo "${pipe_winetricks}"
+    echo "winetricks ${*}"
+    pipe_winetricks="$(mktemp)"
+    rm -rf "${pipe_winetricks}"
+    mkfifo "${pipe_winetricks}"
 
-	# zenity GUI feedback
-	zenity --progress --title="Winetricks ${*}" --text="Winetricks installing ${*}" --pulsate --auto-close < "${pipe_winetricks}" &
-	ZENITY_PID="${!}"
+    # zenity GUI feedback
+    zenity --progress --title="Winetricks ${*}" --text="Winetricks installing ${*}" --pulsate --auto-close <         "${pipe_winetricks}" &
+    ZENITY_PID="${!}"
 
-	"$WINETRICKSBIN" "${@}" | tee "${pipe_winetricks}";
-	WINETRICKS_STATUS="${?}";
+    "$WINETRICKSBIN" "${@}" | tee "${pipe_winetricks}";
+    WINETRICKS_STATUS="${?}";
 
-	wait "${ZENITY_PID}";
-	ZENITY_RETURN="${?}";
+    wait "${ZENITY_PID}";
+    ZENITY_RETURN="${?}";
 
-	rm -rf "${pipe_winetricks}";
+    rm -rf "${pipe_winetricks}";
 
-	# NOTE: sometimes the process finishes before the wait command, giving the error code 127
-	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
-        if [ "${WINETRICKS_STATUS}" == "141" ] ; then
-            echo "Error installing d3dcompiler_47. Attempting alternative install."
-            WINEPREFIX="$WINEPREFIX" "$WINETRICKSBIN" -q d3dcompiler_47;
-		elif [ "${WINETRICKS_STATUS}" != "0" ] ; then
-			wineserver -k;
-			echo "ERROR on : winetricks ${*}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
-			gtk_fatal_error "The installation was cancelled because of sub-job failure!\n * winetricks ${*}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
-		else
-				:
-		fi
-	else
-		wineserver -k;
-		gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}";
-	fi
-	echo "winetricks ${*} DONE!";
+    # NOTE: sometimes the process finishes before the wait command, giving the error code 127
+    if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
+        if [ "${WINETRICKS_STATUS}" != "0" ] ; then
+            wineserver -k;
+            echo "ERROR on : winetricks ${*}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
+            gtk_fatal_error "The installation was cancelled because of sub-job failure!\n * winetricks ${*}\n  -     WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
+        fi
+    else
+        wineserver -k;
+        gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}";
+    fi
+    echo "winetricks ${*} DONE!";
 
-	heavy_wineserver_wait;
+    heavy_wineserver_wait;
 }
+
+winetricks_dll_install() {
+    echo "winetricks ${*}"
+
+    gtk_continue_question "Now the script will install the DLL ${*}. Continue?"
+
+    "$WINETRICKSBIN" "${@}"
+
+    echo "winetricks ${*} DONE!";
+
+    heavy_wineserver_wait;
+
+}
+
 if [ -z "${WINETRICKS_UNATTENDED}" ]; then
-	winetricks_install -q corefonts
-	winetricks_install -q tahoma
-	winetricks_install -q settings fontsmooth=rgb
-	winetricks_install -q settings win10
-	winetricks_install -q d3dcompiler_47
+    winetricks_install -q corefonts
+    winetricks_install -q tahoma
+    winetricks_install -q settings fontsmooth=rgb
+    winetricks_install -q settings win10
+    winetricks_dll_install -q d3dcompiler_47;
 else
 	echo "================================================="
 	winetricks_install corefonts
@@ -858,7 +867,7 @@ else
 	echo "================================================="
 	winetricks_install settings win10
 	echo "================================================="
-	winetricks_install d3dcompiler_47
+	winetricks_dll_install d3dcompiler_47
 	echo "================================================="
 fi
 #-------------------------------------------------

@@ -824,15 +824,10 @@ winetricks_install() {
 
 	# NOTE: sometimes the process finishes before the wait command, giving the error code 127
 	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
-        if [ "${WINETRICKS_STATUS}" == "141" ] ; then
-            echo "Error installing d3dcompiler_47. Attempting alternative install."
-            WINEPREFIX="$WINEPREFIX" "$WINETRICKSBIN" -q d3dcompiler_47;
-		elif [ "${WINETRICKS_STATUS}" != "0" ] ; then
+		if [ "${WINETRICKS_STATUS}" != "0" ] ; then
 			wineserver -k;
 			echo "ERROR on : winetricks ${*}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
 			gtk_fatal_error "The installation was cancelled because of sub-job failure!\n * winetricks ${*}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
-		else
-				:
 		fi
 	else
 		wineserver -k;
@@ -842,12 +837,26 @@ winetricks_install() {
 
 	heavy_wineserver_wait;
 }
+
+winetricks_dll_install() {
+    echo "winetricks ${*}"
+    
+	gtk_continue_question "Now the script will install the DLL ${*}. Continue?"
+
+	"$WINETRICKSBIN" "${@}"
+
+    echo "winetricks ${*} DONE!";
+    
+    heavy_wineserver_wait;
+
+}
+
 if [ -z "${WINETRICKS_UNATTENDED}" ]; then
 	winetricks_install -q corefonts
 	winetricks_install -q tahoma
 	winetricks_install -q settings fontsmooth=rgb
 	winetricks_install -q settings win10
-	winetricks_install -q d3dcompiler_47
+	winetricks_dll_install -q d3dcompiler_47;
 else
 	echo "================================================="
 	winetricks_install corefonts
@@ -858,7 +867,7 @@ else
 	echo "================================================="
 	winetricks_install settings win10
 	echo "================================================="
-	winetricks_install d3dcompiler_47
+	winetricks_dll_install d3dcompiler_47
 	echo "================================================="
 fi
 #-------------------------------------------------
