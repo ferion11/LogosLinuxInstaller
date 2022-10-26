@@ -4,7 +4,7 @@
 # Script version to match Verbum version.
 LOGOS_SCRIPT_TITLE="Verbum10_Setup"
 LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
-LOGOS_SCRIPT_VERSION="v10.0"
+LOGOS_SCRIPT_VERSION="v10.0-1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program

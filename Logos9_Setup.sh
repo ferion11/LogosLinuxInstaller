@@ -2,7 +2,7 @@
 # From https://github.com/ferion11/LogosLinuxInstaller
 LOGOS_SCRIPT_TITLE="Logos9_Setup"
 LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
-LOGOS_SCRIPT_VERSION="9.17"
+LOGOS_SCRIPT_VERSION="9.17-1"
 
 #=================================================
 # version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
