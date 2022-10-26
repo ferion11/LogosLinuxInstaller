@@ -376,6 +376,14 @@ case "\${1}" in
 		echo "======= removing all LogosBible index files done! ======="
 		exit 0
 		;;
+	"removeLibraryCatalog")
+		echo "======= removing LogosBible LibraryCatalog files only: ======="
+		LOGOS_EXE="\$(find "\${WINEPREFIX}" -name Logos.exe | grep "Logos\/Logos.exe")"
+		LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
+		rm -fv "\${LOGOS_DIR}"/Data/*/LibraryCatalog/*
+		echo "======= removing all LogosBible index files done! ======="
+		exit 0
+		;;
 	"logsOn")
 		echo "======= enable LogosBible logging only: ======="
 		${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
