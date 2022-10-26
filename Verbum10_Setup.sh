@@ -376,6 +376,14 @@ case "\${1}" in
 		echo "======= removing all VerbumBible index files done! ======="
 		exit 0
 		;;
+	"removeLibraryCatalog")
+		echo "======= removing VerbumBible LibraryCatalog files only: ======="
+		VERBUM_EXE="\$(find "\${WINEPREFIX}" -name Verbum.exe | grep "Verbum\/Verbum.exe")"
+		VERBUM_DIR="\$(dirname "\${VERBUM_EXE}")"
+		rm -fv "\${VERBUM_DIR}"/Data/*/LibraryCatalog/*
+		echo "======= removing all VerbumBible index files done! ======="
+		exit 0
+		;;
 	"logsOn")
 		echo "======= enable VerbumBible logging only: ======="
 		${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
