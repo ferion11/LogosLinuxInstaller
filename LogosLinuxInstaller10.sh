@@ -1,10 +1,11 @@
 #!/bin/bash
 # From https://github.com/ferion11/LogosLinuxInstaller
-# Modified to install Logoos 10 by Revd. John Goodman M0RVJ
 # Script version to match FaithLife Product version.
 LOGOS_SCRIPT_TITLE="LogosLinuxInstaller"
 LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
 LOGOS_SCRIPT_VERSION="v10.0-1"
+# Modified to install Logoos 10 by Revd. John Goodman M0RVJ
+# Modified by T. H. Wright for optargs and to be FaithLife-product-agnostic.
 
 # Default AppImage FULL (with deps) to install 64bits version:
 export WINE64_APPIMAGE_FULL_VERSION="v7.18-staging"
@@ -36,8 +37,8 @@ export EXTRA_INFO="Usually is necessary: winbind cabextract libjpeg8."
 
 #======= Aux =============
 if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
-		echo "* Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-		gtk_fatal_error "Running Wine/winetricks as root is highly discouraged (you can set FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+		echo "* Running Wine/winetricks as root is highly discouraged (you can set LOGOS_FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+		gtk_fatal_error "Running Wine/winetricks as root is highly discouraged (you can set LOGOS_FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
         exit 1;
 fi
 
@@ -46,7 +47,7 @@ cat << EOF
 LogosLinuxInstaller, by $LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION.
 
 Usage: ./$LOGOS_SCRIPT_TITLE.sh
-Installs Logos Bible Software with Wine in an AppImage on Linux.
+Installs ${FLPRODUCT} Bible Software with Wine in an AppImage on Linux.
 
 Options:
     -h   --help         Prints this help message and exit.
@@ -336,7 +337,7 @@ case "\${1}" in
 		;;
 	"indexing")
 		# Indexing Run:
-		echo "======= Running indexing on the Logos inside this installation only: ======="
+		echo "======= Running indexing on the ${FLPRODUCT} inside this installation only: ======="
 		LOGOS_INDEXER_EXE=\$(find "\${WINEPREFIX}" -name ${FLPRODUCT}Indexer.exe |  grep "${FLPRODUCT}\/System\/${FLPRODUCT}Indexer.exe")
 		if [ -z "\${LOGOS_INDEXER_EXE}" ] ; then
 			echo "* ERROR: the ${FLPRODUCT}Indexer.exe can't be found!!!"
@@ -351,7 +352,7 @@ case "\${1}" in
 		exit 0
 		;;
 	"removeAllIndex")
-		echo "======= removing all ${FLPRODUCT}Bible index files only: ======="
+		echo "======= removing all ${FLPRODUCT}Bible BibleIndex, LibraryIbdex, PersonalBookIndex, and LibraryCatalog files: ======="
 		LOGOS_EXE="\$(find "\${WINEPREFIX}" -name ${FLPRODUCT}.exe | grep "${FLPRODUCT}\/${FLPRODUCT}.exe")"
 		LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
 		rm -fv "\${LOGOS_DIR}"/Data/*/BibleIndex/*
@@ -362,7 +363,7 @@ case "\${1}" in
 		exit 0
 		;;
 	"removeLibraryCatalog")
-		echo "======= removing LogosBible LibraryCatalog files only: ======="
+		echo "======= removing ${FLPRODUCT}Bible LibraryCatalog files only: ======="
 		LOGOS_EXE="\$(find "\${WINEPREFIX}" -name ${FLPRODUCT}.exe | grep "${FLPRODUCT}\/${FLPRODUCT}.exe")"
 		LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
 		rm -fv "\${LOGOS_DIR}"/Data/*/LibraryCatalog/*
@@ -568,7 +569,7 @@ make_skel() {
 
 	# Making the links (and dir)
 	mkdir "${APPDIR_BINDIR}" || die "can't make dir: ${APPDIR_BINDIR}"
-	cd "${APPDIR_BINDIR}" || die "ERROR: Can't enter on dir: ${APPDIR_BINDIR}"
+	cd "${APPDIR_BINDIR}" || die "ERROR: Can't open dir: ${APPDIR_BINDIR}"
 	ln -s "../${SET_APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
 	ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
 	[ "${WINE_BITS}" == "64" ] && ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine64
@@ -634,8 +635,8 @@ productChoice="$(zenity --width=700 --height=310 \
 case "${productChoice}" in
     1*)
         echo "Installing Logos Bible Software"
-		FLPRODUCT="Logos"
-		FLPRODUCTi="logos4"
+	FLPRODUCT="Logos"
+	FLPRODUCTi="logos4"
         ;;
     2*)
         echo "Installing Verbum Bible Software"
@@ -662,13 +663,14 @@ if [ -d "${INSTALLDIR}" ]; then
 	gtk_fatal_error "a directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
 fi
 
+echo "* Script version: ${LOGOS_SCRIPT_VERSION}"
 installationChoice="$(zenity --width=700 --height=310 \
 	--title="Question: Install ${FLPRODUCT} Bible using script ${LOGOS_SCRIPT_VERSION}" \
-	--text="This script will create one directory in (which can be changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be an installation of ${FLPRODUCT}Bible v${LOGOS_SCRIPT_VERSION} independent of other installations.\nPlease select the type of installation:" \
+	--text="This script will create one directory in (which can be changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be an installation of ${FLPRODUCT}Bible v${LOGOS_VERSION} independent of other installations.\nPlease select the type of installation:" \
 	--list --radiolist --column "S" --column "Description" \
 	TRUE "1- Install ${FLPRODUCT}Bible64 using the native Wine64 (default) Which must be 7.18-staging or later. Stable or Devel do not work." \
 	FALSE "2- Install ${FLPRODUCT}Bible64 using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage." )"
-# FALSE "3- Install ${FLPRODUCT}Bible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies."
+	# FALSE "3- Install ${FLPRODUCT}Bible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies."
 
 case "${installationChoice}" in
 	1*)
@@ -757,7 +759,6 @@ else
 fi
 light_wineserver_wait
 echo "================================================="
-
 #-------------------------------------------------
 cat > "${WORKDIR}"/disable-winemenubuilder.reg << EOF
 REGEDIT4
@@ -921,7 +922,7 @@ clean_all
 echo "================================================="
 
 if gtk_question "${FLPRODUCT} Bible Installed!\nYou can run it using the script ${FLPRODUCT}.sh inside ${INSTALLDIR}.\nDo you want to run it now?\nNOTE: Just close the error on the first execution."; then
-	"${INSTALLDIR}"/${FLPRODUCT}.sh
+	"${INSTALLDIR}"/"${FLPRODUCT}".sh
 fi
 
 echo "End!"
