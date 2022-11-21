@@ -1,5 +1,9 @@
 # Changelog
 
+* v10.0-3
+  - Fix #93.
+* v10.0-2
+  - Fix #92.
 * v10.0-1
   - Install DLL d3dcompiler_47 (jg00dman, thw26)
   - L10: Change winetricks URL
