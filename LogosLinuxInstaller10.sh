@@ -3,7 +3,7 @@
 # Script version to match FaithLife Product version.
 LOGOS_SCRIPT_TITLE="LogosLinuxInstaller"
 LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
-LOGOS_SCRIPT_VERSION="v10.0-1"
+LOGOS_SCRIPT_VERSION="v10.0-2"
 # Modified to install Logoos 10 by Revd. John Goodman M0RVJ
 # Modified by T. H. Wright for optargs and to be FaithLife-product-agnostic.
 
@@ -900,7 +900,7 @@ else
 fi
 #-------------------------------------------------
 
-gtk_continue_question "You need to supply the installer, download from https://www.logos.com/get-started and place the installer in ${INSTALLDIR}.\${FLPRODUCT} 10 is currently only available to those who have a license.\nIn previous years the free engine is made available to everyone a few months later.\nYou will need to interact with the installer. The progress slider does not show progress but it is working.\n\nI HAVE PLACED THE INSTALLER IN THE CORRECT DIR AND WISH TO CONTINUE..."
+gtk_continue_question "You need to supply the installer, download from https://www.logos.com/get-started and place the installer in ${INSTALLDIR}.\n\n${FLPRODUCT} 10 is currently only available to those who have a license.\n\nIn previous years the free engine is made available to everyone a few months later and this script will be updated once it is made available.\n\nYou will need to interact with the installer. The progress slider does not show progress but it is working.\n\nI HAVE PLACED THE INSTALLER IN THE CORRECT DIR AND WISH TO CONTINUE..."
 
 echo "================================================="
 # Geting and installing the software:
