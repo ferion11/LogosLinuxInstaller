@@ -1081,13 +1081,21 @@ main () {
 	heavy_wineserver_wait;
 	clean_all;
 
-	if gtk_question "${FLPRODUCT} Bible ${TARGETVERSION} installed!\n\nA launch script has been placed in ${INSTALLDIR}for your use. The script's name is ${FLPRODUCT}.sh.\n\nDo you want to run it now?\n\nNOTE: There may be an error on first execution. You can close the error dialog."; then
-		"${INSTALLDIR}"/"${FLPRODUCT}".sh
-	else echo "The script has finished. Exiting…";
+	LOGOS_EXE=$(find "${WINEPREFIX}" -name ${FLPRODUCT}.exe | grep "${FLPRODUCT}/${FLPRODUCT}.exe")
+
+	if [ -f "${LOGOS_EXE}" ]; then
+		if gtk_question "${FLPRODUCT} Bible ${TARGETVERSION} installed!\n\nA launch script has been placed in ${INSTALLDIR}for your use. The script's name is ${FLPRODUCT}.sh.\n\nDo you want to run it now?\n\nNOTE: There may be an error on first execution. You can close the error dialog."; then
+			"${INSTALLDIR}"/"${FLPRODUCT}".sh
+		else echo "The script has finished. Exiting…";
+		fi
+	else
+		gtk_fatal_error "The ${FLPRODUCT} executable was not found. This means something went wrong while installing ${FLPRODUCT}. Please contact the Logos on Linux community for help."
+		echo "Installation failed. Exiting…"
+		exit 1;
 	fi
 	# END INSTALL
 	
-	exit 0
+	exit 0;
 }
 
 main;
