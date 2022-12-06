@@ -686,9 +686,10 @@ chooseVersion() {
 		*10)
 			checkDependenciesLogos10;
 			export TARGETVERSION="10";
-			# version of Logos from: https://wiki.logos.com/The_Logos_9_Beta_Program
-			#if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.15.0.0005/Logos-x64.msi" ; fi
-			export LOGOS64_MSI="${FLPRODUCT}Setup.exe"
+			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS10/Installer/10.1.0.0046/${FLPRODUCT}-x64.msi" ; fi
+			LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
+			LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
+
 			;;
 		*9)
 			checkDependenciesLogos9;
@@ -988,13 +989,17 @@ getLogosExecutable() {
 	fi
 }
 
+installMSI() {
+	echo "${WINE_EXE} msiexec /i ${LOGOS64_MSI}"
+	${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
+}
+
 installLogos9() {	
 	getPremadeWineBottle;
 
 	getLogosExecutable;
 
-	echo "${WINE_EXE} msiexec /i ${LOGOS64_MSI}"
-	${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
+	installMSI;
 
 	echo "======= Set ${FLPRODUCT}Bible Indexing to Vista Mode: ======="
 	${WINE_EXE} reg add "HKCU\\Software\\Wine\\AppDefaults\\${FLPRODUCT}Indexer.exe" /v Version /t REG_SZ /d vista /f
@@ -1038,22 +1043,9 @@ EOF
 		winetricks_dll_install d3dcompiler_47
 	fi
 
-	#-------------------------------------------------
-	#getLogosExecutable # DISABLED due to no public download for free Logos 10 installer
-	#<<<<< REMOVE this block once free installer available. TODO: replace with the `getLogosExecutable` function.
-	gtk_continue_question "You need to supply the installer. Download it from https://www.logos.com/get-started and place the installer in ${INSTALLDIR}.\n\n${FLPRODUCT} 10 is currently only available to those who have a license.\n\nIn previous years the free engine is made available to everyone a few months later than release. This script will be updated once the free engine is made available.\n\nYou will need to interact with the installer. Once started, the progress slider does not show progress but it is working.\n\nI HAVE PLACED THE INSTALLER IN THE CORRECT DIR AND WISH TO CONTINUE…"
-	
-	echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION}…"
-	if [ -f "${INSTALLDIR}/${LOGOS64_MSI}" ]; then
-		echo "${LOGOS64_MSI} exists. Using it…"
-	#	cp "${INSTALLDIR}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
-	else
-		echo "${LOGOS64_MSI} was not found. This installer is exiting. The failed install is in ${INSTALLDIR}. You need to delete the directory, rerun the installer, and ensure the installer has been placed in the correct directory when asked. Please try again."
-		exit 1
-	fi
-	#>>>>> END REMOVE
-	echo "Executing: ${WINE_EXE} ${INSTALLDIR}/${LOGOS64_MSI}"
-	${WINE_EXE} "${INSTALLDIR}"/"${LOGOS64_MSI}"
+	getLogosExecutable;
+
+	installMSI;
 }
 
 main () {
