@@ -1,51 +1,37 @@
 #!/bin/bash
-# From https://github.com/ferion11/LogosLinuxInstaller
-# Script version to match FaithLife Product version.
-LOGOS_SCRIPT_TITLE="LogosLinuxInstaller"
-LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
-LOGOS_SCRIPT_VERSION="v10.0-4"
-# Modified to install Logoos 10 by Revd. John Goodman M0RVJ
-# Modified by T. H. Wright for optargs and to be FaithLife-product-agnostic.
 
-# Default AppImage FULL (with deps) to install 64bits version:
+LOGOS_SCRIPT_TITLE="Logos Linux Installer" # From https://github.com/ferion11/LogosLinuxInstaller
+LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
+LOGOS_SCRIPT_VERSION="v10.0-4" # Script version to match FaithLife Product version.
+
+#####
+# Originally written by Ferion11.
+# Modified to install Logoos 10 by Revd. John Goodman M0RVJ
+# Modified for optargs, to be FaithLife-product-agnostic, and general code refactoring by Revd. T. H. Wright
+#####
+
+# BEGIN ENVIRONMENT
 if [ -z "${WINE64_APPIMAGE_FULL_VERSION}" ]; then WINE64_APPIMAGE_FULL_VERSION="v7.18-staging"; export WINE64_APPIMAGE_FULL_VERSION; fi
 if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then WINE64_APPIMAGE_FULL_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/v10.0-1/wine-staging_7.18-x86_64.AppImage"; export WINE64_APPIMAGE_FULL_URL; fi
 if [ -z "${WINE64_APPIMAGE_FULL_FILENAME}" ]; then WINE64_APPIMAGE_FULL_FILENAME="$(basename "${WINE64_APPIMAGE_FULL_URL}")"; export WINE64_APPIMAGE_FULL_FILENAME; fi
-#=================================================
-# Default AppImage (without deps) to install 64bits version:
 if [ -z "${WINE64_APPIMAGE_VERSION}" ]; then WINE64_APPIMAGE_VERSION="v7.18-staging"; export WINE64_APPIMAGE_VERSION; fi
 if [ -z "${WINE64_APPIMAGE_URL}" ]; then WINE64_APPIMAGE_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/v10.0-1/wine-staging_7.18-x86_64.AppImage"; export WINE64_APPIMAGE_URL; fi
 if [ -z "${WINE64_APPIMAGE_FILENAME}" ]; then WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_APPIMAGE_FILENAME; fi
 if [ -z "${APPIMAGE_LINK_SELECTION_NAME}" ]; then APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"; fi
-#=================================================
-# winetricks version in use (and downloader option set):
-#if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" ; fi
-# back to Jul 23, 2020 release of winetricks, not more of the last git random broken fun:
-#if [ -z "${WINETRICKS_URL}" ]; then export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/29d4edcfaec76128a68a0506605fd84473b6e38c/src/winetricks" ; fi
-# trying one customized version of winetricks, of the link above:
 if [ -z "${WINETRICKS_URL}" ]; then WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/5904ee355e37dff4a3ab37e1573c56cffe6ce223/src/winetricks"; export WINETRICKS_URL; fi
 if [ -z "${WINETRICKS_DOWNLOADER+x}" ]; then WINETRICKS_DOWNLOADER="wget" ; export WINETRICKS_DOWNLOADER; fi
 if [ -z "${WINETRICKS_UNATTENDED+x}" ]; then WINETRICKS_UNATTENDED="" ; export WINETRICKS_UNATTENDED; fi
-
-#=================================================
 if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
 if [ -z "${DOWNLOADED_RESOURCES}" ]; then DOWNLOADED_RESOURCES="${PWD}" ; export DOWNLOADED_RESOURCES; fi
 if [ -z "${LOGOS_FORCE_ROOT+x}" ]; then export LOGOS_FORCE_ROOT="" ; fi
 if [ -z "${WINEBOOT_GUI+x}" ]; then export WINEBOOT_GUI="" ; fi
 if [ -z "${EXTRA_INFO}" ]; then EXTRA_INFO="Usually is necessary: winbind cabextract libjpeg8."; export EXTRA_INFO; fi
-#=================================================
-#=================================================
-
-#======= Aux =============
-if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
-		echo "* Running Wine/winetricks as root is highly discouraged (you can set LOGOS_FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-		gtk_fatal_error "Running Wine/winetricks as root is highly discouraged (you can set LOGOS_FORCE_ROOT=1). See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-        exit 1;
-fi
+if [ -z "${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; fi # Make wine output less verbose
+# END ENVIRONMENT
 
 usage() {
 cat << EOF
-LogosLinuxInstaller, by $LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION.
+$LOGOS_SCRIPT_TITLE, by $LOGOS_SCRIPT_AUTHOR, $LOGOS_SCRIPT_VERSION.
 
 Usage: ./$LOGOS_SCRIPT_TITLE.sh
 Installs ${FLPRODUCT} Bible Software with Wine in an AppImage on Linux.
@@ -53,6 +39,8 @@ Installs ${FLPRODUCT} Bible Software with Wine in an AppImage on Linux.
 Options:
     -h   --help         Prints this help message and exit.
     -v   --version      Prints version information and exit.
+    -f   --force-root   Sets LOGOS_FORCE_ROOT to true, which permits
+                        the root user to run the script.
 EOF
 }
 
@@ -64,18 +52,22 @@ do
       unset RESET_OPTARGS
       set -- 
     fi
-    case "$arg" in
+    case "$arg" in # Relate long options to short options
         --help)      set -- "$@" -h ;;
         --version)   set -- "$@" -V ;;
+		--force-root) set -- "$@" -f ;;
         *)           set -- "$@" "$arg" ;;
     esac
 done
-OPTSTRING=':hv' # Available options
+OPTSTRING=':hvf' # Available options
 
-# First loop: set variable options
+# First loop: set variable options which may affect other options
 while getopts "$OPTSTRING" opt; do
-        case $opt in
-        esac
+	case $opt in
+		f) export LOGOS_FORCE_ROOT="1"; ;;
+		\?) echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
+		:)  echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 && exit ;;
+	esac
 done
 OPTIND=1 # Reset the index.
 
@@ -94,6 +86,15 @@ fi
 shift $((OPTIND-1))
 # END OPTARGS
 
+# BEGIN DIE IF ROOT
+if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
+	echo "* Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+	gtk_fatal_error "Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+	exit 1;
+fi
+# END DIE IF ROOT
+
+# BEGIN FUNCTION DECLARATIONS
 die() { echo >&2 "$*"; exit 1; };
 
 have_dep() {
@@ -117,7 +118,7 @@ heavy_wineserver_wait() {
 	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly…" --pulsate --auto-close --no-cancel
 }
 
-#zenity------
+## BEGIN ZENITY FUNCTIONS
 gtk_info() {
 	zenity --info --width=300 --height=200 --text="$*" --title='Information'
 }
@@ -253,32 +254,7 @@ gtk_download() {
 	fi
 	echo "${FILENAME} download finished!"
 }
-
-check_commands() {
-	for cmd in "$@"; do
-		if have_dep "${cmd}"; then
-			echo "* command ${cmd} is installed!"
-		else
-			echo "* Your system does not have the command: ${cmd}. Please install command ${cmd} package. ${EXTRA_INFO}"
-			gtk_fatal_error "Your system does not have command: ${cmd}. Please install command ${cmd} package.\n ${EXTRA_INFO}"
-		fi
-	done
-}
-# shellcheck disable=SC2001
-check_libs() {
-	for lib in "$@"; do
-		HAVE_LIB="$(ldconfig -N -v "$(sed 's/:/ /g' <<< "${LD_LIBRARY_PATH}")" 2>/dev/null | grep "${lib}")"
-		if [ -n "${HAVE_LIB}" ]; then
-			echo "* ${lib} is installed!"
-		else
-			echo "* Your system does not have the lib: ${lib}. Please install ${lib} package. ${EXTRA_INFO}"
-			gtk_fatal_error "Your system does not have lib: ${lib}. Please install ${lib} package.\n ${EXTRA_INFO}"
-		fi
-	done
-}
-#--------------
-#==========================
-
+## END ZENITY FUNCTIONS
 # wait on all processes that are using the ${1} directory to finish
 wait_process_using_dir() {
 	VERIFICATION_DIR="${1}"
@@ -311,15 +287,14 @@ wait_process_using_dir() {
 	echo "---------------------"
 }
 
-#======= making the starting scripts ==============
 create_starting_scripts() {
 # ${1} - WINE_BITS: 32 or 64
 # ${2} - WINE_EXE name: wine or wine64
 	export WINE_BITS="${1}"
 	export WINE_EXE="${2}"
 
+## BEGIN CREATE MAIN LAUNCHER
 	echo "Creating starting scripts for ${FLPRODUCT}Bible ${WINE_BITS}bits…"
-	#------- Main Launcher -------------
 	cat > "${WORKDIR}"/"${FLPRODUCT}".sh << EOF
 #!/bin/bash
 # generated by "${LOGOS_SCRIPT_VERSION}" script from https://github.com/ferion11/LogosLinuxInstaller
@@ -364,7 +339,7 @@ case "\${1}" in
 		exit 0
 		;;
 	"removeAllIndex")
-		echo "======= removing all ${FLPRODUCT}Bible BibleIndex, LibraryIbdex, PersonalBookIndex, and LibraryCatalog files: ======="
+		echo "======= removing all ${FLPRODUCT}Bible BibleIndex, LibraryIndex, PersonalBookIndex, and LibraryCatalog files: ======="
 		LOGOS_EXE="\$(find "\${WINEPREFIX}" -name ${FLPRODUCT}.exe | grep "${FLPRODUCT}\/${FLPRODUCT}.exe")"
 		LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
 		rm -fv "\${LOGOS_DIR}"/Data/*/BibleIndex/*
@@ -447,11 +422,11 @@ wineserver -w
 IFS=\${IFS_TMP}
 #-------------------------------------------------
 EOF
-	#------------------------------
 	chmod +x "${WORKDIR}"/"${FLPRODUCT}".sh
 	mv "${WORKDIR}"/"${FLPRODUCT}".sh "${INSTALLDIR}"/
+## END CREATE MAIN LAUNCHER
 
-	#------- controlPanel.sh ------
+## BEGIN CREATE CONTROLPANEL.SH
 	cat > "${WORKDIR}"/controlPanel.sh << EOF
 #!/bin/bash
 # generated by "${LOGOS_SCRIPT_VERSION}" script from https://github.com/ferion11/LogosLinuxInstaller
@@ -562,9 +537,9 @@ wineserver -w
 IFS=\${IFS_TMP}
 #-------------------------------------------------
 EOF
-	#------------------------------
 	chmod +x "${WORKDIR}"/controlPanel.sh
 	mv "${WORKDIR}"/controlPanel.sh "${INSTALLDIR}"/
+## END CREATE CONTROLPANEL.SH
 }
 
 
@@ -612,6 +587,30 @@ make_skel() {
 #			echo "================================================="
 #	esac
 
+## BEGIN CHECK DEPENDENCIES FUNCTIONS
+check_commands() {
+    for cmd in "$@"; do
+        if have_dep "${cmd}"; then
+            echo "* command ${cmd} is installed!"
+        else
+            echo "* Your system does not have the command: ${cmd}. Please install command    ${cmd} package. ${EXTRA_INFO}"
+            gtk_fatal_error "Your system does not have command: ${cmd}. Please install       command ${cmd} package.\n ${EXTRA_INFO}"
+        fi
+    done
+}
+# shellcheck disable=SC2001
+check_libs() {
+    for lib in "$@"; do
+        HAVE_LIB="$(ldconfig -N -v "$(sed 's/:/ /g' <<< "${LD_LIBRARY_PATH}")" 2>/dev/null | grep "${lib}")"
+        if [ -n "${HAVE_LIB}" ]; then
+            echo "* ${lib} is installed!"
+        else
+            echo "* Your system does not have the lib: ${lib}. Please install ${lib}         package. ${EXTRA_INFO}"
+            gtk_fatal_error "Your system does not have lib: ${lib}. Please install ${lib}    package.\n ${EXTRA_INFO}"
+        fi
+    done
+}
+
 checkDependenciesXBase() {
 	echo "================================================="
 	echo 'Searching for dependencies:'
@@ -633,7 +632,6 @@ checkDependenciesLogos10() {
 	echo "Checking dependencies for Logos 10."
 	check_commands mktemp patch lsof wget find sed grep ntlm_auth;
 	echo "All dependencies found. Starting Zenity GUI…"
-	#==========================
 }
 
 checkDependenciesLogos9() {
@@ -641,9 +639,9 @@ checkDependenciesLogos9() {
 	check_commands mktemp patch lsof wget xwd find sed grep cabextract ntlm_auth;
 	echo "All dependencies found. Starting Zenity GUI…"
 }
+## END CHECK DEPENDENCIES FUNCTIONS
 
-#======= Main =============
-
+## BEGIN INSTALL OPTIONS FUNCTIONS
 chooseProduct() {
 	productChoice="$(zenity --width=700 --height=310 \
 		--title="Question: Should the script install Logos or Verbum?" \
@@ -689,7 +687,6 @@ chooseVersion() {
 			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS10/Installer/10.1.0.0046/${FLPRODUCT}-x64.msi" ; fi
 			LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
 			LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
-
 			;;
 		*9)
 			checkDependenciesLogos9;
@@ -762,7 +759,6 @@ chooseInstallMethod() {
 				chmod +x "${APPDIR}/${WINE64_APPIMAGE_FULL_FILENAME}"
 				echo "Using: $(${WINE_EXE} --version)"
 				echo "================================================="
-				#-------------------------
 				;;
 			*)
 				gtk_fatal_error "Installation canceled!"
@@ -825,7 +821,6 @@ chooseInstallMethod() {
 		if [ -z "${NO_APPIMAGE}" ] ; then
 			echo "================================================="
 			echo "Using AppImage: ${SET_APPIMAGE_FILENAME}"
-			#-------------------------
 			# Geting the AppImage:
 			if [ -f "${DOWNLOADED_RESOURCES}/${SET_APPIMAGE_FILENAME}" ]; then
 				echo "${SET_APPIMAGE_FILENAME} exist. Using it…"
@@ -840,16 +835,14 @@ chooseInstallMethod() {
 			chmod +x "${APPDIR}/${SET_APPIMAGE_FILENAME}"
 			echo "Using: $(${WINE_EXE} --version)"
 			echo "================================================="
-			#-------------------------
 		fi
-		#-------------------------------------------------
 	else
 		echo "TARGETVERSION not set."
 		exit 1;
 	fi
 }
-#-------------------------------------------------
-
+## END INSTALL OPTIONS FUNCTIONS
+## BEGIN WINE BOTTLE AND WINETRICKS FUNCTIONS
 prepareWineBottle() {
 	gtk_continue_question "Now the script will create and configure the Wine Bottle at ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
 	echo "${WINE_EXE} wineboot"
@@ -913,7 +906,6 @@ setWinetricks() {
 echo "Winetricks is ready to be used."
 }
 
-#-------------------------------------------------
 winetricks_install() {
 	echo "winetricks ${*}"
 	pipe_winetricks="$(mktemp)"
@@ -973,7 +965,8 @@ getPremadeWineBottle() {
 	tar xzf "${WORKDIR}"/"${WINE64_BOTTLE_TARGZ_NAME}" -C "${APPDIR}"/ | zenity --progress --title="Extracting…" --text="Extracting: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	echo "================================================="
 }
-
+## END WINE BOTTLE AND WINETRICKS FUNCTIONS
+## BEGIN LOGOS INSTALL FUNCTIONS
 getLogosExecutable() {
 	gtk_continue_question "Now the script will download and install ${FLPRODUCT} Bible at ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
@@ -1047,6 +1040,8 @@ EOF
 
 	installMSI;
 }
+## END LOGOS INSTALL FUNCTIONS
+# END FUNCTION DECLARATIONS
 
 main () {
 	echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR."
@@ -1092,4 +1087,3 @@ main () {
 
 main;
 
-#==========================
