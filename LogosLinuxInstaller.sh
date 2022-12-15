@@ -39,6 +39,7 @@ Installs ${FLPRODUCT} Bible Software with Wine in an AppImage on Linux.
 Options:
     -h   --help         Prints this help message and exit.
     -v   --version      Prints version information and exit.
+    -D   --debug        Makes Wine print out additional info.
     -f   --force-root   Sets LOGOS_FORCE_ROOT to true, which permits
                         the root user to run the script.
 EOF
@@ -56,15 +57,18 @@ do
         --help)      set -- "$@" -h ;;
         --version)   set -- "$@" -V ;;
 		--force-root) set -- "$@" -f ;;
+		--debug)     set -- "$@" -D ;;
         *)           set -- "$@" "$arg" ;;
     esac
 done
-OPTSTRING=':hvf' # Available options
+OPTSTRING=':hvDf' # Available options
 
 # First loop: set variable options which may affect other options
 while getopts "$OPTSTRING" opt; do
 	case $opt in
-		f) export LOGOS_FORCE_ROOT="1"; ;;
+		f)	export LOGOS_FORCE_ROOT="1"; ;;
+		D)	export DEBUG=true;
+			WINEDEBUG=""; ;;
 		\?) echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
 		:)  echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 && exit ;;
 	esac
@@ -95,6 +99,10 @@ fi
 # END DIE IF ROOT
 
 # BEGIN FUNCTION DECLARATIONS
+debug() {
+	[[ $DEBUG = true ]] && return 0 || return 1
+}
+
 die() { echo >&2 "$*"; exit 1; };
 
 have_dep() {
@@ -1045,7 +1053,8 @@ EOF
 
 main () {
 	echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR."
-	
+	debug && echo "Debug mode enabled."
+
 	# BEGIN PREPARATION
 	checkDependenciesXBase; # We verify the user is running a graphical UI.
 	chooseProduct; # We ask user for his Faithlife product's name and set variables.
