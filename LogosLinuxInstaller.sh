@@ -16,13 +16,13 @@ if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then WINE64_APPIMAGE_FULL_URL="https://
 if [ -z "${WINE64_APPIMAGE_FULL_FILENAME}" ]; then WINE64_APPIMAGE_FULL_FILENAME="$(basename "${WINE64_APPIMAGE_FULL_URL}")"; export WINE64_APPIMAGE_FULL_FILENAME; fi
 if [ -z "${WINE64_APPIMAGE_VERSION}" ]; then WINE64_APPIMAGE_VERSION="v7.18-staging"; export WINE64_APPIMAGE_VERSION; fi
 if [ -z "${WINE64_APPIMAGE_URL}" ]; then WINE64_APPIMAGE_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/v10.0-1/wine-staging_7.18-x86_64.AppImage"; export WINE64_APPIMAGE_URL; fi
-if [ -z "${WINE64_APPIMAGE_FILENAME}" ]; then WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}")"; export WINE64_APPIMAGE_FILENAME; fi
+if [ -z "${WINE64_APPIMAGE_FILENAME}" ]; then WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}" .AppImage)"; export WINE64_APPIMAGE_FILENAME; fi
 if [ -z "${APPIMAGE_LINK_SELECTION_NAME}" ]; then APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"; fi
 if [ -z "${WINETRICKS_URL}" ]; then WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/5904ee355e37dff4a3ab37e1573c56cffe6ce223/src/winetricks"; export WINETRICKS_URL; fi
 if [ -z "${WINETRICKS_DOWNLOADER+x}" ]; then WINETRICKS_DOWNLOADER="wget" ; export WINETRICKS_DOWNLOADER; fi
 if [ -z "${WINETRICKS_UNATTENDED+x}" ]; then WINETRICKS_UNATTENDED="" ; export WINETRICKS_UNATTENDED; fi
 if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d)"; export WORKDIR ; fi
-if [ -z "${DOWNLOADED_RESOURCES}" ]; then DOWNLOADED_RESOURCES="${PWD}" ; export DOWNLOADED_RESOURCES; fi
+if [ -z "${PRESENT_WORKING_DIRECTORY}" ]; then PRESENT_WORKING_DIRECTORY="${PWD}" ; export PRESENT_WORKING_DIRECTORY; fi
 if [ -z "${LOGOS_FORCE_ROOT+x}" ]; then export LOGOS_FORCE_ROOT="" ; fi
 if [ -z "${WINEBOOT_GUI+x}" ]; then export WINEBOOT_GUI="" ; fi
 if [ -z "${EXTRA_INFO}" ]; then EXTRA_INFO="Usually is necessary: winbind cabextract libjpeg8."; export EXTRA_INFO; fi
@@ -755,12 +755,16 @@ chooseInstallMethod() {
 				export PATH="${APPDIR_BINDIR}":"${PATH}"
 
 				# Geting the AppImage:
-				if [ -f "${DOWNLOADED_RESOURCES}/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
+				if [ -f "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
 					echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
-					cp "${DOWNLOADED_RESOURCES}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+					cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+				elif [ -f "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
+					echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
+					cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 				else
 					echo "${WINE64_APPIMAGE_FULL_FILENAME} does not exist. Downloading…"
-					gtk_download "${WINE64_APPIMAGE_FULL_URL}" "${WORKDIR}"
+					gtk_download "${WINE64_APPIMAGE_FULL_URL}" "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}"
+					cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 					mv "${WORKDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR}" | zenity --progress --title="Moving…" --text="Moving: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 				fi
 
@@ -830,9 +834,9 @@ chooseInstallMethod() {
 			echo "================================================="
 			echo "Using AppImage: ${SET_APPIMAGE_FILENAME}"
 			# Geting the AppImage:
-			if [ -f "${DOWNLOADED_RESOURCES}/${SET_APPIMAGE_FILENAME}" ]; then
+			if [ -f "${PRESENT_WORKING_DIRECTORY}/${SET_APPIMAGE_FILENAME}" ]; then
 				echo "${SET_APPIMAGE_FILENAME} exist. Using it…"
-				cp "${DOWNLOADED_RESOURCES}/${SET_APPIMAGE_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${SET_APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
+				cp "${PRESENT_WORKING_DIRECTORY}/${SET_APPIMAGE_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${SET_APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 			else
 				echo "${SET_APPIMAGE_FILENAME} does not exist. Downloading…"
 				gtk_download "${SET_APPIMAGE_URL}" "${WORKDIR}"
@@ -873,9 +877,9 @@ wine_reg_install() {
 
 downloadWinetricks() {
 	echo "Downloading winetricks from the Internet…"
-	if [ -f "${DOWNLOADED_RESOURCES}/winetricks" ]; then
+	if [ -f "${PRESENT_WORKING_DIRECTORY}/winetricks" ]; then
 		echo "A winetricks binary has already been downloaded. Using it…"
-		cp "${DOWNLOADED_RESOURCES}/winetricks" "${WORKDIR}"
+		cp "${PRESENT_WORKING_DIRECTORY}/winetricks" "${WORKDIR}"
 	else
 		echo "winetricks does not exist. Downloading…"
 		gtk_download "${WINETRICKS_URL}" "${WORKDIR}"
@@ -961,9 +965,9 @@ getPremadeWineBottle() {
 	WINE64_BOTTLE_TARGZ_URL="https://github.com/ferion11/wine64_bottle_dotnet/releases/download/v5.11b/wine64_bottle.tar.gz"
 	WINE64_BOTTLE_TARGZ_NAME="wine64_bottle.tar.gz"
 	echo "Installing pre-made wineBottle 64bits…"
-	if [ -f "${DOWNLOADED_RESOURCES}/${WINE64_BOTTLE_TARGZ_NAME}" ]; then
+	if [ -f "${PRESENT_WORKING_DIRECTORY}/${WINE64_BOTTLE_TARGZ_NAME}" ]; then
 		echo "${WINE64_BOTTLE_TARGZ_NAME} exist. Using it…"
-		cp "${DOWNLOADED_RESOURCES}/${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+		cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 	else
 		echo "${WINE64_BOTTLE_TARGZ_NAME} does not exist. Downloading…"
 		gtk_download "${WINE64_BOTTLE_TARGZ_URL}" "${WORKDIR}"
@@ -981,17 +985,21 @@ getLogosExecutable() {
 	echo "================================================="
 	# Geting and install ${FLPRODUCT}Bible:
 	echo "Installing ${FLPRODUCT}Bible 64bits…"
-	if [ -f "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" ]; then
+	if [ -f "${PRESENT_WORKING_DIRECTORY}/${LOGOS64_MSI}" ]; then
 		echo "${LOGOS64_MSI} exists. Using it…"
-		cp "${DOWNLOADED_RESOURCES}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+		cp "${PRESENT_WORKING_DIRECTORY}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+	elif [ -f "${HOME}/Downloads/${LOGOS64_MSI}" ]; then
+		echo "${LOGOS64_MSI} exists. Using it…"
+		cp "${HOME}/Downloads/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 	else
 		echo "${LOGOS64_MSI} does not exist. Downloading…"
-		gtk_download "${LOGOS64_URL}" "${WORKDIR}"
+		gtk_download "${LOGOS64_URL}" "${HOME}/Downloads/${LOGOS64_MSI}"
+		cp "${HOME}/Downloads/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 	fi
 }
 
 installMSI() {
-	echo "${WINE_EXE} msiexec /i ${LOGOS64_MSI}"
+	echo "Running: ${WINE_EXE} msiexec /i ${WORKDIR}/${LOGOS64_MSI}"
 	${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
 }
 
