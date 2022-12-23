@@ -1,8 +1,12 @@
 # Changelog
 * v10.0-4
   - Fix #36.
+  - Fix #81.
   - Fix #97.
   - Fix #99.
+  - Fix #107.
+  - Added `-f|--force-root`.
+  - Added `-D|--debug`.
 * v10.0-3
   - Fix #93.
 * v10.0-2
