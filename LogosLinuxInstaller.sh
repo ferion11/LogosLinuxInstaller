@@ -980,27 +980,33 @@ getPremadeWineBottle() {
 ## END WINE BOTTLE AND WINETRICKS FUNCTIONS
 ## BEGIN LOGOS INSTALL FUNCTIONS
 getLogosExecutable() {
-	gtk_continue_question "Now the script will download and install ${FLPRODUCT} Bible at ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
+	# This VAR is used to verify the downloaded MSI is latest
+	LOGOS_EXECUTABLE="${FLPRODUCT}_v${LOGOS_VERSION}-x64.msi"
+
+	gtk_continue_question "Now the script will check for the MSI installer. Then it will download and install ${FLPRODUCT} Bible at ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
 	echo "================================================="
-	# Geting and install ${FLPRODUCT}Bible:
+	# Geting and install ${FLPRODUCT} Bible
+	# First check current directory to see if the .MSI is present; if not, check user's Downloads/; if not, download it new. Once found, copy it to WORKDIR for future use.
 	echo "Installing ${FLPRODUCT}Bible 64bits…"
-	if [ -f "${PRESENT_WORKING_DIRECTORY}/${LOGOS64_MSI}" ]; then
-		echo "${LOGOS64_MSI} exists. Using it…"
-		cp "${PRESENT_WORKING_DIRECTORY}/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
-	elif [ -f "${HOME}/Downloads/${LOGOS64_MSI}" ]; then
-		echo "${LOGOS64_MSI} exists. Using it…"
-		cp "${HOME}/Downloads/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+	if [ -f "${PRESENT_WORKING_DIRECTORY}/${LOGOS_EXECUTABLE}" ]; then
+		echo "${LOGOS_EXECUTABLE} exists. Using it…"
+		cp "${PRESENT_WORKING_DIRECTORY}/${LOGOS_EXECUTABLE}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS_EXECUTABLE}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+	elif [ -f "${HOME}/Downloads/${LOGOS_EXECUTABLE}" ]; then
+		echo "${LOGOS_EXECUTABLE} exists. Using it…"
+		cp "${HOME}/Downloads/${LOGOS_EXECUTABLE}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS_EXECUTABLE}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 	else
-		echo "${LOGOS64_MSI} does not exist. Downloading…"
+		echo "${LOGOS_EXECUTABLE} does not exist. Downloading…"
 		gtk_download "${LOGOS64_URL}" "${HOME}/Downloads/${LOGOS64_MSI}"
-		cp "${HOME}/Downloads/${LOGOS64_MSI}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS64_MSI}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+		mv "${HOME}/Downloads/${LOGOS64_MSI}" "${HOME}/Downloads/${LOGOS_EXECUTABLE}"
+		cp "${HOME}/Downloads/${LOGOS_EXECUTABLE}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS_EXECUTABLE}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
 	fi
 }
 
 installMSI() {
-	echo "Running: ${WINE_EXE} msiexec /i ${WORKDIR}/${LOGOS64_MSI}"
-	${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS64_MSI}"
+	# Execute the .MSI
+	echo "Running: ${WINE_EXE} msiexec /i ${WORKDIR}/${LOGOS_EXECUTABLE}"
+	${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS_EXECUTABLE}"
 }
 
 installLogos9() {	
