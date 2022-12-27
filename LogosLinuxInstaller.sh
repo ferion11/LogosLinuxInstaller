@@ -879,43 +879,54 @@ downloadWinetricks() {
 	echo "Downloading winetricks from the Internet…"
 	if [ -f "${PRESENT_WORKING_DIRECTORY}/winetricks" ]; then
 		echo "A winetricks binary has already been downloaded. Using it…"
-		cp "${PRESENT_WORKING_DIRECTORY}/winetricks" "${WORKDIR}"
+		cp "${PRESENT_WORKING_DIRECTORY}/winetricks" "${APPDIR_BINDIR}"
+	elif [ -f "${HOME}/Downloads/winetricks" ]; then
+		echo "A winetricks binary has already been downloaded. Using it…"
+		cp "${HOME}/Downloads/winetricks" "${APPDIR_BINDIR}"
 	else
 		echo "winetricks does not exist. Downloading…"
-		gtk_download "${WINETRICKS_URL}" "${WORKDIR}"
+		gtk_download "${WINETRICKS_URL}" "${APPDIR_BINDIR}"
 	fi
-	chmod +x "${WORKDIR}/winetricks"
+	chmod 755 "${APPDIR_BINDIR}/winetricks"
 }
 
 setWinetricks() {
-	# TODO: Do not ask if winetricks version is older than 20220411; in that case, default to an internet install.
+	# Check if local winetricks version available; else, download it
 	if [ "$(which winetricks)" ]; then
-		winetricksChoice="$(zenity --width=700 --height=310 \
-		--title="Question: Should the script use local winetricks or download winetricks fresh?" \
-		--text="This script needs to set some Wine options that help or make ${FLPRODUCT} run on Linux. Please select whether to use your local winetricks version or a fresh install." \
-		--list --radiolist --column "S" --column "Description" \
-		TRUE "1- Use local winetricks." \
-		FALSE "2- Download winetricks from the Internet." )"
+		# Check if local winetricks version is up-to-date; if so, offer to use it or to download; else, download it
+		LOCAL_WINETRICKS_VERSION=$(winetricks --version | awk -F' ' '{print $1}')
+		if [ "${LOCAL_WINETRICKS_VERSION}" -ge "20220411" ]; then
+			winetricksChoice="$(zenity --width=700 --height=310 \
+			--title="Question: Should the script use local winetricks or download winetricks fresh?" \
+			--text="This script needs to set some Wine options that help or make ${FLPRODUCT} run on Linux. Please select whether to use your local winetricks version or a fresh install." \
+			--list --radiolist --column "S" --column "Description" \
+			TRUE "1- Use local winetricks." \
+			FALSE "2- Download winetricks from the Internet." )"
 
-		case "${winetricksChoice}" in
-			1*)
-				echo "Setting winetricks to the local binary…"
-				if [ -z "${WINETRICKSBIN}" ]; then WINETRICKSBIN="$(which winetricks)"; fi
-				;;
-			2*)
-				downloadWinetricks;
-				if [ -z "${WINETRICKSBIN}" ]; then WINETRICKSBIN="${WORKDIR}/winetricks"; fi
-				;;
-			*)
-				gtk_fatal_error "Installation canceled!"
-		esac
+			case "${winetricksChoice}" in
+				1*) 
+					echo "Setting winetricks to the local binary…"
+					if [ -z "${WINETRICKSBIN}" ]; then WINETRICKSBIN="$(which winetricks)"; fi
+					;;
+				2*) 
+					downloadWinetricks;
+					if [ -z "${WINETRICKSBIN}" ]; then WINETRICKSBIN="${APPDIR_BINDIR}/winetricks"; fi
+					;;
+				*)  
+					gtk_fatal_error "Installation canceled!"
+				esac
+		else
+			echo "Local winetricks too old. Downloading up-to-date winetricks from the Internet…"
+			downloadWinetricks;
+			export WINETRICKSBIN="${APPDIR_BINDIR}/winetricks"
+		fi
 	else
 		echo "Local winetricks not found. Downloading winetricks from the Internet…"
 		downloadWinetricks;
-		export WINETRICKSBIN="${WORKDIR}/winetricks"
+		export WINETRICKSBIN="${APPDIR_BINDIR}/winetricks"
 	fi
 
-echo "Winetricks is ready to be used."
+	echo "Winetricks is ready to be used."
 }
 
 winetricks_install() {
