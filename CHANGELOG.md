@@ -4,7 +4,10 @@
   - Fix #81.
   - Fix #97.
   - Fix #99.
+  - Fix #103.
   - Fix #107.
+  - Fix #109.
+  - Fix #112.
   - Added `-f|--force-root`.
   - Added `-D|--debug`.
 * v10.0-3
