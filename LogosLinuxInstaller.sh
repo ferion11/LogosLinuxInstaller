@@ -991,22 +991,22 @@ getLogosExecutable() {
 	echo "Installing ${FLPRODUCT}Bible 64bits…"
 	if [ -f "${PRESENT_WORKING_DIRECTORY}/${LOGOS_EXECUTABLE}" ]; then
 		echo "${LOGOS_EXECUTABLE} exists. Using it…"
-		cp "${PRESENT_WORKING_DIRECTORY}/${LOGOS_EXECUTABLE}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS_EXECUTABLE}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+		cp "${PRESENT_WORKING_DIRECTORY}/${LOGOS_EXECUTABLE}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS_EXECUTABLE}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	elif [ -f "${HOME}/Downloads/${LOGOS_EXECUTABLE}" ]; then
 		echo "${LOGOS_EXECUTABLE} exists. Using it…"
-		cp "${HOME}/Downloads/${LOGOS_EXECUTABLE}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS_EXECUTABLE}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+		cp "${HOME}/Downloads/${LOGOS_EXECUTABLE}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS_EXECUTABLE}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	else
 		echo "${LOGOS_EXECUTABLE} does not exist. Downloading…"
 		gtk_download "${LOGOS64_URL}" "${HOME}/Downloads/${LOGOS64_MSI}"
 		mv "${HOME}/Downloads/${LOGOS64_MSI}" "${HOME}/Downloads/${LOGOS_EXECUTABLE}"
-		cp "${HOME}/Downloads/${LOGOS_EXECUTABLE}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS_EXECUTABLE}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+		cp "${HOME}/Downloads/${LOGOS_EXECUTABLE}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${LOGOS_EXECUTABLE}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
 	fi
 }
 
 installMSI() {
 	# Execute the .MSI
-	echo "Running: ${WINE_EXE} msiexec /i ${WORKDIR}/${LOGOS_EXECUTABLE}"
-	${WINE_EXE} msiexec /i "${WORKDIR}"/"${LOGOS_EXECUTABLE}"
+	echo "Running: ${WINE_EXE} msiexec /i ${APPDIR}/${LOGOS_EXECUTABLE}"
+	${WINE_EXE} msiexec /i "${APPDIR}"/"${LOGOS_EXECUTABLE}"
 }
 
 installLogos9() {	
