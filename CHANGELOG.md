@@ -1,19 +1,23 @@
 # Changelog
 * v10.0-4
-  - Fix #36.
-  - Fix #81.
-  - Fix #97.
-  - Fix #99.
-  - Fix #103.
-  - Fix #107.
-  - Fix #109.
-  - Fix #112.
-  - Added `-f|--force-root`.
-  - Added `-D|--debug`.
+  - [T. H. Wright]
+    - Fix #36.
+    - Fix #81.
+    - Fix #97.
+    - Fix #99.
+    - Fix #102.
+    - Fix #103.
+    - Fix #107.
+    - Fix #109.
+    - Fix #112.
+    - Added `-f|--force-root`.
+    - Added `-D|--debug`.
 * v10.0-3
-  - Fix #93.
+  - [T. H. Wright]
+    - Fix #93.
 * v10.0-2
-  - Fix #92.
+  - [T. H. Wright]
+    - Fix #92.
 * v10.0-1
   - Install DLL d3dcompiler_47 (jg00dman, thw26)
   - L10: Change winetricks URL

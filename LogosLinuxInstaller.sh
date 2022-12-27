@@ -117,13 +117,13 @@ clean_all() {
 
 light_wineserver_wait() {
 	echo "* Waiting for ${WINE_EXE} to end properly…"
-	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly…" --pulsate --auto-close --no-cancel
+	${WINESERVER_EXE} -w | zenity --progress --title="Waiting for ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly…" --pulsate --auto-close --no-cancel
 }
 
 heavy_wineserver_wait() {
 	echo "* Waiting for ${WINE_EXE} to end properly…"
 	wait_process_using_dir "${WINEPREFIX}" | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly…" --pulsate --auto-close --no-cancel
-	wineserver -w | zenity --progress --title="Waiting ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly…" --pulsate --auto-close --no-cancel
+	${WINESERVER_EXE} -w | zenity --progress --title="Waiting for ${WINE_EXE} proper end" --text="Waiting for ${WINE_EXE} to end properly…" --pulsate --auto-close --no-cancel
 }
 
 ## BEGIN ZENITY FUNCTIONS
@@ -314,7 +314,7 @@ IFS=$'\n'
 #-------------------------------------------------
 
 #-------------------------------------------------
-[ -x "\${HERE}/data/bin/${WINE_EXE}" ] && export PATH="\${HERE}/data/bin:\${PATH}"
+[ -x "\${HERE}/data/bin/wine64" ] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win64
 export WINEPREFIX="\${HERE}/data/wine64_bottle"
 #-------
@@ -324,7 +324,7 @@ LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILEN
 
 #-------------------------------------------------
 case "\${1}" in
-	"${WINE_EXE}"|"wineserver"|"winetricks"|"selectAppImage")
+	"${WINE_EXE}"|"${WINESERVER_EXE}"|"winetricks"|"selectAppImage")
 		"\${HERE}/controlPanel.sh" "\$@"
 		exit 0
 		;;
@@ -337,10 +337,10 @@ case "\${1}" in
 			exit 1
 		fi
 		echo "* Closing anything running in this wine bottle:"
-		wineserver -k
+		"${WINESERVER_EXE}" -k
 		echo "* Running the indexer:"
-		${WINE_EXE} "\${LOGOS_INDEXER_EXE}"
-		wineserver -w
+		"${WINE_EXE}" "\${LOGOS_INDEXER_EXE}"
+		"${WINESERVER_EXE}" -w
 		echo "======= indexing of ${FLPRODUCT}Bible run done! ======="
 		exit 0
 		;;
@@ -365,15 +365,15 @@ case "\${1}" in
 		;;
 	"logsOn")
 		echo "======= enable ${FLPRODUCT}Bible logging only: ======="
-		${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
-		wineserver -w
+		"${WINE_EXE}" reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
+		"${WINESERVER_EXE}" -w
 		echo "======= enable ${FLPRODUCT}Bible logging done! ======="
 		exit 0
 		;;
 	"logsOff")
 		echo "======= disable ${FLPRODUCT}Bible logging only: ======="
-		${WINE_EXE} reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0000 /f
-		wineserver -w
+		"${WINE_EXE}" reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0000 /f
+		"${WINESERVER_EXE}" -w
 		echo "======= disable ${FLPRODUCT}Bible logging done! ======="
 		exit 0
 		;;
@@ -419,8 +419,8 @@ if [ -z "\${LOGOS_EXE}" ] ; then
 	exit 0
 fi
 
-${WINE_EXE} "\${LOGOS_EXE}"
-wineserver -w
+"${WINE_EXE}" "\${LOGOS_EXE}"
+"${WINESERVER_EXE}" -w
 #-------------------------------------------------
 
 #------------- Ending block ----------------------
@@ -446,7 +446,7 @@ IFS=$'\n'
 #-------------------------------------------------
 
 #-------------------------------------------------
-[ -x "\${HERE}/data/bin/${WINE_EXE}" ] && export PATH="\${HERE}/data/bin:\${PATH}"
+[ -x "\${HERE}/data/bin/wine64" ] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win64
 export WINEPREFIX="\${HERE}/data/wine64_bottle"
 #-------
@@ -456,12 +456,12 @@ export WINEPREFIX="\${HERE}/data/wine64_bottle"
 
 #-------------------------------------------------
 case "\${1}" in
-	"${WINE_EXE}")
-		# ${WINE_EXE} Run:
-		echo "======= Running ${WINE_EXE} only: ======="
+	"wine64")
+		# wine64 Run:
+		echo "======= Running wine64 only: ======="
 		shift
-		${WINE_EXE} "\$@"
-		wineserver -w
+		"${WINE_EXE}" "\$@"
+		"${WINESERVER_EXE}" -w
 		echo "======= ${WINE_EXE} run done! ======="
 		exit 0
 		;;
@@ -469,7 +469,7 @@ case "\${1}" in
 		# wineserver Run:
 		echo "======= Running wineserver only: ======="
 		shift
-		wineserver "\$@"
+		"${WINESERVER_EXE}" "\$@"
 		echo "======= wineserver run done! ======="
 		exit 0
 		;;
@@ -481,8 +481,8 @@ case "\${1}" in
 			WINETRICKSBIN="${APPDIR_BINDIR}/winetricks"
 		else WINETRICKSBIN="$(which winetricks)"
 		fi
-		"\${WINETRICKSBIN}" \$@"
-		wineserver -w
+		"\${WINETRICKSBIN}" "\$@"
+		"${WINESERVER_BIN}" -w
 		echo "======= winetricks run done! ======="
 		exit 0
 		;;
@@ -513,7 +513,7 @@ case "\${1}" in
 				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-				(DISPLAY="" "\${HERE}/controlPanel.sh" ${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
+				(DISPLAY="" "\${HERE}/controlPanel.sh" "${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
 				echo "======= AppImage Selection run done with external link! ======="
 				exit 0
 			fi
@@ -524,7 +524,7 @@ case "\${1}" in
 		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-		(DISPLAY="" "\${HERE}/controlPanel.sh" ${WINE_EXE} wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
+		(DISPLAY="" "\${HERE}/controlPanel.sh" "${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
 		echo "======= AppImage Selection run done! ======="
 		exit 0
 		;;
@@ -532,8 +532,8 @@ case "\${1}" in
 		echo "No arguments parsed."
 esac
 
-${WINE_EXE} control
-wineserver -w
+"${WINE_EXE}" control
+"${WINESERVER_EXE}" -w
 #-------------------------------------------------
 
 #------------- Ending block ----------------------
@@ -548,10 +548,8 @@ EOF
 
 
 make_skel() {
-# ${1} - WINE_EXE name: wine or wine64
-# ${2} - SET_APPIMAGE_FILENAME
-	export WINE_EXE="${1}"
-	export SET_APPIMAGE_FILENAME="${2}"
+# ${1} - SET_APPIMAGE_FILENAME
+	export SET_APPIMAGE_FILENAME="${1}"
 
 	echo "* Making skel64 inside ${INSTALLDIR}"
 	mkdir -p "${INSTALLDIR}"
@@ -560,7 +558,7 @@ make_skel() {
 
 	# Making the links
 	cd "${APPDIR_BINDIR}" || die "ERROR: Can't open dir: ${APPDIR_BINDIR}"
-	ln -s "../${SET_APPIMAGE_FILENAME}" "${APPIMAGE_LINK_SELECTION_NAME}"
+	ln -s "${SET_APPIMAGE_FILENAME}" "${APPDIR_BINDIR}/${APPIMAGE_LINK_SELECTION_NAME}"
 	ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine
 	ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wine64
 	ln -s "${APPIMAGE_LINK_SELECTION_NAME}" wineserver
@@ -589,6 +587,7 @@ make_skel() {
 
 ## BEGIN CHECK DEPENDENCIES FUNCTIONS
 check_commands() {
+	#TODO: Check all commands before erroring out. See #113. Use array?
     for cmd in "$@"; do
         if have_dep "${cmd}"; then
             echo "* command ${cmd} is installed!"
@@ -681,26 +680,27 @@ chooseVersion() {
 		FALSE "${FLPRODUCT} 9" \
 		FALSE "Exit." )"
 	case "${versionChoice}" in
-		*10)
+		*"10")
 			checkDependenciesLogos10;
 			export TARGETVERSION="10";
 			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS10/Installer/10.1.0.0046/${FLPRODUCT}-x64.msi" ; fi
 			LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
 			LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
 			;;
-		*9)
+		*"9")
 			checkDependenciesLogos9;
 			export TARGETVERSION="9";
 			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.17.0.0010/${FLPRODUCT}-x64.msi" ; fi
 			LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
 			LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
 			;;
-		3*)
+		"Exit.")
 			exit
 			;;
 		*)
 			gtk_fatal_error "Installation canceled!"
 	esac
+
 	if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/${FLPRODUCT}Bible${TARGETVERSION}" ; fi
 	export APPDIR="${INSTALLDIR}/data"
 	export APPDIR_BINDIR="${APPDIR}/bin"
@@ -711,139 +711,171 @@ chooseVersion() {
 	fi              
 }
 
-chooseInstallMethod() {
+wineBinaryVersionCheck() {
+	# Does not check for Staging. Will not implement: expecting merging of commits in time.
+	TESTBINARY="${1}"
+
 	if [ "${TARGETVERSION}" == "10" ]; then
-		installationChoice="$(zenity --width=700 --height=310 \
-			--title="Question: Install ${FLPRODUCT} Bible using script ${LOGOS_SCRIPT_VERSION}" \
-			--text="This script will create one directory in (which can be changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be an installation of ${FLPRODUCT}Bible v${LOGOS_VERSION} independent of other installations.\nPlease select the type of installation:" \
-			--list --radiolist --column "S" --column "Description" \
-			TRUE "Native Wine: Install ${FLPRODUCT} Bible ${TARGETVERSION} using native Wine64. WINE must be 7.18-staging or later. Stable or Devel do not work." \
-			FALSE "AppImage: Install ${FLPRODUCT} Bible ${TARGETVERSION} using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage." )"
-
-		case "${installationChoice}" in
-			"Native Wine:"*)
-				echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using the native Wine…"
-				export WINEARCH=win64
-				export WINEPREFIX="${APPDIR}/wine64_bottle"
-				export WINE_EXE="wine64"
-
-				# check for wine installation
-				WINE_VERSION_CHECK="$(${WINE_EXE} --version)"
-				[ -z "${WINE_VERSION_CHECK}" ] && gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
-				echo "Using: ${WINE_VERSION_CHECK}"
-
-				make_skel "${WINE_EXE}" "none.AppImage"
-				;;
-			"AppImage:"*)
-				echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using ${WINE64_APPIMAGE_FULL_VERSION} AppImage…"
-				export WINEARCH=win64
-				export WINEPREFIX="${APPDIR}/wine64_bottle"
-				export WINE_EXE="wine64"
-
-				make_skel "${WINE_EXE}" "${WINE64_APPIMAGE_FULL_FILENAME}"
-
-				# exporting PATH to internal use if using AppImage, doing backup too:
-				export OLD_PATH="${PATH}"
-				export PATH="${APPDIR_BINDIR}":"${PATH}"
-
-				# Geting the AppImage:
-				if [ -f "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
-					echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
-					cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-				elif [ -f "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
-					echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
-					cp "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-				else
-					echo "${WINE64_APPIMAGE_FULL_FILENAME} does not exist. Downloading…"
-					gtk_download "${WINE64_APPIMAGE_FULL_URL}" "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}"
-					cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-					mv "${WORKDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR}" | zenity --progress --title="Moving…" --text="Moving: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-				fi
-
-				chmod +x "${APPDIR}/${WINE64_APPIMAGE_FULL_FILENAME}"
-				echo "Using: $(${WINE_EXE} --version)"
-				echo "================================================="
-				;;
-			*)
-				gtk_fatal_error "Installation canceled!"
-		esac
-
+		WINE_MINIMUM="7.18"
 	elif [ "${TARGETVERSION}" == "9" ]; then
-		installationChoice="$(zenity --width=700 --height=310 \
-			--title="Question: Install ${FLPRODUCT} Bible using script ${LOGOS_SCRIPT_VERSION}" \
-			--text="This script will create one directory in (which can be changed by setting the INSTALLDIR variable):\n\"${INSTALLDIR}\"\nto be an installation of ${FLPRODUCT}Bible v${LOGOS_VERSION} independent of other installations.\nPlease select the type of installation:" \
-			--list --radiolist --column "S" --column "Description" \
-			TRUE "Native Wine: Fast install ${FLPRODUCT}Bible64 using the native Wine64 (default)." \
-			FALSE "AppImage: Fast install ${FLPRODUCT}Bible64 using Wine64 ${WINE64_APPIMAGE_FULL_VERSION} AppImage." )"
-			# FALSE "3- Fast install ${FLPRODUCT}Bible64 using Wine64 ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies."
-
-		case "${installationChoice}" in
-			"Native Wine:"*)
-				echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using the native Wine…"
-				export NO_APPIMAGE="1"
-				export WINEARCH=win64
-				export WINEPREFIX="${APPDIR}/wine64_bottle"
-				export WINE_EXE="wine64"
-
-				# check for wine installation
-				WINE_VERSION_CHECK="$(${WINE_EXE} --version)"
-				[ -z "${WINE_VERSION_CHECK}" ] && gtk_fatal_error "Wine64 not found! Please install native Wine64 first."
-				echo "Using: ${WINE_VERSION_CHECK}"
-
-				make_skel "${WINE_EXE}" "none.AppImage"
-				;;
-			"AppImage"*)
-				echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using ${WINE64_APPIMAGE_FULL_VERSION} AppImage…"
-				export WINEARCH=win64
-				export WINEPREFIX="${APPDIR}/wine64_bottle"
-				export WINE_EXE="wine64"
-
-				make_skel "${WINE_EXE}" "${WINE64_APPIMAGE_FULL_FILENAME}"
-				export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FULL_FILENAME}"
-				export SET_APPIMAGE_URL="${WINE64_APPIMAGE_FULL_URL}"
-				;;
-			3*)
-				echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using ${WINE64_APPIMAGE_VERSION} plain AppImage without dependencies…"
-				export WINEARCH=win64
-				export WINEPREFIX="${APPDIR}/wine64_bottle"
-				export WINE_EXE="wine64"
-
-				make_skel "${WINE_EXE}" "${WINE64_APPIMAGE_FILENAME}"
-				export SET_APPIMAGE_FILENAME="${WINE64_APPIMAGE_FILENAME}"
-				export SET_APPIMAGE_URL="${WINE64_APPIMAGE_URL}"
-				;;
-			*)
-				gtk_fatal_error "Installation canceled!"
-		esac
-
-		# exporting PATH to internal use if using AppImage, doing backup too:
-		if [ -z "${NO_APPIMAGE}" ] ; then
-			export OLD_PATH="${PATH}"
-			export PATH="${APPDIR_BINDIR}":"${PATH}"
-		fi
-
-		if [ -z "${NO_APPIMAGE}" ] ; then
-			echo "================================================="
-			echo "Using AppImage: ${SET_APPIMAGE_FILENAME}"
-			# Geting the AppImage:
-			if [ -f "${PRESENT_WORKING_DIRECTORY}/${SET_APPIMAGE_FILENAME}" ]; then
-				echo "${SET_APPIMAGE_FILENAME} exist. Using it…"
-				cp "${PRESENT_WORKING_DIRECTORY}/${SET_APPIMAGE_FILENAME}" "${APPDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${SET_APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-			else
-				echo "${SET_APPIMAGE_FILENAME} does not exist. Downloading…"
-				gtk_download "${SET_APPIMAGE_URL}" "${WORKDIR}"
-
-				mv "${WORKDIR}/${SET_APPIMAGE_FILENAME}" "${APPDIR}" | zenity --progress --title="Moving…" --text="Moving: ${SET_APPIMAGE_FILENAME}\ninto: ${APPDIR}" --pulsate --auto-close --no-cancel
-			fi
-
-			chmod +x "${APPDIR}/${SET_APPIMAGE_FILENAME}"
-			echo "Using: $(${WINE_EXE} --version)"
-			echo "================================================="
-		fi
+		WINE_MINIMUM="7.0"
 	else
 		echo "TARGETVERSION not set."
-		exit 1;
+		#gtk_fatal_error "TARGETVERSION not set."
 	fi
+
+	# Check if the binary is executable, of if TESTBINARY's version is ≥ WINE_MINIMUM, or if it is Proton, else remove.
+	if [ -x "${TESTBINARY}" ]; then
+		TESTWINEVERSION=$("$TESTBINARY" --version | awk -F' ' '{print $1}' | awk -F'-' '{print $2}');
+		if (( $(echo "$TESTWINEVERSION >= $WINE_MINIMUM" | bc -l) )); then
+			return 0;
+		elif [[ ${TESTBINARY} =~ .*"Proton - Experimental".* ]]; then
+			return 0;
+		# If it is a symlink, check its actual path. If it is Proton, let it pass.
+		elif [ -L "${TESTBINARY}" ]; then
+			TESTWINE=$(readlink -f "$TESTBINARY")
+			if [[ "${TESTWINE}" =~ .*"Proton - Experimental".* ]]; then
+				return 0;
+			fi
+		else
+			return 1;
+		fi
+	fi
+}
+
+checkPath() {
+	IFS=:
+	for dir in $PATH; do
+		if [ -x "$dir/$1" ]; then
+			echo "$dir/$1"
+		fi
+	done
+
+}
+
+createWineBinaryList() {
+	#TODO: Make optarg to add custom path to this array.
+	WINEBIN_PATH_ARRAY=( "/usr/local/bin" "$HOME/bin" "$HOME/PlayOnLinux/wine/linux-amd64/*/bin" "$HOME/.steam/steam/steamapps/common/Proton - Experimental/files/bin" )
+
+	# Temporarily modify PATH for additional WINE64 binaries.
+	for p in "${WINEBIN_PATH_ARRAY[@]}"; do
+		if [[ ":$PATH:" != *":${p}:"* ]] && [ -d "${p}" ]; then
+			PATH="$PATH:${p}"
+		fi
+	done
+
+	# Check each directory in PATH for wine64; add to list
+	checkPath wine64 > "${WORKDIR}/winebinaries"
+
+	cp "${WORKDIR}/winebinaries" "${WORKDIR}/winebinaries.bak"
+
+	# Check remaining binary versions
+	while read -r i; do
+		if wineBinaryVersionCheck "$i"; then
+			# Skip
+			:
+		else
+			sed -i "\@$i@d" "${WORKDIR}/winebinaries"
+		fi
+	done < "${WORKDIR}/winebinaries.bak";
+}
+
+chooseInstallMethod() {
+	
+	export WINEPREFIX="${APPDIR}/wine64_bottle"
+
+	createWineBinaryList;
+
+	WINEBIN_OPTIONS=()
+	while read -r line; do
+		# Set binary code, description, and path based on path
+		if [ -L "$line" ]; then
+			WINEOPT=$(readlink -f "$line")
+		else
+			WINEOPT="$line"
+		fi
+
+		if [[ "$WINEOPT" == *"/usr/bin/"* ]]; then
+			WINEOPT_CODE="System"
+			WINEOPT_DESCRIPTION="Use system's binary (i.e., /usr/bin/wine64). WINE must be 7.18-staging or later. Stable or Devel do not work."
+			WINEOPT_PATH="${line}"
+		elif [[ "$WINEOPT" == *"Proton"* ]]; then
+			WINEOPT_CODE="Proton"
+			WINEOPT_DESCRIPTION="Install using Steam's Proton fork of WINE."
+			WINEOPT_PATH="${line}"
+		elif [[ "$WINEOPT" == *"PlayOnLinux"* ]]; then
+			WINEOPT_CODE="PlayOnLinux"
+			WINEOPT_DESCRIPTION="Install using a PlayOnLinux WINE64 binary."
+			WINEOPT_PATH="${line}"
+		else
+			WINEOPT_CODE="Custom"
+			WINEOPT_DESCRIPTION="Use a WINE64 bianry from another directory."
+			WINEOPT_PATH="${line}"
+		fi
+
+		# Create wine binary option array
+		if [ -z "${WINEBIN_OPTIONS[0]}" ]; then
+			WINEBIN_OPTIONS+=(TRUE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
+		else
+			WINEBIN_OPTIONS+=(FALSE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
+		fi
+	done < "${WORKDIR}/winebinaries"
+
+	# Add AppImage to list
+	WINEBIN_OPTIONS+=(FALSE "AppImage" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" )
+
+	column_names=(--column "Choice" --column "Code" --column "Description" --column "Path")
+
+	installationChoice="$(zenity --width=1024 --height=480 \
+		--title="Question: Which WINE binary should be used to install ${FLPRODUCT}?" \
+		--text="This script will install ${FLPRODUCT} v${LOGOS_VERSION} in ${INSTALLDIR} independent of other installations.\n\nPlease select the WINE binary's path or install method:" \
+		--list --radiolist "${column_names[@]}" "${WINEBIN_OPTIONS[@]}" --print-column=2,3,4)";
+	
+	OIFS=$IFS
+	IFS='|' read -r -a installArray <<< "${installationChoice}"
+	IFS=$OIFS
+
+	export WINEBIN_CODE=${installArray[0]}
+	export WINE_EXE=${installArray[2]}
+
+	case "${WINEBIN_CODE}" in
+		"System"|"Proton"|"PlayOnLinux"|"Custom")
+			echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using a ${WINEBIN_CODE} WINE64 binary…"
+			make_skel "none.AppImage"
+			;;
+		"AppImage"*)
+			echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using ${WINE64_APPIMAGE_FULL_VERSION} AppImage…"
+			make_skel "${WINE64_APPIMAGE_FULL_FILENAME}"
+
+			# exporting PATH to internal use if using AppImage, doing backup too:
+			export OLD_PATH="${PATH}"
+			export PATH="${APPDIR_BINDIR}":"${PATH}"
+
+			# Geting the AppImage:
+			if [ -f "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
+				echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
+				cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}" --pulsate --auto-close --no-cancel
+			elif [ -f "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
+				echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
+				cp "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}" --pulsate --auto-close --no-cancel
+			else
+				echo "${WINE64_APPIMAGE_FULL_FILENAME} does not exist. Downloading…"
+				gtk_download "${WINE64_APPIMAGE_FULL_URL}" "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}"
+				cp "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}" --pulsate --auto-close --no-cancel
+			fi
+
+			chmod +x "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}"
+			echo "Using: $(${WINE_EXE} --version)"
+			if [ -x "$(dirname "${WINE_EXE}")/wineserver" ]; then
+				WINESERVER_EXE="$(dirname "${WINE_EXE}")/wineserver"; export WINESERVER_EXE;
+			else
+				gtk_fatal_error "$(dirname "${WINE_EXE}")/wineserver not found. Please either add it or create a symlink to it, and rerun."
+			fi
+
+			;;
+		*)
+			gtk_fatal_error "Installation canceled!"
+	esac
 }
 ## END INSTALL OPTIONS FUNCTIONS
 ## BEGIN WINE BOTTLE AND WINETRICKS FUNCTIONS
@@ -851,7 +883,7 @@ prepareWineBottle() {
 	gtk_continue_question "Now the script will create and configure the Wine Bottle at ${WINEPREFIX}. You can cancel the instalation of Mono. Do you wish to continue?"
 	echo "${WINE_EXE} wineboot"
 	if [ -z "${WINEBOOT_GUI}" ]; then
-		(DISPLAY="" ${WINE_EXE} wineboot) | zenity --progress --title="Waiting ${WINE_EXE} wineboot" --text="Waiting for ${WINE_EXE} wineboot…" --pulsate --auto-close --no-cancel
+		(DISPLAY="" ${WINE_EXE} wineboot) | zenity --progress --title="Waiting for ${WINE_EXE} wineboot" --text="Waiting for ${WINE_EXE} wineboot…" --pulsate --auto-close --no-cancel
 	else
 		${WINE_EXE} wineboot
 	fi
@@ -908,7 +940,7 @@ setWinetricks() {
 					gtk_fatal_error "Installation canceled!"
 				esac
 		else
-			echo "Local winetricks too old. Downloading up-to-date winetricks from the Internet…"
+			echo "The system's winetricks is too old. Downloading an up-to-date winetricks from the Internet…"
 			downloadWinetricks;
 			export WINETRICKSBIN="${APPDIR_BINDIR}/winetricks"
 		fi
@@ -942,12 +974,12 @@ winetricks_install() {
 	# NOTE: sometimes the process finishes before the wait command, giving the error code 127
 	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
 		if [ "${WINETRICKS_STATUS}" != "0" ] ; then
-			wineserver -k;
+				${WINESERVER_EXE} -k;
 			echo "ERROR on : winetricks ${*}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
 			gtk_fatal_error "The installation was cancelled because of sub-job failure!\n * winetricks ${*}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
 		fi
 	else
-		wineserver -k;
+		"${WINESERVER_EXE}" -k;
 		gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}";
 	fi
 	echo "winetricks ${*} DONE!";
@@ -1052,6 +1084,7 @@ EOF
 		winetricks_install -q tahoma
 		winetricks_install -q settings fontsmooth=rgb
 		winetricks_install -q settings win10
+		#TODO: Verify if d3dcompiler_47 helps Logos 9. See #68. If so, this should be added to Logos 9's install procedure.
 		winetricks_dll_install -q d3dcompiler_47;
 	else
 		winetricks_install corefonts
