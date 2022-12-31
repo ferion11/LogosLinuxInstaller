@@ -486,48 +486,48 @@ case "\${1}" in
 		echo "======= winetricks run done! ======="
 		exit 0
 		;;
-	"selectAppImage")
-		echo "======= Running AppImage Selection only: ======="
-		APPIMAGE_FILENAME=""
-		APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"
-
-		APPIMAGE_FULLPATH="\$(zenity --file-selection --filename="\${HERE}"/data/*.AppImage --file-filter='AppImage files | *.AppImage *.Appimage *.appImage *.appimage' --file-filter='All files | *')"
-		if [ -z "\${APPIMAGE_FULLPATH}" ]; then
-			echo "No *.AppImage file selected! exiting…"
-			exit 1
-		fi
-
-		APPIMAGE_FILENAME="\${APPIMAGE_FULLPATH##*/}"
-		APPIMAGE_DIR="\${APPIMAGE_FULLPATH%\${APPIMAGE_FILENAME}}"
-		APPIMAGE_DIR="\${APPIMAGE_DIR%?}"
-		#-------
-
-		if [ "\${APPIMAGE_DIR}" != "\${HERE}/data" ]; then
-			if zenity --question --width=300 --height=200 --text="Warning: The AppImage isn't at \"./data/ directory\"\!\nDo you want to copy the AppImage to the \"./data/\" directory keeping portability?" --title='Warning!'; then
-				[ -f "\${HERE}/data/\${APPIMAGE_FILENAME}" ] && rm -rf "\${HERE}/data/\${APPIMAGE_FILENAME}"
-				cp "\${APPIMAGE_FULLPATH}" "\${HERE}/data/"
-				APPIMAGE_FULLPATH="\${HERE}/data/\${APPIMAGE_FILENAME}"
-			else
-				echo "Warning: Linking \${APPIMAGE_FULLPATH} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
-				chmod +x "\${APPIMAGE_FULLPATH}"
-				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
-				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
-				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-				(DISPLAY="" "\${HERE}/controlPanel.sh" "${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
-				echo "======= AppImage Selection run done with external link! ======="
-				exit 0
-			fi
-		fi
-
-		echo "Info: Linking ../\${APPIMAGE_FILENAME} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
-		chmod +x "\${APPIMAGE_FULLPATH}"
-		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
-		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
-		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-		(DISPLAY="" "\${HERE}/controlPanel.sh" "${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
-		echo "======= AppImage Selection run done! ======="
-		exit 0
-		;;
+#	"selectAppImage")
+#		echo "======= Running AppImage Selection only: ======="
+#		APPIMAGE_FILENAME=""
+#		APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"
+#
+#		APPIMAGE_FULLPATH="\$(zenity --file-selection --filename="\${HERE}"/data/*.AppImage --file-filter='AppImage files | *.AppImage *.Appimage *.appImage *.appimage' --file-filter='All files | *')"
+#		if [ -z "\${APPIMAGE_FULLPATH}" ]; then
+#			echo "No *.AppImage file selected! exiting…"
+#			exit 1
+#		fi
+#
+#		APPIMAGE_FILENAME="\${APPIMAGE_FULLPATH##*/}"
+#		APPIMAGE_DIR="\${APPIMAGE_FULLPATH%\${APPIMAGE_FILENAME}}"
+#		APPIMAGE_DIR="\${APPIMAGE_DIR%?}"
+#		#-------
+#
+#		if [ "\${APPIMAGE_DIR}" != "\${HERE}/data" ]; then
+#			if zenity --question --width=300 --height=200 --text="Warning: The AppImage isn't at \"./data/ directory\"\!\nDo you want to copy the AppImage to the \"./data/\" directory keeping portability?" --title='Warning!'; then
+#				[ -f "\${HERE}/data/\${APPIMAGE_FILENAME}" ] && rm -rf "\${HERE}/data/\${APPIMAGE_FILENAME}"
+#				cp "\${APPIMAGE_FULLPATH}" "\${HERE}/data/"
+#				APPIMAGE_FULLPATH="\${HERE}/data/\${APPIMAGE_FILENAME}"
+#			else
+#				echo "Warning: Linking \${APPIMAGE_FULLPATH} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+#				chmod +x "\${APPIMAGE_FULLPATH}"
+#				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
+#				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+#				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
+#				(DISPLAY="" "\${HERE}/controlPanel.sh" "${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
+#				echo "======= AppImage Selection run done with external link! ======="
+#				exit 0
+#			fi
+#		fi
+#
+#		echo "Info: Linking ../\${APPIMAGE_FILENAME} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+#		chmod +x "\${APPIMAGE_FULLPATH}"
+#		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
+#		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
+#		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
+#		(DISPLAY="" "\${HERE}/controlPanel.sh" "${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
+#		echo "======= AppImage Selection run done! ======="
+#		exit 0
+#		;;
 	*)
 		echo "No arguments parsed."
 esac
@@ -865,17 +865,19 @@ chooseInstallMethod() {
 			fi
 
 			chmod +x "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}"
-			echo "Using: $(${WINE_EXE} --version)"
-			if [ -x "$(dirname "${WINE_EXE}")/wineserver" ]; then
-				WINESERVER_EXE="$(dirname "${WINE_EXE}")/wineserver"; export WINESERVER_EXE;
-			else
-				gtk_fatal_error "$(dirname "${WINE_EXE}")/wineserver not found. Please either add it or create a symlink to it, and rerun."
-			fi
-
 			;;
 		*)
 			gtk_fatal_error "Installation canceled!"
 	esac
+
+echo "Using: $(${WINE_EXE} --version)"
+
+# Set WINESERVER_EXE based on WINE_EXE.
+if [ -x "$(dirname "${WINE_EXE}")/wineserver" ]; then
+	WINESERVER_EXE="$(echo "$(dirname "${WINE_EXE}")/wineserver" | tr -d '\n')"; export WINESERVER_EXE;
+else
+	gtk_fatal_error "$(dirname "${WINE_EXE}")/wineserver not found. Please either add it or create a symlink to it, and rerun."
+fi
 }
 ## END INSTALL OPTIONS FUNCTIONS
 ## BEGIN WINE BOTTLE AND WINETRICKS FUNCTIONS
