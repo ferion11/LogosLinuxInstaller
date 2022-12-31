@@ -25,7 +25,7 @@ if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d /tmp/LBS.XXXXXXXX)"; export WO
 if [ -z "${PRESENT_WORKING_DIRECTORY}" ]; then PRESENT_WORKING_DIRECTORY="${PWD}" ; export PRESENT_WORKING_DIRECTORY; fi
 if [ -z "${LOGOS_FORCE_ROOT+x}" ]; then export LOGOS_FORCE_ROOT="" ; fi
 if [ -z "${WINEBOOT_GUI+x}" ]; then export WINEBOOT_GUI="" ; fi
-if [ -z "${EXTRA_INFO}" ]; then EXTRA_INFO="Usually is necessary: winbind cabextract libjpeg8."; export EXTRA_INFO; fi
+if [ -z "${EXTRA_INFO}" ]; then EXTRA_INFO="The following packages are usually necessary: winbind cabextract libjpeg8."; export EXTRA_INFO; fi
 if [ -z "${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; fi # Make wine output less verbose
 # END ENVIRONMENT
 
@@ -592,10 +592,14 @@ check_commands() {
         if have_dep "${cmd}"; then
             echo "* command ${cmd} is installed!"
         else
-            echo "* Your system does not have the command: ${cmd}. Please install command    ${cmd} package. ${EXTRA_INFO}"
-            gtk_fatal_error "Your system does not have command: ${cmd}. Please install       command ${cmd} package.\n ${EXTRA_INFO}"
+			echo "* command ${cmd} not installed!"
+			MISSING_CMD+=("${cmd}")
         fi
     done
+	if [ "${#MISSING_CMD[@]}" -ne 0 ]; then
+		echo "Your system is missing ${MISSING_CMD[*]}. Please install your distro's ${MISSING_CMD[*]} packages."
+		gtk_fatal_error "Your system is missing ${MISSING_CMD[*]}. Please install your distro's ${MISSING_CMD[*]} package(s).\n ${EXTRA_INFO}"
+	fi
 }
 # shellcheck disable=SC2001
 check_libs() {
@@ -604,8 +608,8 @@ check_libs() {
         if [ -n "${HAVE_LIB}" ]; then
             echo "* ${lib} is installed!"
         else
-            echo "* Your system does not have the lib: ${lib}. Please install ${lib}         package. ${EXTRA_INFO}"
-            gtk_fatal_error "Your system does not have lib: ${lib}. Please install ${lib}    package.\n ${EXTRA_INFO}"
+            echo "* Your system does not have the lib: ${lib}. Please install ${lib} package. ${EXTRA_INFO}"
+            gtk_fatal_error "Your system does not have lib: ${lib}. Please install ${lib} package.\n ${EXTRA_INFO}"
         fi
     done
 }
@@ -629,7 +633,7 @@ checkDependenciesXBase() {
 
 checkDependenciesLogos10() {
 	echo "Checking dependencies for Logos 10."
-	check_commands mktemp patch lsof wget find sed grep ntlm_auth;
+	check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr;
 	echo "All dependencies found. Starting Zenity GUI…"
 }
 
