@@ -1006,6 +1006,7 @@ chooseInstallMethod() {
 			make_skel "none.AppImage"
 			;;
 		"AppImage"*)
+			check_lib libfuse;
 			echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using ${WINE64_APPIMAGE_FULL_VERSION} AppImage…"
 			make_skel "${WINE64_APPIMAGE_FULL_FILENAME}"
 
