@@ -803,7 +803,7 @@ checkDependenciesLogos10() {
 
 checkDependenciesLogos9() {
 	echo "Checking dependencies for Logos 9."
-	check_commands mktemp xwd cabextract;
+	check_commands xwd cabextract;
 	echo "All dependencies found. Continuing…"
 }
 ## END CHECK DEPENDENCIES FUNCTIONS
