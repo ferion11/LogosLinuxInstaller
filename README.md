@@ -15,14 +15,14 @@ You can download the latest release [[CLICK HERE]](https://github.com/ferion11/L
 
 0.1- After this you need to give permission to execute. (You can use some graphical method too, but it will depend on your Linux distribution.):
 ```
-$ chmod +x LogosLinuxInstaller10.sh
+$ chmod +x LogosLinuxInstaller.sh
 ```
 
 0.2- Then execute the shell script. (You don't need sudo or root access.):
 ```
-$ ./LogosLinuxInstaller10.sh
+$ ./LogosLinuxInstaller.sh
 or with one or more environment variables like:
-$ DOWNLOADED_RESOURCES=${HOME}/Downloads INSTALLDIR=/tmp/logosBibleTemp ./LogosLinuxInstaller10.sh
+$ DOWNLOADED_RESOURCES=${HOME}/Downloads INSTALLDIR=/tmp/logosBibleTemp ./LogosLinuxInstaller.sh
 ```
 
 - You can get the skel with the options `skel64`. It can be useful if you want just the scripts to update one of your local installations. And you can reuse the WineBottle from others installation too.
@@ -196,8 +196,8 @@ $ mv LogosBible10 LogosBible10_old
 
 25.1.3 - Make it executable and execute with the option `skel64`, like:
 ```
-$ chmod +x LogosLinuxInstaller10.sh
-$ ./LogosLinuxInstaller10.sh skel64
+$ chmod +x LogosLinuxInstaller.sh
+$ ./LogosLinuxInstaller.sh skel64
 ```
 
 25.1.4 - Copy the wineBottle and if you are using AppImage then copy it, too:
