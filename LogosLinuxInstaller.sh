@@ -778,9 +778,9 @@ check_libs() {
     done
 }
 
-checkDependenciesXBase() {
+checkDependencies() {
 	echo "================================================="
-	echo 'Searching for dependencies:'
+	echo "Checking system's for dependencies:"
 
 	if [ -z "${DISPLAY}" ]; then
 		echo "* You want to run without X, but it doesn't work."
@@ -793,18 +793,18 @@ checkDependenciesXBase() {
 		echo '* Your system does not have Zenity. Please install Zenity package.'
 		exit 1
 	fi
+
+	check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr wine64;
 }
 
 checkDependenciesLogos10() {
-	echo "Checking dependencies for Logos 10."
-	check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr wine64;
-	echo "All dependencies found. Starting Zenity GUI…"
+	echo "All dependencies found. Continuing…"
 }
 
 checkDependenciesLogos9() {
 	echo "Checking dependencies for Logos 9."
-	check_commands mktemp patch lsof wget xwd find sed grep cabextract ntlm_auth awk tr wine64;
-	echo "All dependencies found. Starting Zenity GUI…"
+	check_commands mktemp xwd cabextract;
+	echo "All dependencies found. Continuing…"
 }
 ## END CHECK DEPENDENCIES FUNCTIONS
 
@@ -1277,7 +1277,7 @@ main () {
 	debug && echo "Debug mode enabled."
 
 	# BEGIN PREPARATION
-	checkDependenciesXBase; # We verify the user is running a graphical UI.
+	checkDependencies; # We verify the user is running a graphical UI and has majority of required dependencies.
 	chooseProduct; # We ask user for his Faithlife product's name and set variables.
 	chooseVersion; # We ask user for his Faithlife product's version and set variables.
 	chooseInstallMethod; # We ask user for his desired install method and begin installation.
