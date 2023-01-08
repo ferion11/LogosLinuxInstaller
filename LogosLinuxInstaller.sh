@@ -338,6 +338,8 @@ IFS=$'\n'
 [ -x "\${HERE}/data/bin/wine64" ] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win64
 export WINEPREFIX="\${HERE}/data/wine64_bottle"
+export WINE_EXE="${WINE_EXE}"
+export WINESERVER_EXE="${WINESERVER_EXE}"
 #-------
 [ -z "\${LOGOS_ICON_URL}" ] && export LOGOS_ICON_URL="${LOGOS_ICON_URL}"
 LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILENAME
@@ -403,7 +405,7 @@ debug() {
 debug && echo "Debug mode enabled."
 
 case "\${1}" in
-	"${WINE_EXE}"|"${WINESERVER_EXE}"|"winetricks"|"selectAppImage")
+	"\${WINE_EXE}"|"\${WINESERVER_EXE}"|"winetricks"|"selectAppImage")
 		"\${HERE}/controlPanel.sh" "\$@"
 		exit 0
 		;;
@@ -416,10 +418,10 @@ case "\${1}" in
 			exit 1
 		fi
 		echo "* Closing anything running in this wine bottle:"
-		"${WINESERVER_EXE}" -k
+		"\${WINESERVER_EXE}" -k
 		echo "* Running the indexer:"
-		"${WINE_EXE}" "\${LOGOS_INDEXER_EXE}"
-		"${WINESERVER_EXE}" -w
+		"\${WINE_EXE}" "\${LOGOS_INDEXER_EXE}"
+		"\${WINESERVER_EXE}" -w
 		echo "======= indexing of ${FLPRODUCT}Bible run done! ======="
 		exit 0
 		;;
@@ -444,15 +446,15 @@ case "\${1}" in
 		;;
 	"logsOn")
 		echo "======= enable ${FLPRODUCT}Bible logging only: ======="
-		"${WINE_EXE}" reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
-		"${WINESERVER_EXE}" -w
+		"\${WINE_EXE}" reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
+		"\${WINESERVER_EXE}" -w
 		echo "======= enable ${FLPRODUCT}Bible logging done! ======="
 		exit 0
 		;;
 	"logsOff")
 		echo "======= disable ${FLPRODUCT}Bible logging only: ======="
-		"${WINE_EXE}" reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0000 /f
-		"${WINESERVER_EXE}" -w
+		"\${WINE_EXE}" reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0000 /f
+		"\${WINESERVER_EXE}" -w
 		echo "======= disable ${FLPRODUCT}Bible logging done! ======="
 		exit 0
 		;;
@@ -498,8 +500,8 @@ if [ -z "\${LOGOS_EXE}" ] ; then
 	exit 0
 fi
 
-"${WINE_EXE}" "\${LOGOS_EXE}"
-"${WINESERVER_EXE}" -w
+"\${WINE_EXE}" "\${LOGOS_EXE}"
+"\${WINESERVER_EXE}" -w
 #-------------------------------------------------
 
 #------------- Ending block ----------------------
@@ -549,6 +551,10 @@ IFS=$'\n'
 [ -x "\${HERE}/data/bin/wine64" ] && export PATH="\${HERE}/data/bin:\${PATH}"
 export WINEARCH=win64
 export WINEPREFIX="\${HERE}/data/wine64_bottle"
+export WINE_EXE="${WINE_EXE}"
+export WINESERVER_EXE="${WINESERVER_EXE}"
+export APPDIR_BINDIR="${APPDIR_BINDIR}"
+export APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"
 #-------
 [ -z "\${WINETRICKS_URL}" ] && export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
 [ -z "\${WINETRICKS_DOWNLOADER+x}" ] && export WINETRICKS_DOWNLOADER="wget"
@@ -618,16 +624,16 @@ case "\${1}" in
 		# wine64 Run:
 		echo "======= Running wine64 only: ======="
 		shift
-		"${WINE_EXE}" "\$@"
-		"${WINESERVER_EXE}" -w
-		echo "======= ${WINE_EXE} run done! ======="
+		"\${WINE_EXE}" "\$@"
+		"\${WINESERVER_EXE}" -w
+		echo "======= \${WINE_EXE} run done! ======="
 		exit 0
 		;;
 	"wineserver")
 		# wineserver Run:
 		echo "======= Running wineserver only: ======="
 		shift
-		"${WINESERVER_EXE}" "\$@"
+		"\${WINESERVER_EXE}" "\$@"
 		echo "======= wineserver run done! ======="
 		exit 0
 		;;
@@ -635,19 +641,19 @@ case "\${1}" in
 		# winetricks Run:
 		echo "======= Running winetricks only: ======="
 		# Determine if user downloaded winetricks or used system winetricks
-		if [ -f "${APPDIR_BINDIR}/winetricks" ]; then
-			WINETRICKSBIN="${APPDIR_BINDIR}/winetricks"
+		if [ -f "\${APPDIR_BINDIR}/winetricks" ]; then
+			WINETRICKSBIN="\${APPDIR_BINDIR}/winetricks"
 		else WINETRICKSBIN="\$(which winetricks)"
 		fi
 		"\${WINETRICKSBIN}" "\$@"
-		"${WINESERVER_BIN}" -w
+		"\${WINESERVER_BIN}" -w
 		echo "======= winetricks run done! ======="
 		exit 0
 		;;
 #	"selectAppImage")
 #		echo "======= Running AppImage Selection only: ======="
 #		APPIMAGE_FILENAME=""
-#		APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"
+#		APPIMAGE_LINK_SELECTION_NAME="\${APPIMAGE_LINK_SELECTION_NAME}"
 #
 #		APPIMAGE_FULLPATH="\$(zenity --file-selection --filename="\${HERE}"/data/*.AppImage --file-filter='AppImage files | *.AppImage *.Appimage *.appImage *.appimage' --file-filter='All files | *')"
 #		if [ -z "\${APPIMAGE_FULLPATH}" ]; then
@@ -671,7 +677,7 @@ case "\${1}" in
 #				ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 #				rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 #				mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-#				(DISPLAY="" "\${HERE}/controlPanel.sh" "${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
+#				(DISPLAY="" "\${HERE}/controlPanel.sh" "\${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
 #				echo "======= AppImage Selection run done with external link! ======="
 #				exit 0
 #			fi
@@ -682,7 +688,7 @@ case "\${1}" in
 #		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 #		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 #		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-#		(DISPLAY="" "\${HERE}/controlPanel.sh" "${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
+#		(DISPLAY="" "\${HERE}/controlPanel.sh" "\${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
 #		echo "======= AppImage Selection run done! ======="
 #		exit 0
 #		;;
@@ -690,8 +696,8 @@ case "\${1}" in
 		echo "No arguments parsed."
 esac
 
-"${WINE_EXE}" control
-"${WINESERVER_EXE}" -w
+"\${WINE_EXE}" control
+"\${WINESERVER_EXE}" -w
 #-------------------------------------------------
 
 #------------- Ending block ----------------------
