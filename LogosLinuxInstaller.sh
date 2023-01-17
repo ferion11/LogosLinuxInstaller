@@ -1,8 +1,9 @@
 #!/bin/bash
 
+LOGOS_RELEASE_VERSION="10.0.1.0056"
 LOGOS_SCRIPT_TITLE="Logos Linux Installer" # From https://github.com/ferion11/LogosLinuxInstaller
 LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
-LOGOS_SCRIPT_VERSION="v10.0-4" # Script version to match FaithLife Product version.
+LOGOS_SCRIPT_VERSION="${LOGOS_RELEASE_VERSION}-v4" # Script version to match FaithLife Product version.
 
 #####
 # Originally written by Ferion11.
@@ -851,7 +852,7 @@ chooseVersion() {
 		*"10")
 			checkDependenciesLogos10;
 			export TARGETVERSION="10";
-			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS10/Installer/10.1.0.0046/${FLPRODUCT}-x64.msi" ; fi
+			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS10/Installer/${LOGOS_RELEASE_VERSION}/${FLPRODUCT}-x64.msi" ; fi
 			LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
 			LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
 			;;
