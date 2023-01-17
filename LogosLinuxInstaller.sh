@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOGOS_RELEASE_VERSION="10.0.1.0056"
+LOGOS_RELEASE_VERSION="10.1.0.0056"
 LOGOS_SCRIPT_TITLE="Logos Linux Installer" # From https://github.com/ferion11/LogosLinuxInstaller
 LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
 LOGOS_SCRIPT_VERSION="${LOGOS_RELEASE_VERSION}-v4" # Script version to match FaithLife Product version.
