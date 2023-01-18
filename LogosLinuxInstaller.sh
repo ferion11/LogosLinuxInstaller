@@ -34,13 +34,19 @@ usage() {
 cat << EOF
 $LOGOS_SCRIPT_TITLE, by $LOGOS_SCRIPT_AUTHOR, $LOGOS_SCRIPT_VERSION.
 
-Usage: ./$LOGOS_SCRIPT_TITLE.sh
+Usage: ./LogosLinuxInstaller.sh
 Installs ${FLPRODUCT} Bible Software with Wine on Linux.
 
 Options:
     -h   --help         Prints this help message and exit.
     -v   --version      Prints version information and exit.
     -D   --debug        Makes Wine print out additional info.
+    -c   --config       Use the Logos on Linux config file when
+                        setting environment variables. Defaults to:
+                        \$HOME/.config/Logos_on_Linux/Logos_on_Linux.conf
+						Optionally can accept a config file provided by
+						the user.
+                        setting variables.
     -f   --force-root   Sets LOGOS_FORCE_ROOT to true, which permits
                         the root user to run the script.
 EOF
@@ -57,16 +63,41 @@ do
     case "$arg" in # Relate long options to short options
         --help)      set -- "$@" -h ;;
         --version)   set -- "$@" -V ;;
+		--config)    set -- "$@" -c ;;
 		--force-root) set -- "$@" -f ;;
 		--debug)     set -- "$@" -D ;;
         *)           set -- "$@" "$arg" ;;
     esac
 done
-OPTSTRING=':hvDf' # Available options
+OPTSTRING=':hvDcf' # Available options
 
 # First loop: set variable options which may affect other options
 while getopts "$OPTSTRING" opt; do
 	case $opt in
+			c)  NEXTOPT=$(${OPTIND})
+			if [ -n "$NEXTOPT" ] && [ "$NEXTOPT" != "-*" ]; then
+				OPTIND=$((OPTIND + 1))
+				if [ -f "$NEXTOPT" ]; then
+					LOGOS_CONFIG="${NEXTOPT}"
+					export LOGOS_CONFIG;
+					set -a
+					# shellcheck disable=SC1090
+					source "$LOGOS_CONFIG";
+					set +a
+				else
+					echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: Invalid config file path." >&2 && usage >&2 && exit;
+				fi
+			elif [ -f "$HOME/.config/Logos_on_Linux/Logos_on_Linux.conf" ]; then
+				LOGOS_CONFIG="$HOME/.config/Logos_on_Linux/Logos_on_Linux.conf"
+				export LOGOS_CONFIG
+				set -a
+				# shellcheck disable=SC1090
+				source "$LOGOS_CONFIG";
+				set +a
+			else
+				echo "No config file found."
+			fi
+			;;
 		f)	export LOGOS_FORCE_ROOT="1"; ;;
 		D)	export DEBUG=true;
 			WINEDEBUG=""; ;;
@@ -85,21 +116,22 @@ while getopts "$OPTSTRING" opt; do
         :)  echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 && exit ;;
     esac
 done
+# If no options passed.
 if [ "$OPTIND" -eq '1' ]; then
-        echo "No options were passed.";
+        :
 fi
 shift $((OPTIND-1))
 # END OPTARGS
 
-# BEGIN DIE IF ROOT
-if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
-	echo "* Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-	gtk_fatal_error "Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-	exit 1;
-fi
-# END DIE IF ROOT
-
 # BEGIN FUNCTION DECLARATIONS
+die-if-root() {
+	if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
+		echo "* Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+		gtk_fatal_error "Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+		exit 1;
+	fi
+}
+
 debug() {
 	[[ $DEBUG = true ]] && return 0 || return 1
 }
@@ -711,6 +743,30 @@ EOF
 ## END CREATE CONTROLPANEL.SH
 }
 
+## BEGIN CREATE CONFIG
+createConfig() {
+	cat > "${HOME}/.config/Logos_on_Linux/Logos_on_Linux.conf" << EOF
+# INSTALL OPTIONS
+FLPRODUCT="${FLPRODUCT}"
+FLPRODUCTi="${FLPRODUCTi}"
+TARGETVERSION="${TARGETVERSION}"
+INSTALLDIR="${INSTALLDIR}"
+APPDIR="${APPDIR}"
+APPDIR_BINDIR="${APPDIR_BINDIR}"
+WINETRICKSBIN="${WINETRICKSBIN}"
+WINEPREFIX="${WINEPREFIX}"
+WINEBIN_CODE="${WINEBIN_CODE}"
+WINE_EXE="${WINE_EXE}"
+WINESERVER_EXE="${WINESERVER_EXE}"
+WINE64_APPIMAGE_FULL_URL="${WINE64_APPIMAGE_FULL_URL}"
+WINE64_APPIMAGE_FULL_FILENAME="${WINE64_APPIMAGE_FULL_FILENAME}"
+LOGOS_EXECUTABLE="${LOGOS_EXECUTABLE}"
+
+# RESTORE OPTIONS
+BACKUPDIR=""
+EOF
+}
+## END CREATE CONFIG
 
 make_skel() {
 # ${1} - SET_APPIMAGE_FILENAME
@@ -811,6 +867,7 @@ checkDependenciesLogos9() {
 
 ## BEGIN INSTALL OPTIONS FUNCTIONS
 chooseProduct() {
+	if [ -z "${FLPRODUCT}" ]; then
 	productChoice="$(zenity --width=700 --height=310 \
 		--title="Question: Should the script install Logos or Verbum?" \
 		--text="Choose which FaithLife product to install:." \
@@ -818,6 +875,9 @@ chooseProduct() {
 		TRUE "Logos Bible Software." \
 		FALSE "Verbum Bible Software." \
 		FALSE "Exit." )"
+	else
+		productChoice="${FLPRODUCT}"
+	fi
 
 	case "${productChoice}" in
 		"Logos"*)
@@ -841,27 +901,27 @@ chooseProduct() {
 }
 
 chooseVersion() {
-	versionChoice="$(zenity --width=700 --height=310 \
+	if [ -z "$TARGETVERSION" ]; then
+		versionChoice="$(zenity --width=700 --height=310 \
 		--title="Question: Which version of ${FLPRODUCT} should the script install?" \
 		--text="Choose which FaithLife product to install:." \
 		--list --radiolist --column "S" --column "Description" \
 		TRUE "${FLPRODUCT} 10" \
 		FALSE "${FLPRODUCT} 9" \
 		FALSE "Exit." )"
+	else
+		versionChoice="$TARGETVERSION"
+	fi
 	case "${versionChoice}" in
 		*"10")
 			checkDependenciesLogos10;
 			export TARGETVERSION="10";
 			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS10/Installer/${LOGOS_RELEASE_VERSION}/${FLPRODUCT}-x64.msi" ; fi
-			LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
-			LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
 			;;
 		*"9")
 			checkDependenciesLogos9;
 			export TARGETVERSION="9";
 			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.17.0.0010/${FLPRODUCT}-x64.msi" ; fi
-			LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
-			LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
 			;;
 		"Exit.")
 			exit
@@ -870,9 +930,18 @@ chooseVersion() {
 			gtk_fatal_error "Installation canceled!"
 	esac
 
-	if [ -z "${INSTALLDIR}" ]; then export INSTALLDIR="${HOME}/${FLPRODUCT}Bible${TARGETVERSION}" ; fi
-	export APPDIR="${INSTALLDIR}/data"
-	export APPDIR_BINDIR="${APPDIR}/bin"
+	LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
+	LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
+
+	if [ -z "${INSTALLDIR}" ]; then
+		export INSTALLDIR="${HOME}/${FLPRODUCT}Bible${TARGETVERSION}" ;
+	fi
+	if [ -z "${APPDIR}" ]; then
+		export APPDIR="${INSTALLDIR}/data"
+	fi
+	if [ -z "${APPDIR_BINDIR}" ]; then
+		export APPDIR_BINDIR="${APPDIR}/bin"
+	fi
 
 	if [ -d "${INSTALLDIR}" ]; then
 		echo "A directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
@@ -951,103 +1020,113 @@ createWineBinaryList() {
 
 chooseInstallMethod() {
 	
-	export WINEPREFIX="${APPDIR}/wine64_bottle"
+	if [ -z "$WINEPREFIX" ]; then
+		export WINEPREFIX="${APPDIR}/wine64_bottle"
+	fi
 
-	createWineBinaryList;
-
-	WINEBIN_OPTIONS=()
-	while read -r line; do
-		# Set binary code, description, and path based on path
-		if [ -L "$line" ]; then
-			WINEOPT=$(readlink -f "$line")
-		else
-			WINEOPT="$line"
-		fi
-
-		if [[ "$WINEOPT" == *"/usr/bin/"* ]]; then
-			WINEOPT_CODE="System"
-			WINEOPT_DESCRIPTION="Use system's binary (i.e., /usr/bin/wine64). WINE must be 7.18-staging or later. Stable or Devel do not work."
-			WINEOPT_PATH="${line}"
-		elif [[ "$WINEOPT" == *"Proton"* ]]; then
-			WINEOPT_CODE="Proton"
-			WINEOPT_DESCRIPTION="Install using Steam's Proton fork of WINE."
-			WINEOPT_PATH="${line}"
-		elif [[ "$WINEOPT" == *"PlayOnLinux"* ]]; then
-			WINEOPT_CODE="PlayOnLinux"
-			WINEOPT_DESCRIPTION="Install using a PlayOnLinux WINE64 binary."
-			WINEOPT_PATH="${line}"
-		else
-			WINEOPT_CODE="Custom"
-			WINEOPT_DESCRIPTION="Use a WINE64 bianry from another directory."
-			WINEOPT_PATH="${line}"
-		fi
-
-		# Create wine binary option array
-		if [ -z "${WINEBIN_OPTIONS[0]}" ]; then
-			WINEBIN_OPTIONS+=(TRUE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
-		else
-			WINEBIN_OPTIONS+=(FALSE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
-		fi
-	done < "${WORKDIR}/winebinaries"
-
-	# Add AppImage to list
-	WINEBIN_OPTIONS+=(FALSE "AppImage" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" )
-
-	column_names=(--column "Choice" --column "Code" --column "Description" --column "Path")
-
-	installationChoice="$(zenity --width=1024 --height=480 \
-		--title="Question: Which WINE binary should be used to install ${FLPRODUCT}?" \
-		--text="This script will install ${FLPRODUCT} v${LOGOS_VERSION} in ${INSTALLDIR} independent of other installations.\n\nPlease select the WINE binary's path or install method:" \
-		--list --radiolist "${column_names[@]}" "${WINEBIN_OPTIONS[@]}" --print-column=2,3,4)";
+	if [ -z "$WINE_EXE" ]; then
+		createWineBinaryList;
 	
-	OIFS=$IFS
-	IFS='|' read -r -a installArray <<< "${installationChoice}"
-	IFS=$OIFS
-
-	export WINEBIN_CODE=${installArray[0]}
-	export WINE_EXE=${installArray[2]}
-
-	case "${WINEBIN_CODE}" in
-		"System"|"Proton"|"PlayOnLinux"|"Custom")
-			echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using a ${WINEBIN_CODE} WINE64 binary…"
-			make_skel "none.AppImage"
-			;;
-		"AppImage"*)
-			check_lib libfuse;
-			echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using ${WINE64_APPIMAGE_FULL_VERSION} AppImage…"
-			make_skel "${WINE64_APPIMAGE_FULL_FILENAME}"
-
-			# exporting PATH to internal use if using AppImage, doing backup too:
-			export OLD_PATH="${PATH}"
-			export PATH="${APPDIR_BINDIR}":"${PATH}"
-
-			# Geting the AppImage:
-			if [ -f "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
-				echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
-				cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}" --pulsate --auto-close --no-cancel
-			elif [ -f "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
-				echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
-				cp "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}" --pulsate --auto-close --no-cancel
+		WINEBIN_OPTIONS=()
+		while read -r line; do
+			# Set binary code, description, and path based on path
+			if [ -L "$line" ]; then
+				WINEOPT=$(readlink -f "$line")
 			else
-				echo "${WINE64_APPIMAGE_FULL_FILENAME} does not exist. Downloading…"
-				gtk_download "${WINE64_APPIMAGE_FULL_URL}" "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}"
-				cp "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}" --pulsate --auto-close --no-cancel
+				WINEOPT="$line"
 			fi
+	
+			if [[ "$WINEOPT" == *"/usr/bin/"* ]]; then
+				WINEOPT_CODE="System"
+				WINEOPT_DESCRIPTION="Use system's binary (i.e., /usr/bin/wine64). WINE must be 7.18-staging or later. Stable or Devel do not work."
+				WINEOPT_PATH="${line}"
+			elif [[ "$WINEOPT" == *"Proton"* ]]; then
+				WINEOPT_CODE="Proton"
+				WINEOPT_DESCRIPTION="Install using Steam's Proton fork of WINE."
+				WINEOPT_PATH="${line}"
+			elif [[ "$WINEOPT" == *"PlayOnLinux"* ]]; then
+				WINEOPT_CODE="PlayOnLinux"
+				WINEOPT_DESCRIPTION="Install using a PlayOnLinux WINE64 binary."
+				WINEOPT_PATH="${line}"
+			else
+				WINEOPT_CODE="Custom"
+				WINEOPT_DESCRIPTION="Use a WINE64 bianry from another directory."
+				WINEOPT_PATH="${line}"
+			fi
+	
+			# Create wine binary option array
+			if [ -z "${WINEBIN_OPTIONS[0]}" ]; then
+				WINEBIN_OPTIONS+=(TRUE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
+			else
+				WINEBIN_OPTIONS+=(FALSE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
+			fi
+		done < "${WORKDIR}/winebinaries"
+	
+		# Add AppImage to list
+		WINEBIN_OPTIONS+=(FALSE "AppImage" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" )
+	
+		column_names=(--column "Choice" --column "Code" --column "Description" --column "Path")
+	
+		installationChoice="$(zenity --width=1024 --height=480 \
+			--title="Question: Which WINE binary should be used to install ${FLPRODUCT}?" \
+			--text="This script will install ${FLPRODUCT} v${LOGOS_VERSION} in ${INSTALLDIR} independent of other installations.\n\nPlease select the WINE binary's path or install method:" \
+			--list --radiolist "${column_names[@]}" "${WINEBIN_OPTIONS[@]}" --print-column=2,3,4)";
+		
+		OIFS=$IFS
+		IFS='|' read -r -a installArray <<< "${installationChoice}"
+		IFS=$OIFS
+	
+		export WINEBIN_CODE=${installArray[0]}
+		export WINE_EXE=${installArray[2]}
+	fi
 
-			chmod +x "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}"
-			;;
-		*)
-			gtk_fatal_error "Installation canceled!"
-	esac
+	if [ -n "${WINEBIN_CODE}" ]; then	
+		case "${WINEBIN_CODE}" in
+			"System"|"Proton"|"PlayOnLinux"|"Custom")
+				echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using a ${WINEBIN_CODE} WINE64 binary…"
+				make_skel "none.AppImage"
+				;;
+			"AppImage"*)
+				check_lib libfuse;
+				echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using ${WINE64_APPIMAGE_FULL_VERSION} AppImage…"
+				make_skel "${WINE64_APPIMAGE_FULL_FILENAME}"
+	
+				# exporting PATH to internal use if using AppImage, doing backup too:
+				export OLD_PATH="${PATH}"
+				export PATH="${APPDIR_BINDIR}":"${PATH}"
+	
+				# Geting the AppImage:
+				if [ -f "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
+					echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
+					cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}" --pulsate --auto-close --no-cancel
+				elif [ -f "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
+					echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
+					cp "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}" --pulsate --auto-close --no-cancel
+				else
+					echo "${WINE64_APPIMAGE_FULL_FILENAME} does not exist. Downloading…"
+					gtk_download "${WINE64_APPIMAGE_FULL_URL}" "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}"
+					cp "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}" --pulsate --auto-close --no-cancel
+				fi
+	
+				chmod +x "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}"
+				;;
+			*)
+				gtk_fatal_error "Installation canceled!"
+		esac
+	else
+		echo "WINEBIN_CODE is not set in your config file."
+	fi
 
-echo "Using: $(${WINE_EXE} --version)"
+	echo "Using: $(${WINE_EXE} --version)"
 
-# Set WINESERVER_EXE based on WINE_EXE.
-if [ -x "$(dirname "${WINE_EXE}")/wineserver" ]; then
-	WINESERVER_EXE="$(echo "$(dirname "${WINE_EXE}")/wineserver" | tr -d '\n')"; export WINESERVER_EXE;
-else
-	gtk_fatal_error "$(dirname "${WINE_EXE}")/wineserver not found. Please either add it or create a symlink to it, and rerun."
-fi
+	# Set WINESERVER_EXE based on WINE_EXE.
+	if [ -z "${WINESERVER_EXE}" ]; then
+		if [ -x "$(dirname "${WINE_EXE}")/wineserver" ]; then
+			WINESERVER_EXE="$(echo "$(dirname "${WINE_EXE}")/wineserver" | tr -d '\n')"; export WINESERVER_EXE;
+		else
+			gtk_fatal_error "$(dirname "${WINE_EXE}")/wineserver not found. Please either add it or create a symlink to it, and rerun."
+		fi
+	fi
 }
 ## END INSTALL OPTIONS FUNCTIONS
 ## BEGIN WINE BOTTLE AND WINETRICKS FUNCTIONS
@@ -1065,7 +1144,7 @@ prepareWineBottle() {
 wine_reg_install() {
 	REG_FILENAME="${1}"
 	echo "${WINE_EXE} regedit.exe ${REG_FILENAME}"
-	${WINE_EXE} regedit.exe "${WORKDIR}"/"${REG_FILENAME}" | zenity --progress --title="Wine regedit" --text="Wine is installing ${REG_FILENAME} in ${WINEPREFIX}" --pulsate --auto-close --no-cancel
+	"${WINE_EXE}" regedit.exe "${WORKDIR}"/"${REG_FILENAME}" | zenity --progress --title="Wine regedit" --text="Wine is installing ${REG_FILENAME} in ${WINEPREFIX}" --pulsate --auto-close --no-cancel
 
 	light_wineserver_wait
 	echo "${WINE_EXE} regedit.exe ${REG_FILENAME} DONE!"
@@ -1088,38 +1167,40 @@ downloadWinetricks() {
 
 setWinetricks() {
 	# Check if local winetricks version available; else, download it
-	if [ "$(which winetricks)" ]; then
-		# Check if local winetricks version is up-to-date; if so, offer to use it or to download; else, download it
-		LOCAL_WINETRICKS_VERSION=$(winetricks --version | awk -F' ' '{print $1}')
-		if [ "${LOCAL_WINETRICKS_VERSION}" -ge "20220411" ]; then
-			winetricksChoice="$(zenity --width=700 --height=310 \
-			--title="Question: Should the script use local winetricks or download winetricks fresh?" \
-			--text="This script needs to set some Wine options that help or make ${FLPRODUCT} run on Linux. Please select whether to use your local winetricks version or a fresh install." \
-			--list --radiolist --column "S" --column "Description" \
-			TRUE "1- Use local winetricks." \
-			FALSE "2- Download winetricks from the Internet." )"
+	if [ -z "${WINETRICKSBIN}" ]; then 
+		if [ "$(which winetricks)" ]; then
+			# Check if local winetricks version is up-to-date; if so, offer to use it or to download; else, download it
+			LOCAL_WINETRICKS_VERSION=$(winetricks --version | awk -F' ' '{print $1}')
+			if [ "${LOCAL_WINETRICKS_VERSION}" -ge "20220411" ]; then
+				winetricksChoice="$(zenity --width=700 --height=310 \
+				--title="Question: Should the script use local winetricks or download winetricks fresh?" \
+				--text="This script needs to set some Wine options that help or make ${FLPRODUCT} run on Linux. Please select whether to use your local winetricks version or a fresh install." \
+				--list --radiolist --column "S" --column "Description" \
+				TRUE "1- Use local winetricks." \
+				FALSE "2- Download winetricks from the Internet." )"
 
-			case "${winetricksChoice}" in
-				1*) 
-					echo "Setting winetricks to the local binary…"
-					if [ -z "${WINETRICKSBIN}" ]; then WINETRICKSBIN="$(which winetricks)"; fi
-					;;
-				2*) 
-					downloadWinetricks;
-					if [ -z "${WINETRICKSBIN}" ]; then WINETRICKSBIN="${APPDIR_BINDIR}/winetricks"; fi
-					;;
-				*)  
-					gtk_fatal_error "Installation canceled!"
-				esac
+				case "${winetricksChoice}" in
+					1*) 
+						echo "Setting winetricks to the local binary…"
+						WINETRICKSBIN="$(which winetricks)";
+						;;
+					2*) 
+						downloadWinetricks;
+						WINETRICKSBIN="${APPDIR_BINDIR}/winetricks";
+						;;
+					*)  
+						gtk_fatal_error "Installation canceled!"
+					esac
+			else
+				echo "The system's winetricks is too old. Downloading an up-to-date winetricks from the Internet…"
+				downloadWinetricks;
+				export WINETRICKSBIN="${APPDIR_BINDIR}/winetricks"
+			fi
 		else
-			echo "The system's winetricks is too old. Downloading an up-to-date winetricks from the Internet…"
+			echo "Local winetricks not found. Downloading winetricks from the Internet…"
 			downloadWinetricks;
 			export WINETRICKSBIN="${APPDIR_BINDIR}/winetricks"
 		fi
-	else
-		echo "Local winetricks not found. Downloading winetricks from the Internet…"
-		downloadWinetricks;
-		export WINETRICKSBIN="${APPDIR_BINDIR}/winetricks"
 	fi
 
 	echo "Winetricks is ready to be used."
@@ -1161,7 +1242,7 @@ winetricks_install() {
 
 winetricks_dll_install() {
 	echo "winetricks ${*}"
-	gtk_continue_question "Now the script will install the DLL ${*}. Continue?"
+	gtk_continue_question "Now the script will install the DLL ${*}. There will not be any GUI feedback for this. Continue?"
 	"$WINETRICKSBIN" "${@}"
 	echo "winetricks ${*} DONE!";
 	heavy_wineserver_wait;
@@ -1188,7 +1269,9 @@ getPremadeWineBottle() {
 ## BEGIN LOGOS INSTALL FUNCTIONS
 getLogosExecutable() {
 	# This VAR is used to verify the downloaded MSI is latest
-	LOGOS_EXECUTABLE="${FLPRODUCT}_v${LOGOS_VERSION}-x64.msi"
+	if [ -z "${LOGOS_EXECUTABLE}" ]; then 
+		LOGOS_EXECUTABLE="${FLPRODUCT}_v${LOGOS_VERSION}-x64.msi"
+	fi
 
 	gtk_continue_question "Now the script will check for the MSI installer. Then it will download and install ${FLPRODUCT} Bible at ${WINEPREFIX}. You will need to interact with the installer. Do you wish to continue?"
 
@@ -1213,18 +1296,34 @@ getLogosExecutable() {
 installMSI() {
 	# Execute the .MSI
 	echo "Running: ${WINE_EXE} msiexec /i ${APPDIR}/${LOGOS_EXECUTABLE}"
-	${WINE_EXE} msiexec /i "${APPDIR}"/"${LOGOS_EXECUTABLE}"
+	"${WINE_EXE}" msiexec /i "${APPDIR}"/"${LOGOS_EXECUTABLE}"
+}
+
+installFonts() {
+	if [ -z "${WINETRICKS_UNATTENDED}" ]; then
+		winetricks_install -q corefonts
+		winetricks_install -q tahoma
+		winetricks_install -q settings fontsmooth=rgb
+	else
+		winetricks_install corefonts
+		winetricks_install tahoma
+		winetricks_install settings fontsmooth=rgb
+	fi
 }
 
 installLogos9() {	
 	getPremadeWineBottle;
+
+	setWineTricks;
+
+	installFonts
 
 	getLogosExecutable;
 
 	installMSI;
 
 	echo "======= Set ${FLPRODUCT}Bible Indexing to Vista Mode: ======="
-	${WINE_EXE} reg add "HKCU\\Software\\Wine\\AppDefaults\\${FLPRODUCT}Indexer.exe" /v Version /t REG_SZ /d vista /f
+	"${WINE_EXE}" reg add "HKCU\\Software\\Wine\\AppDefaults\\${FLPRODUCT}Indexer.exe" /v Version /t REG_SZ /d vista /f
 	echo "======= ${FLPRODUCT}Bible logging set to Vista mode! ======="
 }
 
@@ -1251,17 +1350,13 @@ EOF
 
 	setWinetricks;
 
+	installFonts;
+
 	if [ -z "${WINETRICKS_UNATTENDED}" ]; then
-		winetricks_install -q corefonts
-		winetricks_install -q tahoma
-		winetricks_install -q settings fontsmooth=rgb
 		winetricks_install -q settings win10
 		#TODO: Verify if d3dcompiler_47 helps Logos 9. See #68. If so, this should be added to Logos 9's install procedure.
 		winetricks_dll_install -q d3dcompiler_47;
 	else
-		winetricks_install corefonts
-		winetricks_install tahoma
-		winetricks_install settings fontsmooth=rgb
 		winetricks_install settings win10
 		winetricks_dll_install d3dcompiler_47
 	fi
@@ -1275,13 +1370,14 @@ EOF
 
 main () {
 	echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR."
+	die-if-root;
 	debug && echo "Debug mode enabled."
 
 	# BEGIN PREPARATION
 	checkDependencies; # We verify the user is running a graphical UI and has majority of required dependencies.
 	chooseProduct; # We ask user for his Faithlife product's name and set variables.
-	chooseVersion; # We ask user for his Faithlife product's version and set variables.
-	chooseInstallMethod; # We ask user for his desired install method and begin installation.
+	chooseVersion; # We ask user for his Faithlife product's version, set variables, and create project skeleton.
+	chooseInstallMethod; # We ask user for his desired install method.
 	prepareWineBottle; # We run wineboot.
 	# END PREPARATION
 
@@ -1304,13 +1400,23 @@ main () {
 	LOGOS_EXE=$(find "${WINEPREFIX}" -name ${FLPRODUCT}.exe | grep "${FLPRODUCT}/${FLPRODUCT}.exe")
 
 	if [ -f "${LOGOS_EXE}" ]; then
-		if gtk_question "${FLPRODUCT} Bible ${TARGETVERSION} installed!\n\nA launch script has been placed in ${INSTALLDIR} for your use. The script's name is ${FLPRODUCT}.sh.\n\nDo you want to run it now?\n\nNOTE: There may be an error on first execution. You can close the error dialog."; then
+		gtk_continue_quesiton "${FLPRODUCT} Bible ${TARGETVERSION} installed!"
+		if [ -z "$LOGOS_CONFIG" ]; then
+			if gtk_question "Should the script save your install config?\n\n(Config file will be saved in $HOME/.config/Logos_on_Linux/Logos_on_Linux.conf)"; then
+				mkdir -p "${HOME}/.config/Logos_on_Linux"
+				if [ -d "${HOME/.config/Logos_on_Linux}" ]; then
+					createConfig;
+				fi
+			fi
+		fi
+
+		if gtk_question "A launch script has been placed in ${INSTALLDIR} for your use. The script's name is ${FLPRODUCT}.sh.\n\nDo you want to run it now?\n\nNOTE: There may be an error on first execution. You can close the error dialog."; then
 			"${INSTALLDIR}"/"${FLPRODUCT}".sh
 		else echo "The script has finished. Exiting…";
 		fi
 	else
 		gtk_fatal_error "The ${FLPRODUCT} executable was not found. This means something went wrong while installing ${FLPRODUCT}. Please contact the Logos on Linux community for help."
-		echo "Installation failed. Exiting…"
+		echo "Installation failed. ${LOGOS_EXE} not found. Exiting…"
 		exit 1;
 	fi
 	# END INSTALL
