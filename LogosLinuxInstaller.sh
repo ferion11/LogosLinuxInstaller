@@ -47,6 +47,7 @@ Options:
 						Optionally can accept a config file provided by
 						the user.
                         setting variables.
+    -F   --skip-fonts   Skips installing corefonts and tahoma.
     -f   --force-root   Sets LOGOS_FORCE_ROOT to true, which permits
                         the root user to run the script.
 EOF
@@ -64,12 +65,13 @@ do
         --help)      set -- "$@" -h ;;
         --version)   set -- "$@" -V ;;
 		--config)    set -- "$@" -c ;;
+		--skip-fonts) set -- "$@" -F ;;
 		--force-root) set -- "$@" -f ;;
 		--debug)     set -- "$@" -D ;;
         *)           set -- "$@" "$arg" ;;
     esac
 done
-OPTSTRING=':hvDcf' # Available options
+OPTSTRING=':hvDcFf' # Available options
 
 # First loop: set variable options which may affect other options
 while getopts "$OPTSTRING" opt; do
@@ -98,6 +100,7 @@ while getopts "$OPTSTRING" opt; do
 				echo "No config file found."
 			fi
 			;;
+		F)  export SKIP_FONTS="1" ;;
 		f)	export LOGOS_FORCE_ROOT="1"; ;;
 		D)	export DEBUG=true;
 			WINEDEBUG=""; ;;
@@ -1301,12 +1304,16 @@ installMSI() {
 
 installFonts() {
 	if [ -z "${WINETRICKS_UNATTENDED}" ]; then
-		winetricks_install -q corefonts
-		winetricks_install -q tahoma
+		if [ -z "${SKIP_FONTS}" ]; then
+			winetricks_install -q corefonts
+			winetricks_install -q tahoma
+		fi
 		winetricks_install -q settings fontsmooth=rgb
 	else
-		winetricks_install corefonts
-		winetricks_install tahoma
+		if [ -z "${SKIP_FONTS}" ]; then
+			winetricks_install corefonts
+			winetricks_install tahoma
+		fi
 		winetricks_install settings fontsmooth=rgb
 	fi
 }
