@@ -892,6 +892,7 @@ chooseProduct() {
 			echo "Installing Verbum Bible Software"
 			export FLPRODUCT="Verbum"
 			export FLPRODUCTi="verbum" #This is the variable referencing the icon path name in the repo.
+			export VERBUM_PATH="Verbum/"
 			;;
 		"Exit"*)
 			exit
@@ -919,12 +920,12 @@ chooseVersion() {
 		*"10")
 			checkDependenciesLogos10;
 			export TARGETVERSION="10";
-			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS10/Installer/${LOGOS_RELEASE_VERSION}/${FLPRODUCT}-x64.msi" ; fi
+			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS10/${VERBUM_PATH}Installer/${LOGOS_RELEASE_VERSION}/${FLPRODUCT}-x64.msi" ; fi
 			;;
 		*"9")
 			checkDependenciesLogos9;
 			export TARGETVERSION="9";
-			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/Installer/9.17.0.0010/${FLPRODUCT}-x64.msi" ; fi
+			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/${VERBUM_PATH}Installer/9.17.0.0010/${FLPRODUCT}-x64.msi" ; fi
 			;;
 		"Exit.")
 			exit
