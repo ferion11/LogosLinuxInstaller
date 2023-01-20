@@ -811,7 +811,6 @@ make_skel() {
 
 ## BEGIN CHECK DEPENDENCIES FUNCTIONS
 check_commands() {
-	#TODO: Check all commands before erroring out. See #113. Use array?
     for cmd in "$@"; do
         if have_dep "${cmd}"; then
             echo "* command ${cmd} is installed!"
@@ -1327,15 +1326,21 @@ installFonts() {
 	fi
 }
 
+installD3DCompiler() {
+	if [ -z "${WINETRICKS_UNATTENDED}" ]; then
+		winetricks_dll_install -q d3dcompiler_47;
+	else
+		winetricks_dll_install d3dcompiler_47;
+	fi
+}
+
 installLogos9() {	
 	getPremadeWineBottle;
 
 	setWineTricks;
-
-	installFonts
-
+	installFonts;
+	installD3DCompiler;
 	getLogosExecutable;
-
 	installMSI;
 
 	echo "======= Set ${FLPRODUCT}Bible Indexing to Vista Mode: ======="
@@ -1365,20 +1370,16 @@ EOF
 	wine_reg_install "renderer_gdi.reg";
 
 	setWinetricks;
-
 	installFonts;
+	installD3DCompiler;
 
 	if [ -z "${WINETRICKS_UNATTENDED}" ]; then
 		winetricks_install -q settings win10
-		#TODO: Verify if d3dcompiler_47 helps Logos 9. See #68. If so, this should be added to Logos 9's install procedure.
-		winetricks_dll_install -q d3dcompiler_47;
 	else
 		winetricks_install settings win10
-		winetricks_dll_install d3dcompiler_47
 	fi
 
 	getLogosExecutable;
-
 	installMSI;
 }
 ## END LOGOS INSTALL FUNCTIONS

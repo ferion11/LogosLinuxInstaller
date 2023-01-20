@@ -1,9 +1,13 @@
 # Changelog
-* 10.1.0.0056-v4
-  - Change in numbering scheme to note if Logos was updated or the script
-  - Fix #116.
-  - Added `-c|--config`.
-  - Added `-F|--skip-fonts`.
+* 10.1.0.0056-v5.1
+  - [T. H. Wright]
+    - Fix #68.
+* 10.1.0.0056-v5
+  - [T. H. Wright]
+    - Change in numbering scheme to note if Logos was updated or the script
+    - Fix #116.
+    - Added `-c|--config`.
+    - Added `-F|--skip-fonts`.
 * v10.0-4
   - [T. H. Wright]
     - Fix #36.
