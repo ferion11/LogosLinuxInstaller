@@ -278,15 +278,34 @@ HERE="\$(dirname "\$(readlink -f "\${0}")")"
 IFS_TMP=\${IFS}
 IFS=$'\n'
 
-[ -x "\${HERE}/data/bin/wine64" ] && export PATH="\${HERE}/data/bin:\${PATH}"
-export WINEARCH=win64
-export WINEPREFIX="\${HERE}/data/wine64_bottle"
-export WINE_EXE="${WINE_EXE}"
-export WINESERVER_EXE="${WINESERVER_EXE}"
-LOGOS_EXE=\$(find "\${WINEPREFIX}" -name ${FLPRODUCT}.exe | grep "${FLPRODUCT}\/${FLPRODUCT}.exe")
-LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"
+if [ -z "\${CONFIG_PATH}"]; then
+	CONFIG_PATH="\${HOME}/.config/Logos_on_Linux/Logos_on_Linux.conf"; export CONFIG_PATH;
+fi
+
+if [ -f \${CONFIG_PATH} ]; then
+	set -a;
+	source \${CONFIG_PATH};
+	set +a;
+	if [ -z \${WINEPREFIX} ] || [ -z \${WINE_EXE} ] || [ -z "\${WINESERVER_EXE}" ] || [ -z "\${LOGOS_EXE}" ] || [ -z "\${LOGOS_DIR}" ]; then
+		echo "controlPanel.sh needs these variables set in the config file:"
+		echo "- WINEPREFIX"
+		echo "- WINE_EXE"
+		echo "- WINESERVER_EXE"
+		echo "- LOGOS_EXE"
+		echo "- LOGOS_DIR"
+		echo "Config file incomplete. Exiting." >&2 && exit 1 ;;
+	fi
+else
+	[ -x "\${HERE}/data/bin/wine64" ] && export PATH="\${HERE}/data/bin:\${PATH}"
+	export WINEPREFIX="\${HERE}/data/wine64_bottle"; export WINEPREFIX;
+	export WINE_EXE="${WINE_EXE}"; export WINE_EXE;
+	export WINESERVER_EXE="${WINESERVER_EXE}"; export WINESERVER_EXE;
+	LOGOS_EXE=\$(find "\${WINEPREFIX}" -name ${FLPRODUCT}.exe | grep "${FLPRODUCT}\/${FLPRODUCT}.exe"); export LOGOS_EXE;
+	LOGOS_DIR="\$(dirname "\${LOGOS_EXE}")"; export LOGOS_DIR;
+	LOGS="DISABLED"; export LOGS;
+fi
 [ -z "\${LOGOS_ICON_URL}" ] && export LOGOS_ICON_URL="${LOGOS_ICON_URL}"
-LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILENAME
+LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILENAME;
 if [ -z "\${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; export WINEDEBUG; fi # Make wine output less verbose
 # END ENVIRONMENT
 # BEGIN FUNCTION DECLARATIONS
@@ -298,16 +317,20 @@ Usage: ./\$TITLE
 Interact with ${FLPRODUCT} Bible Software in Wine on Linux.
 
 Options:
-    -h   --help         Prints this help message and exit.
-    -v   --version      Prints version information and exit.
-    -D   --debug        Makes Wine print out additional info.
-    -f   --force-root   Sets LOGOS_FORCE_ROOT to true, which permits
-                        the root user to run the script.
-    -i   --indexing     Run the ${FLPRODUCT} indexer in the background.
-    -d   --dirlink      Create a symlink to the Logos directory in
-                        \${HERE}/installation_dir.
-    -s   --shortcut     Create or update the Logos shortcut, located in
-                        $HOME/.local/share/applications.
+    -h   --help                Prints this help message and exit.
+    -v   --version             Prints version information and exit.
+    -D   --debug               Makes Wine print out additional info.
+    -f   --force-root          Sets LOGOS_FORCE_ROOT to true, which
+                               permits the root user to run the script.
+    -i   --indexing            Run the ${FLPRODUCT} indexer in the
+                               background.
+    -l   --logs                Turn Logos logs on or off.
+    -d   --dirlink             Create a symlink to the Logos directory in
+                               \${HERE}/installation_dir.
+    -s   --shortcut            Create or update the Logos shortcut, located in
+                               HOME/.local/share/applications.
+    --remove-all-index         Removes all index and library catalog files.
+    --remove-library-catalog   Removes all library catalog files.
 UEOF
 }
 
@@ -349,6 +372,7 @@ logsOn() {
 	echo "======= enable ${FLPRODUCT}Bible logging only: ======="
 	"\${WINE_EXE}" reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
 	"\${WINESERVER_EXE}" -w
+	sed -i 's/LOGS="DISABLED"/LOGS="ENABLED"/' ${CONFIG_PATH}
 	echo "======= enable ${FLPRODUCT}Bible logging done! ======="
 	exit 0
 }
@@ -357,6 +381,7 @@ logsOff() {
 	echo "======= disable ${FLPRODUCT}Bible logging only: ======="
 	"\${WINE_EXE}" reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0000 /f
 	"\${WINESERVER_EXE}" -w
+	sed -i -E 's/LOGS="(.*)"/LOGS="DISABLED"/' ${CONFIG_PATH}
 	echo "======= disable ${FLPRODUCT}Bible logging done! ======="
 	exit 0
 }
@@ -406,6 +431,7 @@ do
 		--force-root) set -- "\$@" -f ;;
 		--debug)      set -- "\$@" -D ;;
         --indexing)   set -- "\$@" -i ;;
+		--logs)       set -- "\$@" -l ;;
         --dirlink)    set -- "\$@" -d ;;
 		--shortcut)   set -- "\$@" -s ;;
 		*)            set -- "\$@" "\$arg" ;;
@@ -439,24 +465,32 @@ while getopts "\$OPTSTRING" opt; do
 				remove-library-catalog)
 					removeLibraryCatalog;
 					;;
-				logs-on)
-					logsOn;
-					;;
-				logs-off)
-					logsOff;
-                    ;;
 				*)
 					if [ "\$OPTERR" = 1 ] && [ "\${optspec:0:1}" != ":" ]; then
 						echo "\$TITLE: Unknown option --\${OPTARG}" >&2 && usage >&2 && exit ;;
 					fi
 			esac
-		-i)
+		i)
 			indexing;
 			;;
-		-d)
+		l)
+			# TODO: Check existing value before running command.
+			if [ -f "\${CONFIG_PATH}" ]; then
+				if [ "\${LOGS}" -eq "DISABLED" ]; then
+					logsOn;
+				elif [ "\${LOGS}" -eq "ENABLED" ]; then
+					logsOff;
+				else
+					echo "LOGS var improperly set. Disabling ${FAITHLIFEPRODUCT} logs and resetting the LOGS value."
+					logsOff;
+			else
+				echo "--logs command failed. \${CONFIG_FILE} does not exist. Exiting."
+			fi
+			;;
+		d)
 			dirlink;
 			;;
-        -s)
+        s)
 			shortcut;
 			;;
 		\\?) echo "\$TITLE: -\$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
@@ -503,6 +537,8 @@ EOF
 ## END CREATE MAIN LAUNCHER
 
 ## BEGIN CREATE CONTROLPANEL.SH
+# TODO: Fix the selectAppImage() function.
+
 	cat > "${WORKDIR}"/controlPanel.sh << EOF
 #!/bin/bash
 TITLE="controlPanel.sh"
@@ -516,16 +552,35 @@ HERE="\$(dirname "\$(readlink -f "\${0}")")"
 # Save IFS
 IFS_TMP=\${IFS}
 IFS=$'\n'
+if [ -z "${CONFIG_PATH}"]; then
+    CONFIG_PATH="${HOME}/.config/Logos_on_Linux/Logos_on_Linux.conf"; export CONFIG_PATH;
+fi
 
-[ -x "\${HERE}/data/bin/wine64" ] && export PATH="\${HERE}/data/bin:\${PATH}"
-export WINEARCH=win64
-export WINEPREFIX="\${HERE}/data/wine64_bottle"
-export WINE_EXE="${WINE_EXE}"
-export WINESERVER_EXE="${WINESERVER_EXE}"
-export APPDIR_BINDIR="${APPDIR_BINDIR}"
-export APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"
-[ -z "\${WINETRICKS_URL}" ] && export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
-[ -z "\${WINETRICKS_DOWNLOADER+x}" ] && export WINETRICKS_DOWNLOADER="wget"
+if [ -f ${CONFIG_PATH} ]; then
+	set -a;
+    source ${CONFIG_PATH};
+	set +a;
+	if [ -z \${WINEPREFIX} ] || [ -z \${WINE_EXE} ] || [ -z "\${WINESERVER_EXE}" ] || [ -z "\${APPDIR_BINDR}" ] || [ -z "\${APPIMAGE_LINK_SELECTION_NAME}" ] || [ -z "\${WINETRICKSBIN}" ]; then
+		echo "controlPanel.sh needs these variables set in the config file:"
+		echo "- WINEPREFIX"
+		echo "- WINE_EXE"
+		echo "- WINESERVER_EXE"
+		echo "- APPDIR_BINDIR"
+		echo "- APPIMAGE_LINK_SELECTION_NAME"
+		echo "- WINETRICKSBIN"
+		echo "Config file incomplete. Exiting." >&2 && exit 1 ;;
+	fi
+else
+	[ -x "\${HERE}/data/bin/wine64" ] && export PATH="\${HERE}/data/bin:\${PATH}"
+	export WINEPREFIX="\${HERE}/data/wine64_bottle"; export WINEPREFIX;
+	export WINE_EXE="${WINE_EXE}"; export WINE_EXE;
+	export WINESERVER_EXE="${WINESERVER_EXE}"; export WINESERVER_EXE;
+	export APPDIR_BINDIR="${APPDIR_BINDIR}"; export APPDIR_BINDIR
+	export APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"; export APPIMAGE_LINK_SELECTION_NAME;
+	[ -z "\${WINETRICKS_URL}" ] && export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
+	[ -z "\${WINETRICKS_DOWNLOADER+x}" ] && export WINETRICKS_DOWNLOADER="wget"
+fi
+
 if [ -z "\${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; export WINEDEBUG; fi # Make wine output less verbose
 # END ENVIRONMENT
 # BEGIN FUNCTION DECLARATIONS
@@ -545,6 +600,8 @@ Options:
     --wine64            Run the script's wine64 binary.
     --wineserver        Run the script's wineserver binary.
     --winetricks        Run winetricks.
+    --setAppImage       Set the script's AppImage file. NOTE:
+                        Currently broken. Disabled until fixed.
 EEOF
 }
 
@@ -650,7 +707,6 @@ while getopts "\$OPTSTRING" opt; do
 					exit 0
 					;;
 				#selectAppImage)
-					# TODO: Fix the selectAppImage() function.
 					#selectAppImage;
 					#;;
 				*)
@@ -713,6 +769,8 @@ WINESERVER_EXE="${WINESERVER_EXE}"
 WINE64_APPIMAGE_FULL_URL="${WINE64_APPIMAGE_FULL_URL}"
 WINE64_APPIMAGE_FULL_FILENAME="${WINE64_APPIMAGE_FULL_FILENAME}"
 LOGOS_EXECUTABLE="${LOGOS_EXECUTABLE}"
+LOGOS_EXE="${LOGOS_EXE}"
+LOGOS_DIR="$(dirname "${LOGOS_EXE}")"
 
 # RUN OPTIONS
 LOGS="DISABLED"
