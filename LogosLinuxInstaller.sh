@@ -934,7 +934,15 @@ chooseVersion() {
 			gtk_fatal_error "Installation canceled!"
 	esac
 
-	LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; export LOGOS_VERSION
+	if [ "${FLPRODUCT}" = "Logos" ]; then
+		LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; 
+	elif [ "${FLPRODUCT}" = "Verbum" ]; then
+		LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f7)"; 
+	else
+		echo "FLRPODUCT not set in config. Please update your config to specify either 'Logos' or 'Verbum'. Installation canceled!"
+		gtk_fatal_error "FLPRODUCT not set in config. Please update your config to specify either 'Logos' or 'Verbum'."
+	fi
+	export LOGOS_VERSION;
 	LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
 
 	if [ -z "${INSTALLDIR}" ]; then
