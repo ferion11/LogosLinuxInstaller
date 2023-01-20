@@ -29,7 +29,7 @@ if [ -z "${WINEBOOT_GUI+x}" ]; then export WINEBOOT_GUI="" ; fi
 if [ -z "${EXTRA_INFO}" ]; then EXTRA_INFO="The following packages are usually necessary: winbind cabextract libjpeg8."; export EXTRA_INFO; fi
 if [ -z "${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; fi # Make wine output less verbose
 # END ENVIRONMENT
-
+# BEGIN FUNCTION DECLARATIONS
 usage() {
 cat << EOF
 $LOGOS_SCRIPT_TITLE, by $LOGOS_SCRIPT_AUTHOR, $LOGOS_SCRIPT_VERSION.
@@ -53,80 +53,6 @@ Options:
 EOF
 }
 
-# BEGIN OPTARGS
-RESET_OPTARGS=true
-for arg in "$@"
-do
-    if [ -n "$RESET_OPTARGS" ]; then
-      unset RESET_OPTARGS
-      set -- 
-    fi
-    case "$arg" in # Relate long options to short options
-        --help)      set -- "$@" -h ;;
-        --version)   set -- "$@" -V ;;
-		--config)    set -- "$@" -c ;;
-		--skip-fonts) set -- "$@" -F ;;
-		--force-root) set -- "$@" -f ;;
-		--debug)     set -- "$@" -D ;;
-        *)           set -- "$@" "$arg" ;;
-    esac
-done
-OPTSTRING=':hvDcFf' # Available options
-
-# First loop: set variable options which may affect other options
-while getopts "$OPTSTRING" opt; do
-	case $opt in
-			c)  NEXTOPT=$(${OPTIND})
-			if [ -n "$NEXTOPT" ] && [ "$NEXTOPT" != "-*" ]; then
-				OPTIND=$((OPTIND + 1))
-				if [ -f "$NEXTOPT" ]; then
-					LOGOS_CONFIG="${NEXTOPT}"
-					export LOGOS_CONFIG;
-					set -a
-					# shellcheck disable=SC1090
-					source "$LOGOS_CONFIG";
-					set +a
-				else
-					echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: Invalid config file path." >&2 && usage >&2 && exit;
-				fi
-			elif [ -f "$HOME/.config/Logos_on_Linux/Logos_on_Linux.conf" ]; then
-				LOGOS_CONFIG="$HOME/.config/Logos_on_Linux/Logos_on_Linux.conf"
-				export LOGOS_CONFIG
-				set -a
-				# shellcheck disable=SC1090
-				source "$LOGOS_CONFIG";
-				set +a
-			else
-				echo "No config file found."
-			fi
-			;;
-		F)  export SKIP_FONTS="1" ;;
-		f)	export LOGOS_FORCE_ROOT="1"; ;;
-		D)	export DEBUG=true;
-			WINEDEBUG=""; ;;
-		\?) echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
-		:)  echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 && exit ;;
-	esac
-done
-OPTIND=1 # Reset the index.
-
-# Second loop: determine user action
-while getopts "$OPTSTRING" opt; do
-    case $opt in
-        h)  usage && exit ;;
-        v)  echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR." && exit;;
-        \?) echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
-        :)  echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 && exit ;;
-    esac
-done
-# If no options passed.
-if [ "$OPTIND" -eq '1' ]; then
-        :
-fi
-shift $((OPTIND-1))
-# END OPTARGS
-
-# BEGIN FUNCTION DECLARATIONS
 die-if-root() {
 	if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
 		echo "* Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
@@ -1440,6 +1366,79 @@ main () {
 	
 	exit 0;
 }
+
+# BEGIN OPTARGS
+RESET_OPTARGS=true
+for arg in "$@"
+do
+	if [ -n "$RESET_OPTARGS" ]; then
+	  unset RESET_OPTARGS
+	  set -- 
+	fi
+	case "$arg" in # Relate long options to short options
+		--help)	  set -- "$@" -h ;;
+		--version)   set -- "$@" -V ;;
+		--config)	set -- "$@" -c ;;
+		--skip-fonts) set -- "$@" -F ;;
+		--force-root) set -- "$@" -f ;;
+		--debug)	 set -- "$@" -D ;;
+		*)		   set -- "$@" "$arg" ;;
+	esac
+done
+OPTSTRING=':hvDcFf' # Available options
+
+# First loop: set variable options which may affect other options
+while getopts "$OPTSTRING" opt; do
+	case $opt in
+			c)  NEXTOPT=$(${OPTIND})
+			if [ -n "$NEXTOPT" ] && [ "$NEXTOPT" != "-*" ]; then
+				OPTIND=$((OPTIND + 1))
+				if [ -f "$NEXTOPT" ]; then
+					LOGOS_CONFIG="${NEXTOPT}"
+					export LOGOS_CONFIG;
+					set -a
+					# shellcheck disable=SC1090
+					source "$LOGOS_CONFIG";
+					set +a
+				else
+					echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: Invalid config file path." >&2 && usage >&2 && exit;
+				fi
+			elif [ -f "$HOME/.config/Logos_on_Linux/Logos_on_Linux.conf" ]; then
+				LOGOS_CONFIG="$HOME/.config/Logos_on_Linux/Logos_on_Linux.conf"
+				export LOGOS_CONFIG
+				set -a
+				# shellcheck disable=SC1090
+				source "$LOGOS_CONFIG";
+				set +a
+			else
+				echo "No config file found."
+			fi
+			;;
+		F)  export SKIP_FONTS="1" ;;
+		f)  export LOGOS_FORCE_ROOT="1"; ;;
+		D)  export DEBUG=true;
+			WINEDEBUG=""; ;;
+		\?) echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
+		:)  echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 && exit ;;
+	esac
+done
+OPTIND=1 # Reset the index.
+
+# Second loop: determine user action
+while getopts "$OPTSTRING" opt; do
+	case $opt in
+		h)  usage && exit ;;
+		v)  echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR." && exit;;
+		\?) echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
+		:)  echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 && exit ;;
+	esac
+done
+# If no options passed.
+if [ "$OPTIND" -eq '1' ]; then
+		:
+fi
+shift $((OPTIND-1))
+# END OPTARGS
 
 main;
 
