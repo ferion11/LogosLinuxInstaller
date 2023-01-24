@@ -42,6 +42,10 @@ else
 	LOGS="DISABLED"; export LOGS;
 fi
 
+LOGOS_USER="\$(find "\${HERE}"/data/wine64_bottle/drive_c/users/*/AppData/Local/Logos -name Data | sed -r "s@\${HERE}/data/wine64_bottle/drive_c/users/(.*)/AppData/Local/Logos/Data@\1@")"; export LOGOS_USER;
+LOGOS_UID="\$(find "\${HERE}/data/wine64_bottle/drive_c/users/\${LOGOS_USER}/AppData/Local/Logos/Data/"* -maxdepth 0 -type d | awk -F'/' '{print \$NF}')"; export LOGOS_UID;
+if [ -z "LOGOS_UID" ]; then LOGOS_UID="NoUser"; export LOGOS_UID; fi
+
 [ -z "\${LOGOS_ICON_URL}" ] && export LOGOS_ICON_URL="${LOGOS_ICON_URL}"
 LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILENAME;
 if [ -z "\${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; export WINEDEBUG; fi # Make wine output less verbose
@@ -62,6 +66,10 @@ Options:
                                permits the root user to run the script.
     -i   --indexing            Run the ${FLPRODUCT} indexer in the
                                background.
+    -b   --backup              Saves ${FLPRODUCT} data to the config's
+                               backup location.
+    -r   --restore             Restores ${FLPRODUCT} data from the config's
+                               backup location.
     -l   --logs                Turn Logos logs on or off.
     -d   --dirlink             Create a symlink to the Windows Logos directory
                                in your Logos on Linux install dir.
@@ -135,6 +143,93 @@ yes_or_no() {
 	done
 }
 
+checkDiskSpace() {
+	# TODO: Make disk calculation more accurate by totaling the Documents, Users, and Data dirs, rather than counting the parent dir.
+	if [ "\$1" == "b" ]; then
+		REQUIRED_SPACE="\$(du --max=1 "\${SOURCEDIR}" | tail -n1 | cut -f1)"; export REQUIRED_SPACE;
+		AVAILABLE_SPACE="\$(df "\${BACKUPDIR}" | awk 'NR==2 {print \$4}')"; export AVAILABLE_SPACE;
+		REQUIRED_SPACE_HR="\$(du -h --max=1 "\${SOURCEDIR}" | tail -n1 | cut -f1)"; export REQUIRED_SPACE_HR;
+		AVAILABLE_SPACE_HR="\$(df -h "\${BACKUPDIR}" | awk 'NR==2 {print \$4}')"; export AVAILABLE_SPACE_HR;
+		if (( \$AVAILABLE_SPACE < \$REQUIRED_SPACE )); then
+			echo "Your install needs no more than \$REQUIRED_SPACE_HR but your backup directory only has \$AVAILABLE_SPACE_HR.";
+			return 1;
+		else
+			if [[ "\$(read -e -p "Your install needs no more than \$REQUIRED_SPACE_HR. Your backup directory has \$AVAILABLE_SPACE_HR. Linux systems usually suggest using no more than 80% disk capacity. Proceed with backup? [Y/n]: "; echo \$REPLY)" == [Yy]* ]]; then
+				return 0;
+			else
+				echo "Exiting.";
+				exit 1;
+			fi
+		fi
+	elif [ "\$1" == "r" ]; then
+		REQUIRED_SPACE="\$(du --max=1 "\${BACKUPDIR}" | tail -n1 | cut -f1)"; export REQUIRED_SPACE;
+		AVAILABLE_SPACE="\$(df "\${SOURCEDIR}" | awk 'NR==2 {print \$4}')"; export AVAILABLE_SPACE;
+		REQUIRED_SPACE_HR="\$(du --max=1 "\${BACKUPDIR}" | tail -n1 | cut -f1)"; export REQUIRED_SPACE_HR;
+		AVAILABLE_SPACE_HR="\$(df -h "\${SOURCEDIR}" | awk 'NR==2 {print \$4}')"; export AVAILABLE_SPACE_HR
+		if (( \$AVAILABLE_SPACE < \$REQUIRED_SPACE )); then
+			echo "Your install needs no more than \$REQUIRED_SPACE but your install directory only has \$AVAILABLE_SPACE.";
+			return 1;
+		else
+			if [[ "\$(read -e -p "Your install needs no more than \$REQUIRED_SPACE. Your backup directory has \$AVAILABLE_SPACE. Linux systems usually suggest using no more than 80% disk capacity. Proceed with backup? [Y/n]: "; echo \$REPLY)" == [Yy]* ]]; then
+				return 0;
+			else
+				echo "Exiting.";
+				exit 1;
+			fi
+		fi
+	fi
+}
+
+backup() {
+	check_commands rsync;
+
+	echo \$HERE
+	echo \$LOGOS_USER
+	echo \$LOGOS_UID
+
+	if [ "\${LOGOS_UID}" = "NoUser" ]; then
+		echo "You must log in to your account first. Exiting."
+		exit 1;
+	fi
+
+	if [ -d "\${BACKUPDIR}" ]; then
+		SOURCEDIR="\${HERE}/data/wine64_bottle/drive_c/users/\${LOGOS_USER}/AppData/Local/Logos"; export SOURCEDIR;
+		BACKUPDIR="\$BACKUPDIR"; export BACKUPDIR;
+		checkDiskSpace b;
+		mkdir -p "\${BACKUPDIR}/\${LOGOS_UID}"
+		rsync -avhP --delete "\${SOURCEDIR}/Documents/" "\${BACKUPDIR}/\${LOGOS_UID}/Documents/";
+		rsync -avhP --delete "\${SOURCEDIR}/Users/" "\${BACKUPDIR}/\${LOGOS_UID}/Users/";
+		rsync -avhP --delete "\${SOURCEDIR}/Data/" "\${BACKUPDIR}/\${LOGOS_UID}/Data/";
+		exit 0;
+	else 
+		echo "Backup directory does not exist. Exiting.";
+		exit 1;
+	fi
+}
+
+# TODO: The restore command restores the backup's Logos UID, but if this is a new install, this UID will be different. The restore command should    account for this change.
+restore() {
+	check_commands rsync;
+
+	if [ "\${LOGOS_UID}" = "NoUser" ]; then
+		echo "You must log in to your account first. Exiting."
+		exit 1;
+	fi
+
+	if [ -d "\${BACKUPDIR}" ]; then
+		SOURCEDIR="\${HERE}/data/wine64_bottle/drive_c/users/\${LOGOS_USER}/AppData/Local/Logos"; export SOURCEDIR;
+		BACKUPDIR="\$BACKUPDIR"; export BACKUPDIR;
+		checkDiskSpace r;
+		rsync -avhP "\$BACKUPDIR/\$LOGOS_UID/Documents/" "\$SOURCEDIR/Documents/";
+		rsync -avhP "\$BACKUPDIR/\$LOGOS_UID/Users/" "\$SOURCEDIR/Users/";
+		rsync -avhP "\$BACKUPDIR/\$LOGOS_UID/Data/" "\$SOURCEDIR/Data/";
+		exit 0;
+	else
+		echo "Backup directory does not exist. Exiting.";
+		exit 1;
+	fi
+}
+
 logsOn() {
 	echo "======= enable ${FLPRODUCT}Bible logging only: ======="
 	"\${WINE_EXE}" reg add "HKCU\\\\Software\\\\Logos4\\\\Logging" /v Enabled /t REG_DWORD /d 0001 /f
@@ -198,13 +293,15 @@ do
 		--force-root) set -- "\$@" -f ;;
 		--debug)      set -- "\$@" -D ;;
         --indexing)   set -- "\$@" -i ;;
+		--backup)     set -- "\$@" -b ;;
+		--restore)    set -- "\$@" -r ;;
 		--logs)       set -- "\$@" -l ;;
         --dirlink)    set -- "\$@" -d ;;
 		--shortcut)   set -- "\$@" -s ;;
 		*)            set -- "\$@" "\$arg" ;;
 	esac
 done
-OPTSTRING=':-:hvDfilds' # Available options
+OPTSTRING=':-:hvDfildsbr' # Available options
 
 # First loop: set variable options which may affect other options
 while getopts "\$OPTSTRING" opt; do
@@ -236,6 +333,10 @@ while getopts "\$OPTSTRING" opt; do
 			esac;;
 		i)
 			indexing ;;
+		b)
+			backup ;;
+		r)
+			restore ;;
 		l)
 			if [ -f "\${CONFIG_PATH}" ]; then
 				if [ "\${LOGS}" -eq "DISABLED" ]; then
