@@ -5,6 +5,7 @@
     - Moved generated scripts case statements to optargs (e.g., `-i|--indexing`). Fix #108.
     - Added Logos.sh: `-b|--backup`. Fix #110.
     - Added Logos.sh: `-r|--restore`.
+    - Added Logos.sh: `-e|--edit-config`.
     - Added `-r|--regenerate-scripts`.
 * 10.1.0.0056-v5.1
   - [T. H. Wright]

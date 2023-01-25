@@ -64,6 +64,7 @@ Options:
     -D   --debug               Makes Wine print out additional info.
     -f   --force-root          Sets LOGOS_FORCE_ROOT to true, which
                                permits the root user to run the script.
+    -e   --edit-config         Edit the Logos on Linux config file.
     -i   --indexing            Run the ${FLPRODUCT} indexer in the
                                background.
     -b   --backup              Saves ${FLPRODUCT} data to the config's
@@ -288,20 +289,21 @@ do
 		set -- 
 	fi
 	case "\$arg" in # Relate long options to short options
-		--help)       set -- "\$@" -h ;;
-		--version)    set -- "\$@" -v ;;
-		--force-root) set -- "\$@" -f ;;
-		--debug)      set -- "\$@" -D ;;
-        --indexing)   set -- "\$@" -i ;;
-		--backup)     set -- "\$@" -b ;;
-		--restore)    set -- "\$@" -r ;;
-		--logs)       set -- "\$@" -l ;;
-        --dirlink)    set -- "\$@" -d ;;
-		--shortcut)   set -- "\$@" -s ;;
-		*)            set -- "\$@" "\$arg" ;;
+		--help)        set -- "\$@" -h ;;
+		--version)     set -- "\$@" -v ;;
+		--force-root)  set -- "\$@" -f ;;
+		--debug)       set -- "\$@" -D ;;
+		--edit-config) set -- "\$@" -e ;;
+        --indexing)    set -- "\$@" -i ;;
+		--backup)      set -- "\$@" -b ;;
+		--restore)     set -- "\$@" -r ;;
+		--logs)        set -- "\$@" -l ;;
+        --dirlink)     set -- "\$@" -d ;;
+		--shortcut)    set -- "\$@" -s ;;
+		*)             set -- "\$@" "\$arg" ;;
 	esac
 done
-OPTSTRING=':-:hvDfildsbr' # Available options
+OPTSTRING=':-:bdDefhilrsv' # Available options
 
 # First loop: set variable options which may affect other options
 while getopts "\$OPTSTRING" opt; do
@@ -331,6 +333,13 @@ while getopts "\$OPTSTRING" opt; do
 						echo "\$TITLE: --\${OPTARG}: undefined option." >&2 && usage >&2 && exit
 					fi
 			esac;;
+		e)
+			if [ -n "${EDITOR}" ]; then
+				"\${EDITOR}" "\${CONFIG_PATH}" ;
+			else
+				echo "Error: The EDITOR variable is not set in user's environment."
+			fi
+			exit ;;
 		i)
 			indexing ;;
 		b)
