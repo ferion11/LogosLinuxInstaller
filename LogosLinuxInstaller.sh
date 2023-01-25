@@ -76,7 +76,8 @@ have_dep() {
 
 clean_all() {
 	echo "Cleaning all temp files…"
-	rm -rf "${WORKDIR}"
+	rm -fr "/tmp/LBS.*"
+	rm -fr "${WORKDIR}"
 	echo "done"
 }
 
