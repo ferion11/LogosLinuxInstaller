@@ -443,11 +443,6 @@ chooseVersion() {
 	if [ -z "${APPDIR_BINDIR}" ]; then
 		export APPDIR_BINDIR="${APPDIR}/bin"
 	fi
-
-	if [ -d "${INSTALLDIR}" ] && [ -z "${REGENERATE}" ] ; then
-		echo "A directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
-		gtk_fatal_error "a directory already exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable"
-	fi              
 }
 
 wineBinaryVersionCheck() {
@@ -594,7 +589,26 @@ chooseInstallMethod() {
 		export WINEBIN_CODE=${installArray[0]}
 		export WINE_EXE=${installArray[2]}
 	fi
+}
 
+checkExistingInstall() {
+	# Now that we know what the user wants to install and where, determine whether an install exists and whether to continue.
+	if [ -d "${INSTALLDIR}" ]; then
+		if find "${INSTALLDIR}" -name Logos.exe -o -name Verbum.exe | grep -qE "(Logos\/Logos.exe|Verbum\/Verbum.exe)"; then
+			EXISTING_LOGOS_INSTALL=1; export EXISTING_LOGOS_INSTALL;
+			echo "An install was found at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
+			gtk_fatal_error "An install was found at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
+		else
+			EXISTING_LOGOS_DIRECTORY=1; export EXISTING_LOGOS_DIRECTORY;
+			echo "A directory exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
+			gtk_fatal_error "A directory exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
+		fi
+	else
+		echo "Installing to an empty directory at ${INSTALLDIR}."
+	fi
+}
+
+beginInstall() {
 	if [ -n "${WINEBIN_CODE}" ]; then	
 		case "${WINEBIN_CODE}" in
 			"System"|"Proton"|"PlayOnLinux"|"Custom")
@@ -963,50 +977,7 @@ BACKUPDIR=""
 EOF
 }
 
-regenerateScripts() {
-	echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR."
-	die-if-root;
-	debug && echo "Debug mode enabled."
-
-	checkDependencies;
-	chooseProduct;
-	chooseVersion;
-	chooseInstallMethod;
-
-	create_starting_scripts;
-}
-# END FUNCTION DECLARATIONS
-
-main() {
-	echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR."
-	die-if-root;
-	debug && echo "Debug mode enabled."
-
-	# BEGIN PREPARATION
-	checkDependencies; # We verify the user is running a graphical UI and has majority of required dependencies.
-	chooseProduct; # We ask user for his Faithlife product's name and set variables.
-	chooseVersion; # We ask user for his Faithlife product's version, set variables, and create project skeleton.
-	chooseInstallMethod; # We ask user for his desired install method.
-	prepareWineBottle; # We run wineboot.
-	# END PREPARATION
-
-	# BEGIN INSTALL
-	case "${TARGETVERSION}" in
-		10*)
-				installLogos10; ;; # We run the commands specific to Logos 10.
-		9*)
-				installLogos9; ;; # We run the commands specific to Logos 9.
-		*)
-				gtk_fatal_error "Installation canceled!" ;;
-	esac
-
-	create_starting_scripts;
-
-	heavy_wineserver_wait;
-	clean_all;
-
-	LOGOS_EXE=$(find "${WINEPREFIX}" -name ${FLPRODUCT}.exe | grep "${FLPRODUCT}/${FLPRODUCT}.exe"); export LOGOS_EXE;
-
+postInstall() {
 	if [ -f "${LOGOS_EXE}" ]; then
 		gtk_continue_question "${FLPRODUCT} Bible ${TARGETVERSION} installed!"
 		if [ -z "$LOGOS_CONFIG" ] && [ ! -f "${DEFAULT_CONFIG_PATH}" ]; then
@@ -1033,7 +1004,7 @@ main() {
 			:
 		fi
 
-		if gtk_question "A launch script has been placed in ${INSTALLDIR} for your use. The script's name is ${FLPRODUCT}.sh.\n\nDo you want to run it now?\n\nNOTE: There may be an error on first execution. You can close the error dialog."; then
+		if gtk_question "A launch script has been placed in ${INSTALLDIR} for your use. The script's name is ${FLPRODUCT}.sh.\n\nDo you want to run it now?\n\nNOTE: There may be an error   on first execution. You can close the error dialog."; then
 			"${INSTALLDIR}"/"${FLPRODUCT}".sh
 		else echo "The script has finished. Exiting…";
 		fi
@@ -1041,7 +1012,44 @@ main() {
 		echo "Installation failed. ${LOGOS_EXE} not found. Exiting…"
 		gtk_fatal_error "The ${FLPRODUCT} executable was not found. This means something went wrong while installing ${FLPRODUCT}. Please contact the Logos on Linux community for help."
 	fi
-	# END INSTALL
+}
+# END FUNCTION DECLARATIONS
+
+main() {
+	echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR."
+	die-if-root;
+	debug && echo "Debug mode enabled."
+
+	# BEGIN PREPARATION
+	checkDependencies; # We verify the user is running a graphical UI and has majority of required dependencies.
+	chooseProduct; # We ask user for his Faithlife product's name and set variables.
+	chooseVersion; # We ask user for his Faithlife product's version, set variables, and create project skeleton.
+	chooseInstallMethod; # We ask user for his desired install method.
+	checkExistingInstall;
+	# END PREPARATION
+	if [ -z "${REGENERATE}" ]; then
+		beginInstall;
+		prepareWineBottle; # We run wineboot.
+		case "${TARGETVERSION}" in
+			10*)
+				installLogos10; ;; # We run the commands specific to Logos 10.
+			9*)
+				installLogos9; ;; # We run the commands specific to Logos 9.
+			*)
+				gtk_fatal_error "Installation canceled!" ;;
+		esac
+
+		create_starting_scripts;
+		heavy_wineserver_wait;
+		clean_all;
+
+		LOGOS_EXE=$(find "${WINEPREFIX}" -name ${FLPRODUCT}.exe | grep "${FLPRODUCT}/${FLPRODUCT}.exe"); export LOGOS_EXE;
+
+		postInstall;
+	else
+		create_starting_scripts;
+		echo "The scripts have been regenerated."
+	fi
 }
 
 # BEGIN OPTARGS
@@ -1094,6 +1102,7 @@ while getopts "$OPTSTRING" opt; do
 			;;
 		F)  export SKIP_FONTS="1" ;;
 		f)  export LOGOS_FORCE_ROOT="1"; ;;
+		r)  export REGENERATE="1"; ;;
 		D)  export DEBUG=true;
 			WINEDEBUG=""; ;;
 		\?) echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
@@ -1107,8 +1116,6 @@ while getopts "$OPTSTRING" opt; do
 	case $opt in
 		h)  usage && exit ;;
 		v)  echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR." && exit ;;
-		r)  REGENERATE=1; regenerateScripts;
-			echo "Scripts regenerated. Exiting." && exit ;;
 		\?) echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
 		:)  echo "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 && exit ;;
 	esac

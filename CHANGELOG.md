@@ -7,6 +7,7 @@
     - Added Logos.sh: `-r|--restore`.
     - Added Logos.sh: `-e|--edit-config`.
     - Added `-r|--regenerate-scripts`.
+    - Fix #129.
 * 10.1.0.0056-v5.1
   - [T. H. Wright]
     - Fix #68.
