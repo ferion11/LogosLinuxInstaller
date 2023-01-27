@@ -1025,9 +1025,9 @@ main() {
 	chooseProduct; # We ask user for his Faithlife product's name and set variables.
 	chooseVersion; # We ask user for his Faithlife product's version, set variables, and create project skeleton.
 	chooseInstallMethod; # We ask user for his desired install method.
-	checkExistingInstall;
 	# END PREPARATION
 	if [ -z "${REGENERATE}" ]; then
+		checkExistingInstall;
 		beginInstall;
 		prepareWineBottle; # We run wineboot.
 		case "${TARGETVERSION}" in

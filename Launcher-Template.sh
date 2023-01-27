@@ -23,8 +23,9 @@ if [ -f \${CONFIG_PATH} ]; then
 	set -a;
 	source \${CONFIG_PATH};
 	set +a;
-	if [ -z \${WINEPREFIX} ] || [ -z \${WINE_EXE} ] || [ -z "\${WINESERVER_EXE}" ] || [ -z "\${LOGOS_EXE}" ] || [ -z "\${LOGOS_DIR}" ]; then
+	if [ -z "\${FLPRODUCT}" ] || [ -z "\${WINEPREFIX}" ] || [ -z "\${WINE_EXE}" ] || [ -z "\${WINESERVER_EXE}" ] || [ -z "\${LOGOS_EXE}" ] || [ -z "\${LOGOS_DIR}" ]; then
 		echo "controlPanel.sh needs these variables set in the config file:"
+		echo "- FLPRODUCT"
 		echo "- WINEPREFIX"
 		echo "- WINE_EXE"
 		echo "- WINESERVER_EXE"
@@ -64,6 +65,7 @@ Options:
     -D   --debug               Makes Wine print out additional info.
     -f   --force-root          Sets LOGOS_FORCE_ROOT to true, which
                                permits the root user to run the script.
+    -R   --check-resources     Check ${FLPRODUCT}'s resource usage.
     -e   --edit-config         Edit the Logos on Linux config file.
     -i   --indexing            Run the ${FLPRODUCT} indexer in the
                                background.
@@ -80,6 +82,37 @@ Options:
     --remove-all-index         Removes all index and library catalog files.
     --remove-library-catalog   Removes all library catalog files.
 UEOF
+}
+
+resourceSnapshot() {
+	if [[ \$(which pidstat) ]]; then
+		PIDSTR=\$(ps faux | grep "\${FLPRODUCT}" | grep "\${LOGOS_USER}" | grep -vE "(grep)" | awk '{printf "%s%s",sep, \$2; sep=" -p "} END{print ""}');
+		printf "Snapshot of Logos System Resource Usage:\n\n"
+		eval "pidstat --human -p \${PIDSTR}"
+		eval "pidstat --human -d -p \${PIDSTR}"
+		printf "\n---\n"
+		echo "Note: There may be some processes improperly included."
+	else
+		echo "ERR: You need to install the 'sysstat' package in order to get the	 resource checking option's	  resource usage snapshot."
+	fi
+}
+
+resourcePlot() {
+	if [[ \$(which psrecord) ]]; then
+		declare -a PIDARR PLOT;
+		PIDARR=(\$(ps faux | grep "\${FLPRODUCT}" | grep "\${LOGOS_USER}" | grep -vE "(grep)" | awk '{print \$2}'));
+		for i in \${!PIDARR[@]}; do
+			PLOTNAME="\${APPDIR}/Logos-Resource-Plot_\${PIDARR[\$i]}.png"
+			psrecord "\${PIDARR[\$i]}" --interval 1 --duration 60 --plot "\${PLOTNAME}" & PLOT[\$i]=\$!
+			echo "Writing resource plot to \${PLOTNAME}."
+			WAIT_PIDS="\${WAIT_PIDS} \${PLOT[\$i]}"
+		done
+		echo "Recordings will take 1 minute."
+		eval "wait \${WAIT_PIDS}"
+		exit ;
+	else
+		echo "ERR: You need to install the 'psrecord' package in order to get the   resource checking option's	   resource usage plot."
+		fi
 }
 
 removeAllIndex() {
@@ -293,6 +326,7 @@ do
 		--version)     set -- "\$@" -v ;;
 		--force-root)  set -- "\$@" -f ;;
 		--debug)       set -- "\$@" -D ;;
+		--check-resources) set -- "\$@" -R ;;
 		--edit-config) set -- "\$@" -e ;;
         --indexing)    set -- "\$@" -i ;;
 		--backup)      set -- "\$@" -b ;;
@@ -303,7 +337,7 @@ do
 		*)             set -- "\$@" "\$arg" ;;
 	esac
 done
-OPTSTRING=':-:bdDefhilrsv' # Available options
+OPTSTRING=':-:bdDefhilRrsv' # Available options
 
 # First loop: set variable options which may affect other options
 while getopts "\$OPTSTRING" opt; do
@@ -333,6 +367,10 @@ while getopts "\$OPTSTRING" opt; do
 						echo "\$TITLE: --\${OPTARG}: undefined option." >&2 && usage >&2 && exit
 					fi
 			esac;;
+		R)
+			resourceSnapshot;
+			resourcePlot;
+			exit ;;
 		e)
 			if [ -n "${EDITOR}" ]; then
 				"\${EDITOR}" "\${CONFIG_PATH}" ;
