@@ -1,4 +1,14 @@
 # Changelog
+* 10.1.0.0056-v6
+  - [T. H. Wright]
+    - Move generated scripts to separate files: `Launcher-Template.sh`, `controlPanel-Template.sh`.
+    - Moved generated scripts case statements to optargs (e.g., `-i|--indexing`). Fix #108.
+    - Added Logos.sh: `-b|--backup`. Fix #110.
+    - Added Logos.sh: `-r|--restore`.
+    - Added Logos.sh: `-e|--edit-config`.
+    - Added `-r|--regenerate-scripts`.
+    - Added LOGOS.sh: `-R|--check-resources`. Requires `sysstat`.
+    - Fix #129.
 * 10.1.0.0056-v5.1
   - [T. H. Wright]
     - Fix #68.
