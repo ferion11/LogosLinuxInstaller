@@ -618,7 +618,7 @@ beginInstall() {
 				fi
 				;;
 			"AppImage"*)
-				check_lib libfuse;
+				check_libs libfuse;
 				echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using ${WINE64_APPIMAGE_FULL_VERSION} AppImage…"
 				if [ -z "${REGENERATE}" ]; then
 					make_skel "${WINE64_APPIMAGE_FULL_FILENAME}"
