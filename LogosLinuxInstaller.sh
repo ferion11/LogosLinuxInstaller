@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2317
-LOGOS_RELEASE_VERSION="10.1.0.0056"
+LOGOS_RELEASE_VERSION="23.1.0.0033"
 LOGOS_SCRIPT_TITLE="Logos Linux Installer" # From https://github.com/ferion11/LogosLinuxInstaller
 export LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
 export LOGOS_SCRIPT_VERSION="${LOGOS_RELEASE_VERSION}-v6" # Script version to match FaithLife Product version.
