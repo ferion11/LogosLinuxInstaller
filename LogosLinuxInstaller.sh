@@ -458,7 +458,7 @@ wineBinaryVersionCheck() {
 		#gtk_fatal_error "TARGETVERSION not set."
 	fi
 
-	# Check if the binary is executable, of if TESTBINARY's version is ≥ WINE_MINIMUM, or if it is Proton, else remove.
+	# Check if the binary is executable. If so, check if TESTBINARY's version is ≥ WINE_MINIMUM, or if it is Proton or a link to a Proton binary, else remove.
 	if [ -x "${TESTBINARY}" ]; then
 		TESTWINEVERSION=$("$TESTBINARY" --version | awk -F' ' '{print $1}' | awk -F'-' '{print $2}' | awk -F'.' '{print $1"."$2}');
 		if (( $(echo "$TESTWINEVERSION >= $WINE_MINIMUM" | bc -l) )); then
