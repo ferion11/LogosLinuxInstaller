@@ -460,7 +460,7 @@ wineBinaryVersionCheck() {
 
 	# Check if the binary is executable, of if TESTBINARY's version is ≥ WINE_MINIMUM, or if it is Proton, else remove.
 	if [ -x "${TESTBINARY}" ]; then
-		TESTWINEVERSION=$("$TESTBINARY" --version | awk -F' ' '{print $1}' | awk -F'-' '{print $2}');
+		TESTWINEVERSION=$("$TESTBINARY" --version | awk -F' ' '{print $1}' | awk -F'-' '{print $2}' | awk -F'.' '{print $1"."$2}');
 		if (( $(echo "$TESTWINEVERSION >= $WINE_MINIMUM" | bc -l) )); then
 			return 0;
 		elif [[ ${TESTBINARY} =~ .*"Proton - Experimental".* ]]; then
