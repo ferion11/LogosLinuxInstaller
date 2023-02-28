@@ -174,6 +174,24 @@ If using the AppImage, run:
 sudo dnf install fuse3
 ```
 
+### CentOS
+
+```
+sudo yum install patch mod_auth_ntlm_winbind samba-winbind cabextract zenity bc libxml2
+```
+
+If using wine from a repo, run:
+
+```
+sudo yum install winehq-staging
+```
+
+If using the AppImage, run:
+
+```
+sudo yum install fuse3
+```
+
 ## OpenSuse
 
 TODO
