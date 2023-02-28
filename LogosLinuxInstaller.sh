@@ -1,9 +1,8 @@
 #!/bin/bash
 # shellcheck disable=SC2317
-LOGOS_RELEASE_VERSION="23.1.0.0033"
-LOGOS_SCRIPT_TITLE="Logos Linux Installer" # From https://github.com/ferion11/LogosLinuxInstaller
+export LOGOS_SCRIPT_TITLE="Logos Linux Installer" # From https://github.com/ferion11/LogosLinuxInstaller
 export LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
-export LOGOS_SCRIPT_VERSION="${LOGOS_RELEASE_VERSION}-v6" # Script version to match FaithLife Product version.
+export LOGOS_SCRIPT_VERSION="3.6.1" # Script version to match FaithLife Product version.
 
 #####
 # Originally written by Ferion11.
@@ -350,7 +349,7 @@ checkDependencies() {
 		exit 1
 	fi
 
-	check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr;
+	check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint;
 }
 
 checkDependenciesLogos10() {
@@ -416,12 +415,10 @@ chooseVersion() {
 		*"10")
 			checkDependenciesLogos10;
 			export TARGETVERSION="10";
-			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS10/${VERBUM_PATH}Installer/${LOGOS_RELEASE_VERSION}/${FLPRODUCT}-x64.msi" ; fi
 			;;
 		*"9")
 			checkDependenciesLogos9;
 			export TARGETVERSION="9";
-			if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS9/${VERBUM_PATH}Installer/9.17.0.0010/${FLPRODUCT}-x64.msi" ; fi
 			;;
 		"Exit.")
 			exit
@@ -429,6 +426,9 @@ chooseVersion() {
 		*)
 			logos_error "Installation canceled!"
 	esac
+
+	LOGOS_RELEASE_VERSION=$(curl -s "https://clientservices.logos.com/update/v1/feed/logos${TARGETVERSION}/stable.xml" | xmllint --format - | sed -e 's/ xmlns.*=".*"//g' | sed -e 's@logos:minimum-os-version@minimum-os-version@g' | sed -e 's@logos:version@version@g' | xmllint --xpath "/feed/entry[1]/version/text()" -); export LOGOS_RELEASE_VERSION;
+	if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS${TARGETVERSION}/${VERBUM_PATH}Installer/${LOGOS_RELEASE_VERSION}/${FLPRODUCT}-x64.msi" ; fi
 
 	if [ "${FLPRODUCT}" = "Logos" ]; then
 		LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f6)"; 
