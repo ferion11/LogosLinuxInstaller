@@ -1013,7 +1013,7 @@ postInstall() {
 			:
 		fi
 
-		if logos_info "A launch script has been placed in ${INSTALLDIR} for your use. The script's name is ${FLPRODUCT}.sh.\n\nDo you want to run it now?\n\nNOTE: There may be an error on first execution. You can close the error dialog."; then
+		if gtk_continue_question "A launch script has been placed in ${INSTALLDIR} for your use. The script's name is ${FLPRODUCT}.sh.\n\nDo you want to run it now?\n\nNOTE: There may be an error on first execution. You can close the error dialog."; then
 			"${INSTALLDIR}"/"${FLPRODUCT}".sh
 		else echo "The script has finished. Exiting…";
 		fi
