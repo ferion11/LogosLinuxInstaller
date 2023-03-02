@@ -111,8 +111,8 @@ logos_info() {
 }
 logos_warn() {
     WARN_MESSAGE="${1}"
-    cli_msg "${INFO_MESSAGE}"
-    gtk_warn()
+    cli_msg "${WARN_MESSAGE}"
+    gtk_warn "${WARN_MESSAGE}"
 }
 logos_error() {
 	WIKI_LINK="https://github.com/ferion11/LogosLinuxInstaller/wiki"
