@@ -152,7 +152,7 @@ The steam deck has a locked down filesystem. There are some missing dependencies
 6. Get package lists: `sudo pacman -Fy`
 7. Fix locale issues `sudo pacman -Syu glibc`
 8. then `sudo locale-gen` 
-9. Install dependencies: `sudo pacman -S samba winbind cabextract appmenu-gtk-module patch bc lib32-libjpeg-turbo 
+9. Install dependencies: `sudo pacman -S samba winbind cabextract appmenu-gtk-module patch bc lib32-libjpeg-turbo`
 
 Packages you install may be overwritten by the next Steam OS update, but you can easily reinstall them if that happens.
 
