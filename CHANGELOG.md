@@ -1,8 +1,10 @@
 # Changelog
-* 3.6.1
+* 3.6.2
   - Retrieve Logos release version from XML feed [T. H. Wright]
   - Modify the script version, and update the CHANGELOG to reflect this change.
-* 3.6
+* 3.6.1
+  - Introduce logos_error() to simplify error messages. [T. H. Wright]
+* 3.6.0
   - [T. H. Wright]
     - Move generated scripts to separate files: `Launcher-Template.sh`, `controlPanel-Template.sh`.
     - Moved generated scripts case statements to optargs (e.g., `-i|--indexing`). Fix #108.
@@ -15,13 +17,13 @@
 * 3.5.1
   - [T. H. Wright]
     - Fix #68.
-* 3.5
+* 3.5.0
   - [T. H. Wright]
     - Change in numbering scheme to note if Logos was updated or the script
     - Fix #116.
     - Added `-c|--config`.
     - Added `-F|--skip-fonts`.
-* 3.4
+* 3.4.0
   - [T. H. Wright]
     - Fix #36.
     - Fix #81.
@@ -34,19 +36,19 @@
     - Fix #112.
     - Added `-f|--force-root`.
     - Added `-D|--debug`.
-* 3.3
+* 3.3.0
   - [T. H. Wright]
     - Fix #93.
-* 3.2
+* 3.2.0
   - [T. H. Wright]
     - Fix #92.
-* 3.1
+* 3.1.0
   - Install DLL d3dcompiler_47 (jg00dman, thw26)
   - L10: Change winetricks URL
   - L10: allow using local winetricks (thw26)
   - L10: add winetricks_dll_install (thw26)
   - Add basic optargs: `-h|--help` and `-v|--version` (thw26)
-* 3.0:
+* 3.0.0:
   - Refactoring and renaming of scripts, updates to README, by T. H. Wright (thw26)
   - Logos 10 and Verbum 10 install scripts by John Goodman (jg00dman)
     - NOTE: Scripts are now numbered by Logos version.
