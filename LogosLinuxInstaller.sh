@@ -108,9 +108,13 @@ cli_error() {
 }
 
 logos_error() {
+	WIKI_LINK="https://github.com/ferion11/LogosLinuxInstaller/wiki"
+	TELEGRAM_LINK="https://t.me/linux_logos"
+	MATRIX_LINK="https://matrix.to/#/#logosbible:matrix.org"
     ERROR_MESSAGE="${1}"
-    cli_error="${ERROR_MESSAGE}"
-    gtk_error ${ERROR_MESSAGE};
+	HELP_MESSAGE="If you need help, please consult:\n\n${WIKI_LINK}\n${TELEGRAM_LINK}\n${MATRIX_LINK}"
+    cli_error "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
+    gtk_error "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
 	kill -SIGKILL "-$(($(ps -o pgid= -p "${$}")))"
 	exit 1;
 }
@@ -646,7 +650,7 @@ beginInstall() {
 		if [ -x "$(dirname "${WINE_EXE}")/wineserver" ]; then
 			WINESERVER_EXE="$(echo "$(dirname "${WINE_EXE}")/wineserver" | tr -d '\n')"; export WINESERVER_EXE;
 		else
-			logos_error "$(dirname ${WINE_EXE})/wineserver not found. Please either add it or create a symlink to it, and rerun."
+			logos_error "$(dirname "${WINE_EXE}")/wineserver not found. Please either add it or create a symlink to it, and rerun."
 		fi
 	fi
 }
