@@ -1,5 +1,5 @@
 # Changelog
-* 3.6.3
+* 3.6.3-1
   - Introduce logos_info() and logos_warn() to simplify script feedback. [T. H. Wright]
 * 3.6.2
   - Retrieve Logos release version from XML feed [T. H. Wright]
