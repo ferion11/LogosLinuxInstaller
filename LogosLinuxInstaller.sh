@@ -102,12 +102,6 @@ gtk_warn() {
 gtk_error() {
 	zenity --error --width=300 --height=200 --text="$*" --title='Error!'
 }
-gtk_fatal_error() {
-	gtk_error "$@"
-	echo "End in failure!"
-	kill -SIGKILL "-$(($(ps -o pgid= -p "${$}")))"
-	exit 1
-}
 
 cli_error() {
     echo "${1}"
@@ -116,7 +110,9 @@ cli_error() {
 logos_error() {
     ERROR_MESSAGE="${1}"
     cli_error="${ERROR_MESSAGE}"
-    gtk_fatal_error ${ERROR_MESSAGE};
+    gtk_error ${ERROR_MESSAGE};
+	kill -SIGKILL "-$(($(ps -o pgid= -p "${$}")))"
+	exit 1;
 }
 
 mkdir_critical() {
