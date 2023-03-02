@@ -261,6 +261,16 @@ wait_process_using_dir() {
 	echo "---------------------"
 }
 
+cli_error() {
+	echo "${1}"
+}
+
+logos_error() {
+	ERROR_MESSAGE="${1}"
+	cli_error="${ERROR_MESSAGE}"
+	gtk_fatal_error ${ERROR_MESSAGE};
+}
+
 make_skel() {
 # ${1} - SET_APPIMAGE_FILENAME
 	export SET_APPIMAGE_FILENAME="${1}"
@@ -738,7 +748,7 @@ winetricks_install() {
 
 	# zenity GUI feedback
 	zenity --progress --title="Winetricks ${*}" --text="Winetricks installing ${*}" --pulsate --auto-close < "${pipe_winetricks}" &
-	ZENITY_PID="${!}"
+	ZENITY_PID="${!}";
 
 	"$WINETRICKSBIN" "${@}" | tee "${pipe_winetricks}";
 	WINETRICKS_STATUS="${?}";
