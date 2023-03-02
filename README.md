@@ -142,15 +142,17 @@ sudo pacman -S pamac-cli
 
 ### Steamdeck
 
-The steamdeck has a locked down filesystem. There are some missing dependencies which cause irregular crashes in Logos. These can be installed following this sequence:
+The steam deck has a locked down filesystem. There are some missing dependencies which cause irregular crashes in Logos. These can be installed following this sequence:
 
-- Enter Desktop Mode
-- Use passwd to create a password for the deck user, unless you already did this.
-- Disable read-only mode: `sudo steamos-readonly disable`
-- Initialize pacman keyring: `sudo pacman-key --init`
-- Populate pacman keyring with the default Arch Linux keys: `sudo pacman-key --populate archlinux`
-- Get package lists: `sudo pacman -Fy`
-- Install dependencies: `sudo pacman -S samba`
+1. Enter Desktop Mode
+2. Use `passwd` to create a password for the deck user, unless you already did this.
+3. Disable read-only mode: `sudo steamos-readonly disable`
+4. Initialize pacman keyring: `sudo pacman-key --init`
+5. Populate pacman keyring with the default Arch Linux keys: `sudo pacman-key --populate archlinux`
+6. Get package lists: `sudo pacman -Fy`
+7. Fix locale issues `sudo pacman -Syu glibc`
+8. then `sudo locale-gen` 
+9. Install dependencies: `sudo pacman -S samba winbind cabextract appmenu-gtk-module patch bc lib32-libjpeg-turbo 
 
 Packages you install may be overwritten by the next Steam OS update, but you can easily reinstall them if that happens.
 
