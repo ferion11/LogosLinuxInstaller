@@ -60,7 +60,7 @@ EOF
 die-if-root() {
 	if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
 		echo "* Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-		gtk_fatal_error "Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+		logos_error "Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
 	fi
 }
 
@@ -109,8 +109,18 @@ gtk_fatal_error() {
 	exit 1
 }
 
+cli_error() {
+    echo "${1}"
+}
+
+logos_error() {
+    ERROR_MESSAGE="${1}"
+    cli_error="${ERROR_MESSAGE}"
+    gtk_fatal_error ${ERROR_MESSAGE};
+}
+
 mkdir_critical() {
-	mkdir "$1" || gtk_fatal_error "Can't create the $1 directory"
+	mkdir "$1" || logos_error "Can't create the $1 directory"
 }
 
 gtk_question() {
@@ -120,7 +130,7 @@ gtk_question() {
 	fi
 }
 gtk_continue_question() {
-	if ! gtk_question "$@"; then gtk_fatal_error "The installation was cancelled!"; fi
+	if ! gtk_question "$@"; then logos_error "The installation was cancelled!"; fi
 }
 
 # shellcheck disable=SC2028
@@ -136,7 +146,7 @@ gtk_download() {
 	if [ "$2" != "${2%/}" ]; then
 		# it has '/' at the end or it is existing directory
 		TARGET="$2/${1##*/}"
-		[ -d "$2" ] || mkdir -p "$2" || gtk_fatal_error "Cannot create $2"
+		[ -d "$2" ] || mkdir -p "$2" || logos_error "Cannot create $2"
 	elif [ -d "$2" ]; then
 		# it's existing directory
 		TARGET="$2/${1##*/}"
@@ -144,7 +154,7 @@ gtk_download() {
 		# $2 is file
 		TARGET="$2"
 		# ensure that the directory where the target file will be exists
-		[ -d "${2%/*}" ] || mkdir -p "${2%/*}" || gtk_fatal_error "Cannot create directory ${2%/*}"
+		[ -d "${2%/*}" ] || mkdir -p "${2%/*}" || logos_error "Cannot create directory ${2%/*}"
 	fi
 
 	echo "* Downloading:"
@@ -220,11 +230,10 @@ gtk_download() {
 	# NOTE: sometimes the process finishes before the wait command, giving the error code 127
 	if [ "${ZENITY_RETURN}" == "0" ] || [ "${ZENITY_RETURN}" == "127" ] ; then
 		if [ "${WGET_RETURN}" != "0" ] && [ "${WGET_RETURN}" != "127" ] ; then
-			echo "ERROR: error downloading the file! WGET_RETURN: ${WGET_RETURN}"
-			gtk_fatal_error "The installation was cancelled because of error downloading the file!\n * ${FILENAME}\n  - WGET_RETURN: ${WGET_RETURN}"
+			logos_error "ERROR: The installation was cancelled because of error downloading the file!\n * ${FILENAME}\n  - WGET_RETURN: ${WGET_RETURN}"
 		fi
 	else
-		gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
+		logos_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}"
 	fi
 	echo "${FILENAME} download finished!"
 }
@@ -259,16 +268,6 @@ wait_process_using_dir() {
 	done
 	echo "* End of wait_process_using_dir."
 	echo "---------------------"
-}
-
-cli_error() {
-	echo "${1}"
-}
-
-logos_error() {
-	ERROR_MESSAGE="${1}"
-	cli_error="${ERROR_MESSAGE}"
-	gtk_fatal_error ${ERROR_MESSAGE};
 }
 
 make_skel() {
@@ -320,8 +319,7 @@ check_commands() {
         fi
     done
 	if [ "${#MISSING_CMD[@]}" -ne 0 ]; then
-		echo "Your system is missing ${MISSING_CMD[*]}. Please install your distro's ${MISSING_CMD[*]} packages."
-		gtk_fatal_error "Your system is missing ${MISSING_CMD[*]}. Please install your distro's ${MISSING_CMD[*]} package(s).\n ${EXTRA_INFO}"
+		logos_error "Your system is missing ${MISSING_CMD[*]}. Please install your distro's ${MISSING_CMD[*]} package(s).\n ${EXTRA_INFO}"
 	fi
 }
 # shellcheck disable=SC2001
@@ -331,8 +329,7 @@ check_libs() {
         if [ -n "${HAVE_LIB}" ]; then
             echo "* ${lib} is installed!"
         else
-            echo "* Your system does not have the lib: ${lib}. Please install ${lib} package. ${EXTRA_INFO}"
-            gtk_fatal_error "Your system does not have lib: ${lib}. Please install ${lib} package.\n ${EXTRA_INFO}"
+            logos_error "Your system does not have lib: ${lib}. Please install ${lib} package.\n ${EXTRA_INFO}"
         fi
     done
 }
@@ -397,7 +394,7 @@ chooseProduct() {
 			exit
 			;;
 		*)
-			gtk_fatal_error "Installation canceled!"
+			logos_error "Installation canceled!"
 	esac
 
 	if [ -z "${LOGOS_ICON_URL}" ]; then export LOGOS_ICON_URL="https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/master/img/${FLPRODUCTi}-128-icon.png" ; fi
@@ -430,7 +427,7 @@ chooseVersion() {
 			exit
 			;;
 		*)
-			gtk_fatal_error "Installation canceled!"
+			logos_error "Installation canceled!"
 	esac
 
 	if [ "${FLPRODUCT}" = "Logos" ]; then
@@ -439,7 +436,7 @@ chooseVersion() {
 		LOGOS_VERSION="$(echo "${LOGOS64_URL}" | cut -d/ -f7)"; 
 	else
 		echo "FLPRODUCT not set in config. Please update your config to specify either 'Logos' or 'Verbum'. Installation canceled!"
-		gtk_fatal_error "FLPRODUCT not set in config. Please update your config to specify either 'Logos' or 'Verbum'."
+		logos_error "FLPRODUCT not set in config. Please update your config to specify either 'Logos' or 'Verbum'."
 	fi
 	export LOGOS_VERSION;
 	LOGOS64_MSI="$(basename "${LOGOS64_URL}")"; export LOGOS64_MSI
@@ -464,8 +461,7 @@ wineBinaryVersionCheck() {
 	elif [ "${TARGETVERSION}" == "9" ]; then
 		WINE_MINIMUM="7.0"
 	else
-		echo "TARGETVERSION not set."
-		#gtk_fatal_error "TARGETVERSION not set."
+		logos_error "TARGETVERSION not set."
 	fi
 
 	# Check if the binary is executable. If so, check if TESTBINARY's version is ≥ WINE_MINIMUM, or if it is Proton or a link to a Proton binary, else remove.
@@ -606,12 +602,10 @@ checkExistingInstall() {
 	if [ -d "${INSTALLDIR}" ]; then
 		if find "${INSTALLDIR}" -name Logos.exe -o -name Verbum.exe | grep -qE "(Logos\/Logos.exe|Verbum\/Verbum.exe)"; then
 			EXISTING_LOGOS_INSTALL=1; export EXISTING_LOGOS_INSTALL;
-			echo "An install was found at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
-			gtk_fatal_error "An install was found at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
+			lgoos_error "An install was found at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
 		else
 			EXISTING_LOGOS_DIRECTORY=1; export EXISTING_LOGOS_DIRECTORY;
-			echo "A directory exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
-			gtk_fatal_error "A directory exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
+			logos_error "A directory exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
 		fi
 	else
 		echo "Installing to an empty directory at ${INSTALLDIR}."
@@ -643,7 +637,7 @@ beginInstall() {
 				fi
 				;;
 			*)
-				gtk_fatal_error "Installation canceled!"
+				logos_error "Installation canceled!"
 		esac
 	else
 		echo "WINEBIN_CODE is not set in your config file."
@@ -656,7 +650,7 @@ beginInstall() {
 		if [ -x "$(dirname "${WINE_EXE}")/wineserver" ]; then
 			WINESERVER_EXE="$(echo "$(dirname "${WINE_EXE}")/wineserver" | tr -d '\n')"; export WINESERVER_EXE;
 		else
-			gtk_fatal_error "$(dirname "${WINE_EXE}")/wineserver not found. Please either add it or create a symlink to it, and rerun."
+			logos_error "$(dirname ${WINE_EXE})/wineserver not found. Please either add it or create a symlink to it, and rerun."
 		fi
 	fi
 }
@@ -723,7 +717,7 @@ setWinetricks() {
 						export WINETRICKSBIN;
 						;;
 					*)  
-						gtk_fatal_error "Installation canceled!"
+						logos_error "Installation canceled!"
 					esac
 			else
 				echo "The system's winetricks is too old. Downloading an up-to-date winetricks from the Internet…"
@@ -763,11 +757,11 @@ winetricks_install() {
 		if [ "${WINETRICKS_STATUS}" != "0" ] ; then
 				${WINESERVER_EXE} -k;
 			echo "ERROR on : winetricks ${*}; WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
-			gtk_fatal_error "The installation was cancelled because of sub-job failure!\n * winetricks ${*}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
+			logos_error "The installation was cancelled because of sub-job failure!\n * winetricks ${*}\n  - WINETRICKS_STATUS: ${WINETRICKS_STATUS}";
 		fi
 	else
 		"${WINESERVER_EXE}" -k;
-		gtk_fatal_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}";
+		logos_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}";
 	fi
 	echo "winetricks ${*} DONE!";
 
@@ -1020,7 +1014,7 @@ postInstall() {
 		fi
 	else
 		echo "Installation failed. ${LOGOS_EXE} not found. Exiting…"
-		gtk_fatal_error "The ${FLPRODUCT} executable was not found. This means something went wrong while installing ${FLPRODUCT}. Please contact the Logos on Linux community for help."
+		logos_error "The ${FLPRODUCT} executable was not found. This means something went wrong while installing ${FLPRODUCT}. Please contact the Logos on Linux community for help."
 	fi
 }
 # END FUNCTION DECLARATIONS
@@ -1046,7 +1040,7 @@ main() {
 			9*)
 				installLogos9; ;; # We run the commands specific to Logos 9.
 			*)
-				gtk_fatal_error "Installation canceled!" ;;
+				logos_error "Installation canceled!" ;;
 		esac
 
 		create_starting_scripts;
