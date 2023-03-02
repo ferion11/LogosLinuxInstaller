@@ -92,6 +92,9 @@ heavy_wineserver_wait() {
 }
 
 ## BEGIN ZENITY FUNCTIONS
+cli_msg() {
+	printf "%s\n" "${1}"
+}
 gtk_info() {
 	zenity --info --width=300 --height=200 --text="$*" --title='Information'
 }
@@ -101,18 +104,23 @@ gtk_warn() {
 gtk_error() {
 	zenity --error --width=300 --height=200 --text="$*" --title='Error!'
 }
-
-cli_error() {
-    printf "%s\n" "${1}"
+logos_info() {
+	INFO_MESSAGE="${1}"
+	cli_msg "${INFO_MESSAGE}"
+	gtk_info "${INFO_MESSAGE}"
 }
-
+logos_warn() {
+    WARN_MESSAGE="${1}"
+    cli_msg "${WARN_MESSAGE}"
+    gtk_warn "${WARN_MESSAGE}"
+}
 logos_error() {
 	WIKI_LINK="https://github.com/ferion11/LogosLinuxInstaller/wiki"
 	TELEGRAM_LINK="https://t.me/linux_logos"
 	MATRIX_LINK="https://matrix.to/#/#logosbible:matrix.org"
     ERROR_MESSAGE="${1}"
 	HELP_MESSAGE="If you need help, please consult:\n\n${WIKI_LINK}\n${TELEGRAM_LINK}\n${MATRIX_LINK}"
-    cli_error "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
+    cli_msg "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
     gtk_error "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
 	kill -SIGKILL "-$(($(ps -o pgid= -p "${$}")))"
 	exit 1;
@@ -988,19 +996,16 @@ postInstall() {
 			mkdir -p "${HOME}/.config/Logos_on_Linux";
 			if [ -d "${HOME/.config/Logos_on_Linux}" ]; then
 				createConfig;
-				echo "A config file was created at ${DEFAULT_CONFIG_PATH}.";
-				gtk_continue_question "A config file was created at ${DEFAULT_CONFIG_PATH}.";
+				logos_info "A config file was created at ${DEFAULT_CONFIG_PATH}.";
 			else
-				echo "${HOME}/.config/Logos_on_Linux does not exist. Failed to create config file."
-				gtk_continue_question "${HOME}/.config/Logos_on_Linux does not exist. Failed to create config file."
+				logos_warn "${HOME}/.config/Logos_on_Linux does not exist. Failed to create config file."
 			fi
 		elif [ -z "$LOGOS_CONFIG" ] && [ -f "${DEFAULT_CONFIG_PATH}" ]; then
 			if gtk_question "The script found a config file at ${DEFAULT_CONFIG_PATH}. Should the script overwrite the existing config?"; then
 				if [ -d "${HOME/.config/Logos_on_Linux}" ]; then
 					createConfig;
 				else
-					echo "${HOME}/.config/Logos_on_Linux does not exist. Failed to create config file.";
-					gtk_continue_question "${HOME}/.config/Logos_on_Linux does not exist. Failed to create config file."
+					logos_warn "${HOME}/.config/Logos_on_Linux does not exist. Failed to create config file."
 				fi
 			fi
 		else
@@ -1008,13 +1013,12 @@ postInstall() {
 			:
 		fi
 
-		if gtk_question "A launch script has been placed in ${INSTALLDIR} for your use. The script's name is ${FLPRODUCT}.sh.\n\nDo you want to run it now?\n\nNOTE: There may be an error   on first execution. You can close the error dialog."; then
+		if logos_info "A launch script has been placed in ${INSTALLDIR} for your use. The script's name is ${FLPRODUCT}.sh.\n\nDo you want to run it now?\n\nNOTE: There may be an error on first execution. You can close the error dialog."; then
 			"${INSTALLDIR}"/"${FLPRODUCT}".sh
 		else echo "The script has finished. Exiting…";
 		fi
 	else
-		echo "Installation failed. ${LOGOS_EXE} not found. Exiting…"
-		logos_error "The ${FLPRODUCT} executable was not found. This means something went wrong while installing ${FLPRODUCT}. Please contact the Logos on Linux community for help."
+		logos_error "Installation failed. ${LOGOS_EXE} not found. Exiting…\n\nThe ${FLPRODUCT} executable was not found. This means something went wrong while installing ${FLPRODUCT}. Please contact the Logos on Linux community for help."
 	fi
 }
 # END FUNCTION DECLARATIONS
