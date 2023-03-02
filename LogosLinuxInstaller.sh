@@ -104,7 +104,7 @@ gtk_error() {
 }
 
 cli_error() {
-    echo "${1}"
+    printf "%s\n" "${1}"
 }
 
 logos_error() {
