@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 TITLE="controlPanel.sh"
 VERSION="${LOGOS_SCRIPT_VERSION}"
 AUTHOR="${LOGOS_SCRIPT_AUTHOR}"
