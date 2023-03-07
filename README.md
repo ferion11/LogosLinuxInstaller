@@ -78,7 +78,7 @@ Options:x
                         Currently broken. Disabled until fixed.
 ```
 
-# Installation
+# Installation [WIP]
 
 Once all dependencies are met, run `./LogosLinuxInstaller.sh` and follow the prompts.
 
