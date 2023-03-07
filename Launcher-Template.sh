@@ -217,10 +217,6 @@ checkDiskSpace() {
 backup() {
 	check_commands rsync;
 
-	echo \$HERE
-	echo \$LOGOS_USER
-	echo \$LOGOS_UID
-
 	if [ "\${LOGOS_UID}" = "NoUser" ]; then
 		echo "You must log in to your account first. Exiting."
 		exit 1;
