@@ -93,7 +93,7 @@ NOTE: This install guide is outdated. Please see [#114](https://github.com/ferio
 ## Debian and Ubuntu
 
 ```
-sudo apt install mktemp patch lsof wget find sed grep gawk tr winbind cabextract x11-apps zenity bc libxml2-utils
+sudo apt install mktemp patch lsof wget find sed grep gawk tr winbind cabextract x11-apps zenity bc libxml2-utils curl
 ```
 
 If using wine from a repo, you must install wine staging. Run:
@@ -113,7 +113,7 @@ sudo apt install fuse3
 ## Arch
 
 ```
-sudo pacman -S patch lsof wget sed grep gawk cabextract samba zenity bc libxml2
+sudo pacman -S patch lsof wget sed grep gawk cabextract samba zenity bc libxml2 curl
 ```
 
 If using wine from a repo, run:
@@ -125,7 +125,7 @@ sudo pacman -S wine
 ### Manjaro
 
 ```
-sudo pamac install patch lsof wget sed grep gawk cabextract samba zenity bc libxml2
+sudo pamac install patch lsof wget sed grep gawk cabextract samba zenity bc libxml2 curl
 ```
 
 If using wine from a repo, run:
@@ -161,7 +161,7 @@ After these steps you can go ahead and run the your install script.
 ## RPM
 
 ```
-sudo dnf install patch mod_auth_ntlm_winbind samba-winbind cabextract zenity bc libxml2
+sudo dnf install patch mod_auth_ntlm_winbind samba-winbind cabextract zenity bc libxml2 curl
 ```
 
 If using wine from a repo, run:
@@ -179,7 +179,7 @@ sudo dnf install fuse3
 ### CentOS
 
 ```
-sudo yum install patch mod_auth_ntlm_winbind samba-winbind cabextract zenity bc libxml2
+sudo yum install patch mod_auth_ntlm_winbind samba-winbind cabextract zenity bc libxml2 curl
 ```
 
 If using wine from a repo, run:
