@@ -189,7 +189,6 @@ bytesToHumanReadable() {
 }
 
 checkDiskSpace() {
-	# TODO: Make disk calculation more accurate by totaling the Documents, Users, and Data dirs, rather than counting the parent dir.
 	if [ "\$1" == "b" ]; then
 		DOCUMENTS_SPACE=\$(du --max=1 "\${SOURCEDIR}/Documents" | tail -n1 | cut -f1)
 		USERS_SPACE=\$(du --max=1 "\${SOURCEDIR}/Users" | tail -n1 | cut -f1)
