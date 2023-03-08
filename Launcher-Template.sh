@@ -177,13 +177,27 @@ yes_or_no() {
 	done
 }
 
+# Source: https://unix.stackexchange.com/a/259254/123999
+bytesToHumanReadable() {
+    local i=\${1:-0} d="" s=0 S=("Bytes" "KiB" "MiB" "GiB" "TiB" "PiB" "EiB" "YiB" "ZiB")
+    while ((i > 1024 && s < \${#S[@]}-1)); do
+        printf -v d ".%02d" \$((i % 1024 * 100 / 1024))
+        i=\$((i / 1024))
+        s=\$((s + 1))
+    done
+    echo "\$i$d \${S[\$s]}"
+}
+
 checkDiskSpace() {
 	# TODO: Make disk calculation more accurate by totaling the Documents, Users, and Data dirs, rather than counting the parent dir.
 	if [ "\$1" == "b" ]; then
-		REQUIRED_SPACE="\$(du --max=1 "\${SOURCEDIR}" | tail -n1 | cut -f1)"; export REQUIRED_SPACE;
-		AVAILABLE_SPACE="\$(df "\${BACKUPDIR}" | awk 'NR==2 {print \$4}')"; export AVAILABLE_SPACE;
-		REQUIRED_SPACE_HR="\$(du -h --max=1 "\${SOURCEDIR}" | tail -n1 | cut -f1)"; export REQUIRED_SPACE_HR;
-		AVAILABLE_SPACE_HR="\$(df -h "\${BACKUPDIR}" | awk 'NR==2 {print \$4}')"; export AVAILABLE_SPACE_HR;
+		DOCUMENTS_SPACE=\$(du --max=1 "\${SOURCEDIR}/Documents" | tail -n1 | cut -f1)
+		USERS_SPACE=\$(du --max=1 "\${SOURCEDIR}/Users" | tail -n1 | cut -f1)
+		DATA_SPACE=\$(du --max=1 "\${SOURCEDIR}/Data" | tail -n1 | cut -f1)
+		REQUIRED_SPACE="\$(echo "\${DOCUMENTS_SPACE}" + "\${USERS_SPACE}" + "\${DATA_SPACE}" ' * 1024' | bc)"; export REQUIRED_SPACE;
+		AVAILABLE_SPACE=\$(echo \$(df "\${BACKUPDIR}" | awk 'NR==2 {print \$4}') ' * 1024' | bc); export AVAILABLE_SPACE;
+		REQUIRED_SPACE_HR=\$(bytesToHumanReadable "\${REQUIRED_SPACE}"); export REQUIRED_SPACE_HR;
+		AVAILABLE_SPACE_HR=\$(bytesToHumanReadable "\${AVAILABLE_SPACE}"); export AVAILABLE_SPACE_HR;
 		if (( \$AVAILABLE_SPACE < \$REQUIRED_SPACE )); then
 			echo "Your install needs no more than \$REQUIRED_SPACE_HR but your backup directory only has \$AVAILABLE_SPACE_HR.";
 			return 1;
