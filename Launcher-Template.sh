@@ -290,10 +290,12 @@ dirlink() {
 
 shortcut() {
 	echo "======= making new ${FLPRODUCT}Bible shortcut only: ======="
-	[ ! -f "\${HERE}/data/\${LOGOS_ICON_FILENAME}" ] && wget -c "\${LOGOS_ICON_URL}" -P "\${HERE}/data"
+	[ ! -f "\${HERE}/data/\${LOGOS_ICON_FILENAME}" ] && wget --inet4-only -c "\${LOGOS_ICON_URL}" -P "\${HERE}/data"
 	mkdir -p "\${HOME}/.local/share/applications"
 	rm -rf "\${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop"
-	cat "\${HOME}"/.local/share/applications/${FLPRODUCT}Bible.desktop << SEOF
+	rm -rf "\${HOME}/.local/share/applications/${FLPRODUCT} Bible.desktop"
+	[ ! -f "\${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop" ] && touch "\${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop"
+	cat "\${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop" << SEOF
 [Desktop Entry]
 Name=${FLPRODUCT}Bible
 Comment=A Bible Study Library with Built-In Tools
