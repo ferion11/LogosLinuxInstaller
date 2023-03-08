@@ -357,7 +357,7 @@ checkDependencies() {
 		exit 1
 	fi
 
-	check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint;
+	check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl;
 }
 
 checkDependenciesLogos10() {
