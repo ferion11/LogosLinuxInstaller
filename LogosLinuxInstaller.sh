@@ -81,8 +81,14 @@ t(){ type "$1"&>/dev/null;}
 # https://askubuntu.com/a/1021548/680649
 # https://unix.stackexchange.com/a/77138/123999
 getDialog() {
+	if [ -z "${DISPLAY}" ]; then
+		logos_error "The installer does not work unless you are running a display"
+		exit 1
+	fi
+
 	DIALOG=""
 	DIALOG_ESCAPE=""
+
 	if [[ -t 0 ]]; then
 		verbose && echo "Running in terminal."
 		while :; do
@@ -485,19 +491,6 @@ check_libs() {
 
 checkDependencies() {
 	verbose && echo "Checking system's for dependencies:"
-
-	if [ -z "${DISPLAY}" ]; then
-		logos_error "The installer does not work unless you are running a display"
-		exit 1
-	fi
-
-	if have_dep zenity; then
-		verbose && echo '* Zenity is installed!'
-	else
-		logos_error '* Your system does not have Zenity. Please install Zenity package.'
-		exit 1
-	fi
-
 	check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl;
 }
 
