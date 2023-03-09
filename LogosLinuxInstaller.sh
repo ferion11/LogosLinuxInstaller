@@ -1084,10 +1084,13 @@ OPTSTRING=':hvcDfFr' # Available options
 # First loop: set variable options which may affect other options
 while getopts "$OPTSTRING" opt; do
 	case $opt in
-			c)  NEXTOPT=$(${OPTIND})
-			if [ -n "$NEXTOPT" ] && [ "$NEXTOPT" != "-*" ]; then
+		c)
+			NEXTOPT="${!OPTIND}"
+			if [[ -n "$NEXTOPT" && "$NEXTOPT" != "-*" ]]; then
 				OPTIND=$((OPTIND + 1))
 				if [ -f "$NEXTOPT" ]; then
+					OPTIND=$(( OPTIND + 1 ))
+					echo "${NEXTOPT}"
 					LOGOS_CONFIG="${NEXTOPT}"
 					export LOGOS_CONFIG;
 					set -a

@@ -2,6 +2,8 @@
 * 3.6.4
   - Make bash path environment agnostic [Vskillet]
   - Add bash completion file [T. H. Wright]
+  - Fix controlPanel's `--winetricks` function [T. H. Wright]
+  - Fix installer's `-c|--config` function [T. H. Wright]
 * 3.6.3-1
   - Introduce logos_info() and logos_warn() to simplify script feedback. [T. H. Wright]
 * 3.6.2
