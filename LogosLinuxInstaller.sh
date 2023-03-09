@@ -7,7 +7,7 @@ export LOGOS_SCRIPT_VERSION="3.6.3-1" # Script version for this Installer Script
 #####
 # Originally written by Ferion11.
 # Modified to install Logoos 10 by Revd. John Goodman M0RVJ
-# Made script agnostic to Logos and Verbum as well as version; modified script for and added several optargs; and general code refactoring by Revd. T. H. Wright
+# Made script agnostic to Logos and Verbum as well as version; made script functions abstract, added optargs, made CLI first class, general code refactoring by Revd. T. H. Wright
 #####
 
 # BEGIN ENVIRONMENT

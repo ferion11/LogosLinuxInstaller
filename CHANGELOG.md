@@ -1,5 +1,6 @@
 # Changelog
-* 3.6.4
+* 3.7.0
+  - Decoupled script from `zenity` and compatible with `dialog` and `whiptail`. Fix #104. [T. H. Wright]
   - Make bash path environment agnostic [Vskillet]
   - Add bash completion file [T. H. Wright]
   - Fix controlPanel's `--winetricks` function [T. H. Wright]
