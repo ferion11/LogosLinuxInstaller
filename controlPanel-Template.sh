@@ -41,9 +41,8 @@ else
 	export WINESERVER_EXE="${WINESERVER_EXE}"; export WINESERVER_EXE;
 	export APPDIR_BINDIR="${APPDIR_BINDIR}"; export APPDIR_BINDIR
 	export APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"; export APPIMAGE_LINK_SELECTION_NAME;
-	[ -z "\${WINETRICKS_URL}" ] && export WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
-	[ -z "\${WINETRICKS_DOWNLOADER+x}" ] && export WINETRICKS_DOWNLOADER="wget"
 fi
+if [ -z "${WINETRICKS_URL}" ]; then WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"; export WINETRICKS_URL; fi
 
 if [ -z "\${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; export WINEDEBUG; fi # Make wine output less verbose
 # END ENVIRONMENT
@@ -55,7 +54,7 @@ cat << EEOF
 Usage: ./\$TITLE
 Interact with ${FLPRODUCT} Bible Software in Wine on Linux.
 
-Options:x
+Options:
     -h   --help         Prints this help message and exit.
     -v   --version      Prints version information and exit.
     -D   --debug        Makes Wine print out additional info.
@@ -67,6 +66,55 @@ Options:x
     --setAppImage       Set the script's AppImage file. NOTE:
                         Currently broken. Disabled until fixed.
 EEOF
+}
+
+cli_download() {
+	URI="\${1}"
+	DESTINATION="\${2}"
+	FILENAME="\${URI##*/}"
+
+	if [ "\${DESTINATION}" != "\${DESTINATION%/}" ]; then
+		TARGET="\${DESTINATION}/\${1##*/}"
+		[ -d "\${DESTINATION}" ] || mkdir -p "\${DESTINATION}" || echo "Cannot create \${DESTINATION}" && exit 1
+	elif [ -d "\${DESTINATION}" ]; then
+		TARGET="\${DESTINATION}/${1##*/}"
+	else
+		TARGET="\${DESTINATION}"
+		[ -d "\${DESTINATION%/*}" ] || mkdir -p "\${DESTINATION%/*}" || echo "Cannot create directory \${DESTINATION%/*}" && exit 1
+	fi
+	echo "\${URI}"
+	wget --inet4-only -c "\${URI}" -O "\${TARGET}"
+}
+setWinetricks() {
+	if [ -f "\${APPDIR_BINDIR}/winetricks" ]; then
+		WINETRICKSBIN="\${APPDIR_BINDIR}/winetricks"
+	elif [ \$(which winetricks) &> /dev/null ]; then
+		LOCAL_WINETRICKS_VERSION=\$(winetricks --version | awk -F' ' '{print \$1}')
+		if [ "\${LOCAL_WINETRICKS_VERSION}" -ge "20220411" ]; then
+			WINETRICKSBIN="\$(which winetricks)"
+		fi
+	else
+		if [ ! -z "\${WINETRICKS_URL}" ]; then
+			cli_download "\${WINETRICKS_URL}" "\${APPDIR_BINDIR}/winetricks"
+			chmod 755 "\${APPDIR_BINDIR}/winetricks"
+			WINETRICKSBIN="\${APPDIR_BINDIR}/winetricks"
+			if [ -z "${CONFIG_PATH}" ]; then
+				sed -ri 's/(WINETRICKSBIN=)(".*")/\1TAYLOR/' "\${CONFIG_PATH}"
+			fi
+		else
+			echo "WINETRICKS_URL not set."
+		fi
+	fi
+	export WINETRICKSBIN
+}
+runWinetricks() {
+	if [ ! -z "\${WINETRICKSBIN}" ] && [ -f "\${WINETRICKSBIN}" ]; then
+		:
+	else
+		setWinetricks
+	fi
+    "\${WINETRICKSBIN}" "$@"
+    "\${WINESERVER_EXE}" -w
 }
 
 selectAppImage() {
@@ -160,13 +208,7 @@ while getopts "\$OPTSTRING" opt; do
 					exit 0 ;;
 				winetricks)
 					shift
-					# Determine if user downloaded winetricks or used system winetricks
-					if [ -f "\${APPDIR_BINDIR}/winetricks" ]; then
-						WINETRICKSBIN="\${APPDIR_BINDIR}/winetricks"
-					else WINETRICKSBIN="\$(which winetricks)"
-					fi
-					"\${WINETRICKSBIN}" "\$@"
-					"\${WINESERVER_EXE}" -w
+					runWinetricks;
 					exit 0 ;;
 				#selectAppImage)
 					#selectAppImage ;;
