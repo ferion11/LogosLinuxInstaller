@@ -308,7 +308,7 @@ shortcut() {
 	rm -rf "\${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop"
 	rm -rf "\${HOME}/.local/share/applications/${FLPRODUCT} Bible.desktop"
 	[ ! -f "\${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop" ] && touch "\${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop"
-	cat "\${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop" << SEOF
+	cat > "\${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop" << SEOF
 [Desktop Entry]
 Name=${FLPRODUCT}Bible
 Comment=A Bible Study Library with Built-In Tools
@@ -318,7 +318,7 @@ Terminal=false
 Type=Application
 Categories=Education;
 SEOF
-	chmod 755 "\${HOME}/.local/share/applications//${FLPRODUCT}Bible.desktop"
+	chmod 755 "\${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop"
 	echo "File: \${HOME}/.local/share/applications/${FLPRODUCT}Bible.desktop updated"
 	echo "======= making new ${FLPRODUCT}Bible.desktop shortcut done! ======="
 	exit 0

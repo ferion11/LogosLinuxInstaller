@@ -84,6 +84,8 @@ Once all dependencies are met, run `./LogosLinuxInstaller.sh` and follow the pro
 
 NOTE: You can run Logos on Linux using the Steam Proton Experimental binary, which often has the latest and greatest updates to make Logos run even smoother. The script should be able to find the binary automatically, unless your Steam install is located outside of your HOME directory.
 
+Your system must either have `dialog` or `whiptail` installed for a CLI install (launched from CLI), or you must have `zenity` installed for a GUI install (launched from double clicking).
+
 ## Install Guide
 
 For an install guide with pictures and video, see the wiki's [Install Guide](https://github.com/ferion11/LogosLinuxInstaller/wiki/Install-Guide).
@@ -92,8 +94,30 @@ NOTE: This install guide is outdated. Please see [#114](https://github.com/ferio
 
 ## Debian and Ubuntu
 
+### Install dialog program, choose one of the following:
+
+CLI:
+
 ```
-sudo apt install mktemp patch lsof wget find sed grep gawk tr winbind cabextract x11-apps zenity bc libxml2-utils curl
+sudo apt install dialog
+```
+
+or
+
+```
+sudo apt install whiptail
+```
+
+GUI:
+
+```
+sudo apt install zenity
+```
+
+### Install Dependencies
+
+```
+sudo apt install mktemp patch lsof wget find sed grep gawk tr winbind cabextract x11-apps bc libxml2-utils curl
 ```
 
 If using wine from a repo, you must install wine staging. Run:
@@ -112,8 +136,30 @@ sudo apt install fuse3
 
 ## Arch
 
+### Install dialog program, choose one of the following:
+
+CLI:
+
 ```
-sudo pacman -S patch lsof wget sed grep gawk cabextract samba zenity bc libxml2 curl
+sudo pacman -S dialog
+```
+
+or
+
+```
+sudo pacman -S whiptail
+```
+
+GUI:
+
+```
+sudo pacman -S zenity
+```
+
+### Install Dependencies
+
+```
+sudo pacman -S patch lsof wget sed grep gawk cabextract samba bc libxml2 curl
 ```
 
 If using wine from a repo, run:
@@ -124,8 +170,30 @@ sudo pacman -S wine
 
 ### Manjaro
 
+#### Install dialog program, choose one of the following:
+
+CLI:
+
 ```
-sudo pamac install patch lsof wget sed grep gawk cabextract samba zenity bc libxml2 curl
+sudo pamac install dialog
+```
+
+or
+
+```
+sudo pamac install whiptail
+```
+
+GUI:
+
+```
+sudo pamac install zenity
+```
+
+#### Install Dependencies
+
+```
+sudo pamac install patch lsof wget sed grep gawk cabextract samba bc libxml2 curl
 ```
 
 If using wine from a repo, run:
@@ -160,8 +228,30 @@ After these steps you can go ahead and run the your install script.
 
 ## RPM
 
+### Install dialog program, choose one of the following:
+
+CLI:
+
 ```
-sudo dnf install patch mod_auth_ntlm_winbind samba-winbind cabextract zenity bc libxml2 curl
+sudo dnf install dialog
+```
+
+or
+
+```
+sudo dnf install whiptail
+```
+
+GUI:
+
+```
+sudo dnf install zenity
+```
+
+### Install Dependencies
+
+```
+sudo dnf install patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl
 ```
 
 If using wine from a repo, run:
@@ -178,8 +268,30 @@ sudo dnf install fuse3
 
 ### CentOS
 
+#### Install dialog program, choose one of the following:
+
+CLI:
+
 ```
-sudo yum install patch mod_auth_ntlm_winbind samba-winbind cabextract zenity bc libxml2 curl
+sudo yum install dialog
+```
+
+or
+
+```
+sudo yum install whiptail
+```
+
+GUI:
+
+```
+sudo yum install zenity
+```
+
+### Install Dependencies
+
+```
+sudo yum install patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl
 ```
 
 If using wine from a repo, run:
