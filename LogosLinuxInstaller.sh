@@ -615,7 +615,9 @@ wineBinaryVersionCheck() {
 	if [ -x "${TESTBINARY}" ]; then
 		TESTWINEVERSION=$("$TESTBINARY" --version | awk -F' ' '{print $1}' | awk -F'-' '{print $2}' | awk -F'.' '{print $1"."$2}');
 		if (( $(echo "$TESTWINEVERSION >= $WINE_MINIMUM" | bc -l) )); then
-			return 0;
+			if (( $(echo "$TESTWINEVERSION != 8.0" | bc -l) )); then
+				return 0;
+			fi
 		elif [[ ${TESTBINARY} =~ .*"Proton - Experimental".* ]]; then
 			return 0;
 		# If it is a symlink, check its actual path. If it is Proton, let it pass.
