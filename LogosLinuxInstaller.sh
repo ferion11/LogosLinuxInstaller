@@ -45,17 +45,21 @@ Installs ${FLPRODUCT} Bible Software with Wine on Linux.
 Options:
     -h   --help                 Prints this help message and exit.
     -v   --version              Prints version information and exit.
+    -V   --verbose              Enable extra CLI verbosity.
     -D   --debug                Makes Wine print out additional info.
     -c   --config               Use the Logos on Linux config file when
                                 setting environment variables. Defaults to:
                                 \$HOME/.config/Logos_on_Linux/Logos_on_Linux.conf
                                 Optionally can accept a config file provided by
                                 the user.
+    -b   --custom-binary-path   Set a custom path to search for wine binaries
+                                during the install.
     -r   --regenerate-scripts   Regenerates the Logos.sh and controlPanel.sh
                                 scripts using the config file.
     -F   --skip-fonts           Skips installing corefonts and tahoma.
     -f   --force-root           Sets LOGOS_FORCE_ROOT to true, which permits
                                 the root user to run the script.
+    -k   --make-skel            Make a skeleton install only.
 EOF
 }
 
@@ -65,17 +69,13 @@ die-if-root() {
 	fi
 }
 
-verbose() {
-    [[ $VERBOSE = true ]] && return 0 || return 1
-}
+verbose() { [[ $VERBOSE = true ]] && return 0 || return 1; };
 
-debug() {
-	[[ $DEBUG = true ]] && return 0 || return 1
-}
+debug() { [[ $DEBUG = true ]] && return 0 || return 1; };
 
 die() { echo >&2 "$*"; exit 1; };
 
-t(){ type "$1"&>/dev/null;}
+t(){ type "$1"&>/dev/null; };
 
 # Sources:
 # https://askubuntu.com/a/1021548/680649
@@ -449,20 +449,6 @@ make_skel() {
 	verbose && echo "skel64 done!"
 }
 
-# TODO: Move this to a CLI optarg.
-
-#	#======= Parsing =============
-#	case "${1}" in
-#		"skel64")
-#			export WINE_EXE="wine64"
-#			make_skel "${WINE_EXE}" "none.AppImage"
-#			rm -rf "${WORKDIR}"
-#			exit 0
-#			;;
-#		*)
-#			verbose && echo "No arguments parsed."
-#	esac
-
 ## BEGIN CHECK DEPENDENCIES FUNCTIONS
 check_commands() {
     for cmd in "$@"; do
@@ -618,7 +604,9 @@ wineBinaryVersionCheck() {
 	if [ -x "${TESTBINARY}" ]; then
 		TESTWINEVERSION=$("$TESTBINARY" --version | awk -F' ' '{print $1}' | awk -F'-' '{print $2}' | awk -F'.' '{print $1"."$2}');
 		if (( $(echo "$TESTWINEVERSION >= $WINE_MINIMUM" | bc -l) )); then
-			return 0;
+			if (( $(echo "$TESTWINEVERSION != 8.0" | bc -l) )); then
+				return 0;
+			fi
 		elif [[ ${TESTBINARY} =~ .*"Proton - Experimental".* ]]; then
 			return 0;
 		# If it is a symlink, check its actual path. If it is Proton, let it pass.
@@ -645,7 +633,7 @@ checkPath() {
 
 createWineBinaryList() {
 	#TODO: Make optarg to add custom path to this array.
-	WINEBIN_PATH_ARRAY=( "/usr/local/bin" "$HOME/bin" "$HOME/PlayOnLinux/wine/linux-amd64/*/bin" "$HOME/.steam/steam/steamapps/common/Proton - Experimental/files/bin" )
+	WINEBIN_PATH_ARRAY=( "/usr/local/bin" "$HOME/bin" "$HOME/PlayOnLinux/wine/linux-amd64/*/bin" "$HOME/.steam/steam/steamapps/common/Proton - Experimental/files/bin" "${CUSTOMBINPATH}" )
 
 	# Temporarily modify PATH for additional WINE64 binaries.
 	for p in "${WINEBIN_PATH_ARRAY[@]}"; do
@@ -797,6 +785,11 @@ checkExistingInstall() {
 }
 
 beginInstall() {
+	if [ "${SKEL}" -eq "1" ]; then
+		verbose && echo "Making a skeleton install of the project only. Exiting after completion."
+		make_skel "none.AppImage"
+		exit 0;
+	fi
 	if [ -n "${WINEBIN_CODE}" ]; then	
 		case "${WINEBIN_CODE}" in
 			"System"|"Proton"|"PlayOnLinux"|"Custom")
@@ -1217,8 +1210,6 @@ postInstall() {
 
 main() {
 	echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR."
-	die-if-root;
-	getDialog;
 	debug && logos_info "Debug mode enabled."
 
 	# BEGIN PREPARATION
@@ -1253,6 +1244,11 @@ main() {
 	fi
 }
 
+# BEGIN SCRIPT
+
+die-if-root;
+getDialog;
+
 # BEGIN OPTARGS
 RESET_OPTARGS=true
 for arg in "$@"
@@ -1263,16 +1259,19 @@ do
 	fi
 	case "$arg" in # Relate long options to short options
 		--help)					set -- "$@" -h ;;
-		--version)				set -- "$@" -V ;;
+		--version)				set -- "$@" -v ;;
+		--verbose)				set -- "$@" -V ;;
 		--config)				set -- "$@" -c ;;
 		--skip-fonts)			set -- "$@" -F ;;
 		--regenerate-scripts)	set -- "$@" -r ;;
 		--force-root)			set -- "$@" -f ;;
 		--debug)				set -- "$@" -D ;;
+        --make-skel)			set -- "$@" -k ;;
+		--custom-binary-path)	set -- "$@" -b ;;
 		*)						set -- "$@" "$arg" ;;
 	esac
 done
-OPTSTRING=':hvcDfFr' # Available options
+OPTSTRING=':hvVcDfFrkb:' # Available options
 
 # First loop: set variable options which may affect other options
 while getopts "$OPTSTRING" opt; do
@@ -1304,11 +1303,19 @@ while getopts "$OPTSTRING" opt; do
 				logos_info "No config file found."
 			fi
 			;;
+		V)  export VERBOSE="true" ;;
 		F)  export SKIP_FONTS="1" ;;
 		f)  export LOGOS_FORCE_ROOT="1"; ;;
 		r)  export REGENERATE="1"; ;;
-		D)  export DEBUG=true;
+		D)  export DEBUG="true";
 			WINEDEBUG=""; ;;
+		k)  export SKEL="1"; ;;
+		b)  CUSTOMBINPATH="$2";
+			if [ -d "$CUSTOMBINPATH" ]; then
+				export CUSTOMBINPATH;
+			else
+				logos_info "$LOGOS_SCRIPT_TITLE: User supplied path: \"${OPTARG}\". Custom binary path does not exist." >&2 && usage >&2 && exit 
+			fi; shift 2 ;;
 		\?) logos_info "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
 		:)  logos_info "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 && exit ;;
 	esac

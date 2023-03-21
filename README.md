@@ -11,22 +11,26 @@ This repository contains a set of bash scripts for installing Logos Bible (Verbu
 
 ```
 Usage: ./LogosLinuxInstaller.sh
-Installs  Bible Software with Wine on Linux.
+Installs ${FLPRODUCT} Bible Software with Wine on Linux.
 
 Options:
     -h   --help                 Prints this help message and exit.
     -v   --version              Prints version information and exit.
+    -V   --verbose              Enable extra CLI verbosity.
     -D   --debug                Makes Wine print out additional info.
     -c   --config               Use the Logos on Linux config file when
                                 setting environment variables. Defaults to:
-                                $HOME/.config/Logos_on_Linux/Logos_on_Linux.conf
+                                \$HOME/.config/Logos_on_Linux/Logos_on_Linux.conf
                                 Optionally can accept a config file provided by
                                 the user.
+    -b   --custom-binary-path   Set a custom path to search for wine binaries
+                                during the install.
     -r   --regenerate-scripts   Regenerates the Logos.sh and controlPanel.sh
                                 scripts using the config file.
     -F   --skip-fonts           Skips installing corefonts and tahoma.
     -f   --force-root           Sets LOGOS_FORCE_ROOT to true, which permits
                                 the root user to run the script.
+    -k   --make-skel            Make a skeleton install only.
 ```
 
 ## Logos.sh
