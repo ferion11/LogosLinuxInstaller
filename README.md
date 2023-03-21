@@ -336,3 +336,6 @@ doas pkg install …
 
 This would require rewriting major chunks of the script, which has assumed GNU/Linux and Bash.
 
+## ChromeOS
+
+TODO.
