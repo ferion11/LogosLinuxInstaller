@@ -45,6 +45,7 @@ Installs ${FLPRODUCT} Bible Software with Wine on Linux.
 Options:
     -h   --help                 Prints this help message and exit.
     -v   --version              Prints version information and exit.
+    -V   --verbose              Enable extra CLI verbosity.
     -D   --debug                Makes Wine print out additional info.
     -c   --config               Use the Logos on Linux config file when
                                 setting environment variables. Defaults to:
@@ -65,17 +66,13 @@ die-if-root() {
 	fi
 }
 
-verbose() {
-    [[ $VERBOSE = true ]] && return 0 || return 1
-}
+verbose() { [[ $VERBOSE = true ]] && return 0 || return 1; };
 
-debug() {
-	[[ $DEBUG = true ]] && return 0 || return 1
-}
+debug() { [[ $DEBUG = true ]] && return 0 || return 1; };
 
 die() { echo >&2 "$*"; exit 1; };
 
-t(){ type "$1"&>/dev/null;}
+t(){ type "$1"&>/dev/null; };
 
 # Sources:
 # https://askubuntu.com/a/1021548/680649
@@ -1263,7 +1260,8 @@ do
 	fi
 	case "$arg" in # Relate long options to short options
 		--help)					set -- "$@" -h ;;
-		--version)				set -- "$@" -V ;;
+		--version)				set -- "$@" -v ;;
+		--verbose)				set -- "$@" -V ;;
 		--config)				set -- "$@" -c ;;
 		--skip-fonts)			set -- "$@" -F ;;
 		--regenerate-scripts)	set -- "$@" -r ;;
@@ -1272,7 +1270,7 @@ do
 		*)						set -- "$@" "$arg" ;;
 	esac
 done
-OPTSTRING=':hvcDfFr' # Available options
+OPTSTRING=':hvVcDfFr' # Available options
 
 # First loop: set variable options which may affect other options
 while getopts "$OPTSTRING" opt; do
@@ -1304,10 +1302,11 @@ while getopts "$OPTSTRING" opt; do
 				logos_info "No config file found."
 			fi
 			;;
+		V)  export VERBOSE="true" ;;
 		F)  export SKIP_FONTS="1" ;;
 		f)  export LOGOS_FORCE_ROOT="1"; ;;
 		r)  export REGENERATE="1"; ;;
-		D)  export DEBUG=true;
+		D)  export DEBUG="true";
 			WINEDEBUG=""; ;;
 		\?) logos_info "$LOGOS_SCRIPT_TITLE: -$OPTARG: undefined option." >&2 && usage >&2 && exit ;;
 		:)  logos_info "$LOGOS_SCRIPT_TITLE: -$OPTARG: missing argument." >&2 && usage >&2 && exit ;;

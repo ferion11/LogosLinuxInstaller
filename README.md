@@ -16,6 +16,7 @@ Installs  Bible Software with Wine on Linux.
 Options:
     -h   --help                 Prints this help message and exit.
     -v   --version              Prints version information and exit.
+    -V   --verbose              Enable extra CLI verbosity.
     -D   --debug                Makes Wine print out additional info.
     -c   --config               Use the Logos on Linux config file when
                                 setting environment variables. Defaults to:
