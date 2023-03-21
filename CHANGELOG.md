@@ -1,6 +1,7 @@
 # Changelog
 * 3.7.1
-  - Add `-V|--verbose` to installer. Fix #165. [T. H. Wright]
+  - Add installer `-V|--verbose`. Fix #165. [T. H. Wright]
+  - Add installer `-k|--make_skel` and `-b|--custom-binary-path`. Resolve TODOs. Fix #166. [T. H. Wright]
   - Disable wine 8.0 installs. Fix #148. [T. H. Wright]
 * 3.7.0
   - Decoupled script from `zenity` and compatible with `dialog` and `whiptail`. Fix #104. [T. H. Wright]
