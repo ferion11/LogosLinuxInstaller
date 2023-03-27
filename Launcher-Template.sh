@@ -383,7 +383,7 @@ while getopts "\$OPTSTRING" opt; do
 			resourcePlot;
 			exit ;;
 		e)
-			if [ -n "${EDITOR}" ]; then
+			if [ -n "\${EDITOR}" ]; then
 				"\${EDITOR}" "\${CONFIG_PATH}" ;
 			else
 				echo "Error: The EDITOR variable is not set in user's environment."
