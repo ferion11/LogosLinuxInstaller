@@ -44,8 +44,14 @@ else
 fi
 
 LOGOS_USER="\$(find "\${HERE}"/data/wine64_bottle/drive_c/users/*/AppData/Local/Logos -name Data | sed -r "s@\${HERE}/data/wine64_bottle/drive_c/users/(.*)/AppData/Local/Logos/Data@\1@")"; export LOGOS_USER;
-LOGOS_UID="\$(find "\${HERE}/data/wine64_bottle/drive_c/users/\${LOGOS_USER}/AppData/Local/Logos/Data/"* -maxdepth 0 -type d | awk -F'/' '{print \$NF}')"; export LOGOS_UID;
-if [ -z "LOGOS_UID" ]; then LOGOS_UID="NoUser"; export LOGOS_UID; fi
+
+if [ "\$(find "\${HERE}/data/wine64_bottle/drive_c/users/\${LOGOS_USER}/AppData/Local/Logos/Data/"* -maxdepth 0 -type d | awk -F'/' '{print \$NF}')" ]; then
+	LOGOS_UID="\$(find "\${HERE}/data/wine64_bottle/drive_c/users/\${LOGOS_USER}/AppData/Local/Logos/Data/"* -maxdepth 0 -type d | awk -F'/' '{print \$NF}')"; export LOGOS_UID;
+elif [ -z "LOGOS_UID" ]; then
+	LOGOS_UID="NoUser"; export LOGOS_UID;
+else
+	:
+fi
 
 [ -z "\${LOGOS_ICON_URL}" ] && export LOGOS_ICON_URL="${LOGOS_ICON_URL}"
 LOGOS_ICON_FILENAME="\$(basename "\${LOGOS_ICON_URL}")"; export LOGOS_ICON_FILENAME;
