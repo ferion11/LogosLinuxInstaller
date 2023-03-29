@@ -94,7 +94,7 @@ Your system must either have `dialog` or `whiptail` installed for a CLI install 
 
 For an install guide with pictures and video, see the wiki's [Install Guide](https://github.com/ferion11/LogosLinuxInstaller/wiki/Install-Guide).
 
-NOTE: This install guide is outdated. Please see [#114](https://github.com/ferion11/LogosLinuxInstaller/issues/114).
+NOTE: This install guide is outdated. Please see [#173](https://github.com/ferion11/LogosLinuxInstaller/issues/173).
 
 ## Debian and Ubuntu
 
