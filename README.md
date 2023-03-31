@@ -84,7 +84,7 @@ Options:x
 
 # Installation [WIP]
 
-Once all dependencies are met, run `./LogosLinuxInstaller.sh` and follow the prompts.
+Once all dependencies are met, you can either run the script from the CLI for a CLI-only install, or you can double click the icon in your file browser or on your desktop for a GUI install. Then, follow the prompts.
 
 NOTE: You can run Logos on Linux using the Steam Proton Experimental binary, which often has the latest and greatest updates to make Logos run even smoother. The script should be able to find the binary automatically, unless your Steam install is located outside of your HOME directory.
 
