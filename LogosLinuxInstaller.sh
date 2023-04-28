@@ -513,45 +513,132 @@ make_skel() {
 }
 
 ## BEGIN CHECK DEPENDENCIES FUNCTIONS
+getOS() {
+    if [ -f /etc/os-release ]; then
+        # freedesktop.org and systemd
+        source /etc/os-release
+        OS="${ID}"
+        OS_RELEASE="${VERSION_ID}"
+    elif type lsb_release >/dev/null 2>&1; then
+        # linuxbase.org
+        OS="$(lsb_release -si)"
+        OS_RELEASE="$(lsb_release -sr)"
+    elif [ -f /etc/lsb-release ]; then
+        # For some versions of Debian/Ubuntu without lsb_release command
+        source /etc/lsb-release
+        OS="${DISTRIB_ID}"
+        OS_RELEASE="${DISTRIB_RELEASE}"
+    elif [ -f /etc/debian_version ]; then
+        OS=Debian
+        OS_RELEASE="$(cat /etc/debian_version)"
+    elif [ -f /etc/SuSe-release ]; then
+        :
+    elif [ -f /etc/redhat-release ]; then
+        :
+    else
+        OS="$(uname -s)"
+        OS_RELEASE="$(uname -r)"
+    fi
+}
+
+getPackageManager() {
+	if [ -x "$(command -v sudo)" ]; then
+		SUPERUSERDO="sudo"
+	elif [ -x "$(command -v doas)" ]; then
+		SUPERUSERDO="doas"
+	else
+		:	
+	fi
+
+	if [ -x "$(command -v apt)" ]; then
+		PACKAGE_MANAGER="apt install"
+		PACKAGES="mktemp patch lsof wget find sed grep gawk tr winbind cabextract x11-apps bc libxml2-utils curl"
+		LIBRARYPACKAGES="fuse3"
+	elif [ -x "$(command -v dnf)" ]; then
+		PACKAGE_MANAGER="dnf install"
+		PACKAGES="patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl"
+	elif [ -x "$(command -v yum)" ]; then
+		PACKAGE_MANAGER="yum install"
+		PACKAGES="patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl"
+	elif [ -x "$(command -v pamac)" ]; then
+		PACKAGE_MANAGER="pamac install --no-upgrade"
+		PACKAGES="patch lsof wget sed grep gawk cabextract samba bc libxml2 curl"
+	elif [ -x "$(command -v pacman)" ]; then
+		PACKAGE_MANAGER="pacman -S"
+		PACKAGES="patch lsof wget sed grep gawk cabextract samba bc libxml2 curl"
+	elif [ -x "$(command -v apk)" ]; then
+		# PACKAGE_MANAGER="apk add"
+		# PACKAGES="patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl"
+		:
+	elif [ -x "$(command -v zypper)" ]; then
+		# PACKAGE_MANAGER="zypper install"
+		# PACKAGES=""
+		:
+	elif [ -x "$(command -v pkg)" ]; then
+		# PACKAGE_MANAGER="pkg install"
+		# PACKAGES=""
+		:
+	else
+		verbose && echo "Your distribution's package manager could not be determined."
+	fi
+	if [ -n "${SUPERUSERDO}" ]; then export SUPERUSERDO; fi
+	if [ -n "${PACKAGE_MANAGER}" ]; then export PACKAGE_MANAGER; fi
+	if [ -n "${PACKAGES}" ]; then export PACKAGES; fi
+	if [ -n "${LIBRARYPACKAGES}" ]; then export LIBRARYPACKAGES; fi
+}
+
+installPackages() {
+	"${SUPERUSERDO}" "${PACKAGE_MANAGER}" "$@"
+}
+
 check_commands() {
-    for cmd in "$@"; do
-        if have_dep "${cmd}"; then
-            verbose && echo "* command ${cmd} is installed!"
-        else
+	if [ -z "${SUPERUSERDO}" ]; then logos_error "Your distribution appears to be missing the ability to escalate privileges (e.g., sudo, doas). Please install either sudo or doas."; fi
+	for cmd in "$@"; do
+		if have_dep "${cmd}"; then
+			verbose && echo "* command ${cmd} is installed!"
+		else
 			verbose && echo "* command ${cmd} not installed!"
 			MISSING_CMD+=("${cmd}")
-        fi
-    done
+		fi
+	done
 	if [ "${#MISSING_CMD[@]}" -ne 0 ]; then
-		logos_error "Your system is missing ${MISSING_CMD[*]}. Please install your distro's ${MISSING_CMD[*]} package(s).\n ${EXTRA_INFO}"
+		if [ -n "${PACKAGE_MANGER}" ]; then
+			logos_continue_question "Your ${OS} install is missing the command(s): ${MISSING_CMD[*]}. To continue, the script will attempt to install the package(s): ${PACKAGES} by using (${PACKAGE_MANAGER}). Proceed?" "Your system is missing the command(s) ${MISSING_CMD[*]}. Please install your distro's package(s) associated with ${MISSING_CMD[*]} for ${OS}.\n ${EXTRA_INFO}"
+			installPackages ${PACKAGES}
+		else
+			logos_error "The script could not determine your ${OS} install's package manager or it is unsupported. Your computer is missing the command(s) ${MISSING_CMD[*]}. Please install your distro's package(s) associated with ${MISSING_CMD[*]} for ${OS}.\n${EXTRA_INFO}"
+		fi
 	fi
 }
 # shellcheck disable=SC2001
 check_libs() {
-    for lib in "$@"; do
-        HAVE_LIB="$(ldconfig -N -v "$(sed 's/:/ /g' <<< "${LD_LIBRARY_PATH}")" 2>/dev/null | grep "${lib}")"
-        if [ -n "${HAVE_LIB}" ]; then
-            verbose && echo "* ${lib} is installed!"
-        else
-            logos_error "Your system does not have lib: ${lib}. Please install ${lib} package.\n ${EXTRA_INFO}"
-        fi
-    done
+	if [ -z "${SUPERUSERDO}" ]; then logos_error "Your distribution appears to be missing the ability to escalate privileges (e.g., sudo, doas). Please install either sudo or doas."; fi
+	for lib in "$@"; do
+		HAVE_LIB="$(ldconfig -N -v "$(sed 's/:/ /g' <<< "${LD_LIBRARY_PATH}")" 2>/dev/null | grep "${lib}")"
+		if [ -n "${HAVE_LIB}" ]; then
+			verbose && echo "* ${lib} is installed!"
+		else
+			if [ -n "${PACKAGE_MANGER}" ]; then
+				logos_continue_question "Your ${OS} install is missing the library: ${lib}. To continue, the script will attempt to install the library by using ${PACKAGE_MANAGER}. Proceed?" "Your system does not have lib: ${lib}. Please install the package associated with ${lib} for ${OS}.\n ${EXTRA_INFO}"
+				installPackages ${LIBRARYPACKAGES}
+			else
+				logos_error "The script could not determine your ${OS} install's package manager or it is unsupported. Your computer is missing the library: ${lib}. Please install the package associated with ${lib} for ${OS}.\n ${EXTRA_INFO}"
+			fi
+		fi
+	done
 }
 
 checkDependencies() {
-	verbose && echo "Checking system's for dependencies:"
-	check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl;
-}
-
-checkDependenciesLogos10() {
+	verbose && echo "Checking system for dependencies…"
+	if [ "TARGETVERSION" = "10" ]; then
+		check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl;
+	elif [ "TARGETVERSION" = "9" ]; then
+		check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl xwd cabextract;
+	else logos_error "Unknown Logos version."
+	fi
 	verbose && echo "All dependencies found. Continuing…"
 }
 
-checkDependenciesLogos9() {
-	verbose && echo "Checking dependencies for Logos 9."
-	check_commands xwd cabextract;
-	verbose && echo "All dependencies found. Continuing…"
-}
 ## END CHECK DEPENDENCIES FUNCTIONS
 
 ## BEGIN INSTALL OPTIONS FUNCTIONS
@@ -614,11 +701,9 @@ chooseVersion() {
 	fi
 	case "${versionChoice}" in
 		*"10")
-			checkDependenciesLogos10;
 			export TARGETVERSION="10";
 			;;
 		*"9")
-			checkDependenciesLogos9;
 			export TARGETVERSION="9";
 			;;
 		"Exit.")
@@ -627,7 +712,9 @@ chooseVersion() {
 		*)
 			logos_error "Unknown version. Installation canceled!"
 	esac
+}
 
+logosSetup() {
 	LOGOS_RELEASE_VERSION=$(curl -s "https://clientservices.logos.com/update/v1/feed/logos${TARGETVERSION}/stable.xml" | xmllint --format - | sed -e 's/ xmlns.*=".*"//g' | sed -e 's@logos:minimum-os-version@minimum-os-version@g' | sed -e 's@logos:version@version@g' | xmllint --xpath "/feed/entry[1]/version/text()" -); export LOGOS_RELEASE_VERSION;
 	if [ -z "${LOGOS64_URL}" ]; then export LOGOS64_URL="https://downloads.logoscdn.com/LBS${TARGETVERSION}/${VERBUM_PATH}Installer/${LOGOS_RELEASE_VERSION}/${FLPRODUCT}-x64.msi" ; fi
 
@@ -728,7 +815,6 @@ getAppImage() {
 }
 
 chooseInstallMethod() {
-	
 	if [ -z "$WINEPREFIX" ]; then
 		export WINEPREFIX="${APPDIR}/wine64_bottle"
 	fi
@@ -790,7 +876,6 @@ chooseInstallMethod() {
 				no-diag-msg "No dialog tool found."
 			fi
 		done < "${WORKDIR}/winebinaries"
-	
 	
 		BACKTITLE="Choose Wine Binary Menu"
 		TITLE="Choose Wine Binary"
@@ -1243,9 +1328,12 @@ postInstall() {
 main() {
 	{ echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR.";
 	# BEGIN PREPARATION
-	verbose && date; checkDependencies; # We verify the user is running a graphical UI and has majority of required dependencies.
+	verbose && date; getOS;
+	verbose && date; getPackageManager;
 	verbose && date; chooseProduct; # We ask user for his Faithlife product's name and set variables.
 	verbose && date; chooseVersion; # We ask user for his Faithlife product's version, set variables, and create project skeleton.
+	verbose && date; checkDependencies; # We check for most of the required dependencies by product version.
+	verbose && date; logosSetup; # We set some basic variables for the install, including retrieving the product's latest release.
 	verbose && date; chooseInstallMethod; # We ask user for his desired install method.
 	# END PREPARATION
 	if [ -z "${REGENERATE}" ]; then
