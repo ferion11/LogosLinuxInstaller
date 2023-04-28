@@ -785,7 +785,7 @@ checkExistingInstall() {
 }
 
 beginInstall() {
-	if [ "${SKEL}" -eq "1" ]; then
+	if [ "${SKEL}" != "1" ]; then
 		verbose && echo "Making a skeleton install of the project only. Exiting after completion."
 		make_skel "none.AppImage"
 		exit 0;
