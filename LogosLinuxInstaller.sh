@@ -766,7 +766,7 @@ chooseInstallMethod() {
 			logos_error "No dialog tool found."
 		fi
 	fi
-	echo "${WINE_EXE}"
+	verbose && echo "${WINE_EXE}"
 }
 
 checkExistingInstall() {
@@ -1247,7 +1247,10 @@ main() {
 # BEGIN SCRIPT
 
 die-if-root;
-getDialog;
+
+if [ -z "${DIALOG}" ]; then
+	getDialog;
+fi
 
 # BEGIN OPTARGS
 RESET_OPTARGS=true
