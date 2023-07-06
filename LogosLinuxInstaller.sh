@@ -2,7 +2,7 @@
 # shellcheck disable=SC2317
 export LOGOS_SCRIPT_TITLE="Logos Linux Installer" # From https://github.com/ferion11/LogosLinuxInstaller
 export LOGOS_SCRIPT_AUTHOR="Ferion11, John Goodman, T. H. Wright"
-export LOGOS_SCRIPT_VERSION="3.7.1" # Script version for this Installer Script
+export LOGOS_SCRIPT_VERSION="3.7.2" # Script version for this Installer Script
 
 #####
 # Originally written by Ferion11.
@@ -741,8 +741,8 @@ chooseInstallMethod() {
 		if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
 			installationChoice=$( $DIALOG --backtitle "${BACKTITLE}" --title "${TITLE}" --radiolist "${QUESTION_TEXT}" 0 0 "${WINEBIN_OPTIONS_LENGTH}" "${WINEBIN_OPTIONS[@]}" 3>&1 1>&2 2>&3 3>&- )
 			read -r -a installArray <<< "${installationChoice}"
-			export WINEBIN_CODE=$(echo "${installArray[0]}" | awk -F' ' '{print $1}')
-			export WINE_EXE=$(echo "${installArray[1]}" | awk -F' ' '{print $2}')
+			WINEBIN_CODE=$(echo "${installArray[0]}" | awk -F' ' '{print $1}'); export WINEBIN_CODE
+			WINE_EXE=$(echo "${installArray[1]}" | awk -F' ' '{print $2}'); export WINE_EXE
 		elif [[ "${DIALOG}" == "zenity" ]]; then
 			column_names=(--column "Choice" --column "Code" --column "Description" --column "Path")
 			installationChoice=$(zenity --width=1024 --height=480 \

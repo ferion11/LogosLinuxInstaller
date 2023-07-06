@@ -1,4 +1,8 @@
 # Changelog
+* 3.7.2
+  - Fix #178.
+  - Make AppImage default install.
+  - Add options to `-D|--debug`.
 * 3.7.1
   - Add installer `-V|--verbose`. Fix #165. [T. H. Wright]
   - Add installer `-k|--make_skel` and `-b|--custom-binary-path`. Resolve TODOs. Fix #166. [T. H. Wright]
