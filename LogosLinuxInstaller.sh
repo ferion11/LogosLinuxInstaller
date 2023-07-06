@@ -632,6 +632,7 @@ checkPath() {
 }
 
 createWineBinaryList() {
+	logos_info "Creating binary list."
 	#TODO: Make optarg to add custom path to this array.
 	WINEBIN_PATH_ARRAY=( "/usr/local/bin" "$HOME/bin" "$HOME/PlayOnLinux/wine/linux-amd64/*/bin" "$HOME/.steam/steam/steamapps/common/Proton - Experimental/files/bin" "${CUSTOMBINPATH}" )
 
@@ -682,6 +683,18 @@ chooseInstallMethod() {
 		createWineBinaryList;
 	
 		WINEBIN_OPTIONS=()
+		
+		# Add AppImage to list
+		if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
+			WINEBIN_OPTIONS+=("AppImage" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" ON)
+		elif [[ "${DIALOG}" == "zenity" ]]; then
+			WINEBIN_OPTIONS+=(TRUE "AppImage" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}")
+		elif [[ "${DIALOG}" == "kdialog" ]]; then
+			logos_error "kdialog not implemented."
+		else
+			logos_error "No dialog tool found."
+		fi
+		
 		while read -r line; do
 			# Set binary code, description, and path based on path
 			if [ -L "$line" ]; then
@@ -692,35 +705,27 @@ chooseInstallMethod() {
 	
 			if [[ "$WINEOPT" == *"/usr/bin/"* ]]; then
 				WINEOPT_CODE="System"
-				WINEOPT_DESCRIPTION="Use system's binary (i.e., /usr/bin/wine64). WINE must be 7.18-staging or later. Stable or Devel do not work."
+				WINEOPT_DESCRIPTION="\"Use system's binary (i.e., /usr/bin/wine64). WINE must be 7.18-staging or later. Stable or Devel do not work.\""
 				WINEOPT_PATH="${line}"
 			elif [[ "$WINEOPT" == *"Proton"* ]]; then
 				WINEOPT_CODE="Proton"
-				WINEOPT_DESCRIPTION="Install using Steam's Proton fork of WINE."
+				WINEOPT_DESCRIPTION="\"Install using Steam's Proton fork of WINE.\""
 				WINEOPT_PATH="${line}"
 			elif [[ "$WINEOPT" == *"PlayOnLinux"* ]]; then
 				WINEOPT_CODE="PlayOnLinux"
-				WINEOPT_DESCRIPTION="Install using a PlayOnLinux WINE64 binary."
+				WINEOPT_DESCRIPTION="\"Install using a PlayOnLinux WINE64 binary.\""
 				WINEOPT_PATH="${line}"
 			else
 				WINEOPT_CODE="Custom"
-				WINEOPT_DESCRIPTION="Use a WINE64 binary from another directory."
+				WINEOPT_DESCRIPTION="\"Use a WINE64 binary from another directory.\""
 				WINEOPT_PATH="${line}"
 			fi
 	
 			# Create wine binary option array
 			if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
-				if [ -z "${WINEBIN_OPTIONS[0]}" ]; then
-					WINEBIN_OPTIONS+=("${WINEOPT_CODE} ${WINEOPT_PATH}" "${WINEOPT_DESCRIPTION}" ON)
-				else
-					WINEBIN_OPTIONS+=("${WINEOPT_CODE} ${WINEOPT_PATH}" "${WINEOPT_DESCRIPTION}" OFF)
-				fi
+				WINEBIN_OPTIONS+=("${WINEOPT_CODE}" "${WINEOPT_PATH}" OFF)
 			elif [[ "${DIALOG}" == "zenity" ]]; then
-				if [ -z "${WINEBIN_OPTIONS[0]}" ]; then
-					WINEBIN_OPTIONS+=(TRUE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
-				else
-					WINEBIN_OPTIONS+=(FALSE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
-				fi
+				WINEBIN_OPTIONS+=(FALSE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
 			elif [[ "${DIALOG}" == "kdialog" ]]; then
 				logos_error "kdialog not implemented."
 			else
@@ -728,33 +733,24 @@ chooseInstallMethod() {
 			fi
 		done < "${WORKDIR}/winebinaries"
 	
-		# Add AppImage to list
-		if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
-			WINEBIN_OPTIONS+=("AppImage" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" OFF)
-		elif [[ "${DIALOG}" == "zenity" ]]; then
-			WINEBIN_OPTIONS+=(FALSE "AppImage" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}")
-		elif [[ "${DIALOG}" == "kdialog" ]]; then
-			logos_error "kdialog not implemented."
-		else
-			logos_error "No dialog tool found."
-		fi
 	
 		BACKTITLE="Choose Wine Binary Menu"
 		TITLE="Choose Wine Binary"
 		QUESTION_TEXT="Which Wine binary and install method should the script use to install ${FLPRODUCT} v${LOGOS_VERSION} in ${INSTALLDIR}?"
-		column_names=(--column "Choice" --column "Code" --column "Description" --column "Path")
+		WINEBIN_OPTIONS_LENGTH="${#WINEBIN_OPTIONS[@]}"
 		if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
-			installationChoice="$($DIALOG --backtitle "${BACKTITLE}" --title "${TITLE}" --radiolist "${QUESTION_TEXT}" 0 0 0 "${WINEBIN_OPTIONS[@]}" 3>&1 1>&2 2>&3 3>&-)"
+			installationChoice=$( $DIALOG --backtitle "${BACKTITLE}" --title "${TITLE}" --radiolist "${QUESTION_TEXT}" 0 0 "${WINEBIN_OPTIONS_LENGTH}" "${WINEBIN_OPTIONS[@]}" 3>&1 1>&2 2>&3 3>&- )
 			read -r -a installArray <<< "${installationChoice}"
 			WINEBIN_CODE=$(echo "${installArray[0]}" | awk -F' ' '{print $1}')
 			WINE_EXE=$(echo "${installArray[0]}" | awk -F' ' '{print $2}')
 			export WINEBIN_CODE;
 			export WINE_EXE;
 		elif [[ "${DIALOG}" == "zenity" ]]; then
-			installationChoice="$(zenity --width=1024 --height=480 \
+			column_names=(--column "Choice" --column "Code" --column "Description" --column "Path")
+			installationChoice=$(zenity --width=1024 --height=480 \
 				--title="${TITLE}" \
 				--text="${QUESTION_TEXT}" \
-				--list --radiolist "${column_names[@]}" "${WINEBIN_OPTIONS[@]}" --print-column=2,3,4)";
+				--list --radiolist "${column_names[@]}" "${WINEBIN_OPTIONS[@]}" --print-column=2,3,4);
 			OIFS=$IFS
 			IFS='|' read -r -a installArray <<< "${installationChoice}"
 			IFS=$OIFS
@@ -814,7 +810,7 @@ beginInstall() {
 				fi
 				;;
 			*)
-				logos_error "WINEBINE_CODE error. Installation canceled!"
+				logos_error "WINEBIN_CODE error. Installation canceled!"
 		esac
 	else
 		verbose && echo "WINEBIN_CODE is not set in your config file."
@@ -1211,7 +1207,6 @@ postInstall() {
 main() {
 	echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR."
 	debug && logos_info "Debug mode enabled."
-
 	# BEGIN PREPARATION
 	checkDependencies; # We verify the user is running a graphical UI and has majority of required dependencies.
 	chooseProduct; # We ask user for his Faithlife product's name and set variables.
@@ -1311,7 +1306,10 @@ while getopts "$OPTSTRING" opt; do
 		f)  export LOGOS_FORCE_ROOT="1"; ;;
 		r)  export REGENERATE="1"; ;;
 		D)  export DEBUG="true";
-			WINEDEBUG=""; ;;
+			VERBOSE="true";
+			WINEDEBUG="";
+			set -x;
+			;;
 		k)  export SKEL="1"; ;;
 		b)  CUSTOMBINPATH="$2";
 			if [ -d "$CUSTOMBINPATH" ]; then
