@@ -741,10 +741,8 @@ chooseInstallMethod() {
 		if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
 			installationChoice=$( $DIALOG --backtitle "${BACKTITLE}" --title "${TITLE}" --radiolist "${QUESTION_TEXT}" 0 0 "${WINEBIN_OPTIONS_LENGTH}" "${WINEBIN_OPTIONS[@]}" 3>&1 1>&2 2>&3 3>&- )
 			read -r -a installArray <<< "${installationChoice}"
-			WINEBIN_CODE=$(echo "${installArray[0]}" | awk -F' ' '{print $1}')
-			WINE_EXE=$(echo "${installArray[0]}" | awk -F' ' '{print $2}')
-			export WINEBIN_CODE;
-			export WINE_EXE;
+			export WINEBIN_CODE=$(echo "${installArray[0]}" | awk -F' ' '{print $1}')
+			export WINE_EXE=$(echo "${installArray[1]}" | awk -F' ' '{print $2}')
 		elif [[ "${DIALOG}" == "zenity" ]]; then
 			column_names=(--column "Choice" --column "Code" --column "Description" --column "Path")
 			installationChoice=$(zenity --width=1024 --height=480 \
@@ -762,7 +760,7 @@ chooseInstallMethod() {
 			logos_error "No dialog tool found."
 		fi
 	fi
-	verbose && echo "${WINE_EXE}"
+	verbose && echo "chooseInstallMethod(): WINEBIN_CODE: ${WINEBIN_CODE}; WINE_EXE: ${WINE_EXE}"
 }
 
 checkExistingInstall() {
@@ -807,6 +805,7 @@ beginInstall() {
 					# Geting the AppImage:
 					getAppImage;	
 					chmod +x "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}"
+					export WINE_EXE="${APPDIR_BINDIR}/wine64"
 				fi
 				;;
 			*)
