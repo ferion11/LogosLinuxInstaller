@@ -74,6 +74,14 @@ verbose() { [[ $VERBOSE = true ]] && return 0 || return 1; };
 
 debug() { [[ $DEBUG = true ]] && return 0 || return 1; };
 
+setDebug() {
+	DEBUG="true";
+	VERBOSE="true";
+	WINEDEBUG="";
+	set -x;
+	echo "Debug mode enabled." >> "${LOGOS_LOG}";
+}
+
 die() { echo >&2 "$*"; exit 1; };
 
 t(){ type "$1"&>/dev/null; };
@@ -96,29 +104,29 @@ getDialog() {
 			t whiptail && DIALOG=whiptail && break
 			t dialog && DIALOG=dialog && DIALOG_ESCAPE=-- && export DIALOG_ESCAPE && break
 			if test "${XDG_CURRENT_DESKTOP}" != "KDE"; then
-				t zenity && DIALOG=zenity && VERBOSE=true && break
-				t kdialog && DIALOG=kdialog && VERBOSE=true && break
+				t zenity && DIALOG=zenity && GUI=true && break
+				t kdialog && DIALOG=kdialog && GUI=true && break
 			elif test "${XDG_CURRENT_DESKTOP}" == "KDE"; then
-				t kdialog && DIALOG=kdialog && VERBOSE=true && break
-				t zenity && DIALOG=zenity && VERBOSE=true && break
+				t kdialog && DIALOG=kdialog && GUI=true && break
+				t zenity && DIALOG=zenity && GUI=true && break
 			else
-				logos_error "No dialog program found. Please install either dialog, whiptail, zenity, or kdialog"
+				echo "No dialog program found. Please install either dialog, whiptail, zenity, or kdialog";
 			fi
 		done;
 	else
 		verbose && echo "Running by double click." >> "${LOGOS_LOG}"
 		while :; do
 			if test "${XDG_CURRENT_DESKTOP}" != "KDE"; then
-				t zenity && DIALOG=zenity && VERBOSE=true && break
-				t kdialog && DIALOG=kdialog && VERBOSE=true && break
+				t zenity && DIALOG=zenity && GUI=true && break
+				t kdialog && DIALOG=kdialog && GUI=true && break
 			elif test "${XDG_CURRENT_DESKTOP}" == "KDE"; then
-				t kdialog && DIALOG=kdialog && VERBOSE=true && break
-				t zenity && DIALOG=zenity && VERBOSE=true && break
+				t kdialog && DIALOG=kdialog && GUI=true && break
+				t zenity && DIALOG=zenity && GUI=true && break
 			else
-				logos_error "No dialog program found. Please install either zenity or kdialog."
+				x-terminal-emulator -e echo "No dialog program found. Please install either zenity or kdialog." >> "${LOGOS_LOG}"
 			fi
 		done;
-	fi; export DIALOG
+	fi; export DIALOG; export GUI;
 }
 
 have_dep() {
@@ -1208,7 +1216,6 @@ postInstall() {
 
 main() {
 	{ echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR.";
-	debug && logos_info "Debug mode enabled.";
 	# BEGIN PREPARATION
 	verbose && date; checkDependencies; # We verify the user is running a graphical UI and has majority of required dependencies.
 	verbose && date; chooseProduct; # We ask user for his Faithlife product's name and set variables.
@@ -1240,17 +1247,20 @@ main() {
 		create_starting_scripts;
 		logos_info "The scripts have been regenerated."
 	fi
-	} | tee "${LOGOS_LOG}";
+	} | tee -a "${LOGOS_LOG}";
 }
 # END FUNCTION DECLARATIONS
 
-# BEGIN SCRIPT
-
-die-if-root;
-
+# BEGIN SCRIPT EXECUTION
 if [ -z "${DIALOG}" ]; then
 	getDialog;
+	if test "${GUI}" == "true"; then
+		echo "Running in a GUI. Enabling logging." >> "${LOGOS_LOG}"
+		setDebug;
+	fi
 fi
+
+die-if-root;
 
 # BEGIN OPTARGS
 RESET_OPTARGS=true
@@ -1310,10 +1320,7 @@ while getopts "$OPTSTRING" opt; do
 		F)  export SKIP_FONTS="1" ;;
 		f)  export LOGOS_FORCE_ROOT="1"; ;;
 		r)  export REGENERATE="1"; ;;
-		D)  export DEBUG="true";
-			VERBOSE="true";
-			WINEDEBUG="";
-			set -x;
+		D)  export setDebug;
 			;;
 		k)  export SKEL="1"; ;;
 		b)  CUSTOMBINPATH="$2";
@@ -1347,5 +1354,5 @@ shift $((OPTIND-1))
 main;
 
 exit 0;
-
+# END SCRIPT EXECUTION
 
