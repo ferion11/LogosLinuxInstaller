@@ -29,6 +29,7 @@ if [ -z "${LOGOS_FORCE_ROOT+x}" ]; then export LOGOS_FORCE_ROOT="" ; fi
 if [ -z "${WINEBOOT_GUI+x}" ]; then export WINEBOOT_GUI="" ; fi
 if [ -z "${EXTRA_INFO}" ]; then EXTRA_INFO="The following packages are usually necessary: winbind cabextract libjpeg8."; export EXTRA_INFO; fi
 if [ -z "${DEFAULT_CONFIG_PATH}" ]; then DEFAULT_CONFIG_PATH="${HOME}/.config/Logos_on_Linux/Logos_on_Linux.conf"; export DEFAULT_CONFIG_PATH; fi
+if [ -z "${LOGOS_LOG}" ]; then LOGOS_LOG="${HOME}/.local/state/Logos_on_Linux/install.log"; export LOGOS_LOG; fi
 if [ -z "${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; fi; export WINEDEBUG # Make wine output less verbose
 if [ -z "${DEBUG}" ]; then DEBUG="FALSE"; fi; export DEBUG
 if [ -z "${VERBOSE}" ]; then VERBOSE="FALSE"; fi; export VERBOSE
@@ -164,7 +165,8 @@ logos_info() {
 	if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
 		cli_msg "${INFO_MESSAGE}"
 	elif [[ "${DIALOG}" == "zenity" ]]; then
-		gtk_info "${INFO_MESSAGE}"
+		gtk_info "${INFO_MESSAGE}";
+		echo "${INFO_MESSAGE}" >> "${LOGOS_LOG}";
 	elif [[ "${DIALOG}" == "kdialog" ]]; then
 		:
 	fi
@@ -185,7 +187,8 @@ logos_warn() {
 	if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
 	    cli_msg "${WARN_MESSAGE}"
 	elif [[ "${DIALOG}" == "zenity" ]]; then
-	    gtk_warn "${WARN_MESSAGE}"
+		gtk_warn "${WARN_MESSAGE}"
+		echo "${WARN_MESSAGE}" >> "${LOGOS_LOG}";
 	elif [[ "${DIALOG}" == "kdialog" ]]; then
 		:
 	fi
@@ -199,7 +202,8 @@ logos_error() {
 	if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
 	    cli_msg "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
 	elif [[ "${DIALOG}" == "zenity" ]]; then
-	    gtk_error "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
+		gtk_error "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
+		echo "${ERROR_MESSAGE}" >> "${LOGOS_LOG}";
 	elif [[ "${DIALOG}" == "kdialog" ]]; then
 		:
 	fi
