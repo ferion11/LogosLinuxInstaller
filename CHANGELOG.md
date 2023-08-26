@@ -1,4 +1,7 @@
 # Changelog
+* 3.7.3
+  - Fix #186.
+  - Add GUI logging at `~/.local/state/Logos_on_Linux/install.log`.
 * 3.7.2
   - Fix #178.
   - Make AppImage default install.
