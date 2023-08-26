@@ -29,7 +29,7 @@ if [ -z "${LOGOS_FORCE_ROOT+x}" ]; then export LOGOS_FORCE_ROOT="" ; fi
 if [ -z "${WINEBOOT_GUI+x}" ]; then export WINEBOOT_GUI="" ; fi
 if [ -z "${EXTRA_INFO}" ]; then EXTRA_INFO="The following packages are usually necessary: winbind cabextract libjpeg8."; export EXTRA_INFO; fi
 if [ -z "${DEFAULT_CONFIG_PATH}" ]; then DEFAULT_CONFIG_PATH="${HOME}/.config/Logos_on_Linux/Logos_on_Linux.conf"; export DEFAULT_CONFIG_PATH; fi
-if [ -z "${LOGOS_LOG}" ]; then LOGOS_LOG="${HOME}/.local/state/Logos_on_Linux/install.log"; export LOGOS_LOG; fi
+if [ -z "${LOGOS_LOG}" ]; then LOGOS_LOG="${HOME}/.local/state/Logos_on_Linux/install.log"; mkdir -p "${HOME}/.local/state/Logos_on_Linux"; touch "${LOGOS_LOG}"; export LOGOS_LOG; fi
 if [ -z "${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; fi; export WINEDEBUG # Make wine output less verbose
 if [ -z "${DEBUG}" ]; then DEBUG="FALSE"; fi; export DEBUG
 if [ -z "${VERBOSE}" ]; then VERBOSE="FALSE"; fi; export VERBOSE
@@ -96,24 +96,24 @@ getDialog() {
 			t whiptail && DIALOG=whiptail && break
 			t dialog && DIALOG=dialog && DIALOG_ESCAPE=-- && export DIALOG_ESCAPE && break
 			if test "${XDG_CURRENT_DESKTOP}" != "KDE"; then
-				t zenity && DIALOG=zenity && break
-				t kdialog && DIALOG=kdialog && break
+				t zenity && DIALOG=zenity && VERBOSE=true && break
+				t kdialog && DIALOG=kdialog && VERBOSE=true && break
 			elif test "${XDG_CURRENT_DESKTOP}" == "KDE"; then
-				t kdialog && DIALOG=kdialog && break
-				t zenity && DIALOG=zenity && break
+				t kdialog && DIALOG=kdialog && VERBOSE=true && break
+				t zenity && DIALOG=zenity && VERBOSE=true && break
 			else
 				logos_error "No dialog program found. Please install either dialog, whiptail, zenity, or kdialog"
 			fi
 		done;
 	else
-		verbose && echo "Running by double click."
+		verbose && echo "Running by double click." >> "${LOGOS_LOG}"
 		while :; do
 			if test "${XDG_CURRENT_DESKTOP}" != "KDE"; then
-				t zenity && DIALOG=zenity && break
-				t kdialog && DIALOG=kdialog && break
+				t zenity && DIALOG=zenity && VERBOSE=true && break
+				t kdialog && DIALOG=kdialog && VERBOSE=true && break
 			elif test "${XDG_CURRENT_DESKTOP}" == "KDE"; then
-				t kdialog && DIALOG=kdialog && break
-				t zenity && DIALOG=zenity && break
+				t kdialog && DIALOG=kdialog && VERBOSE=true && break
+				t zenity && DIALOG=zenity && VERBOSE=true && break
 			else
 				logos_error "No dialog program found. Please install either zenity or kdialog."
 			fi
@@ -166,7 +166,7 @@ logos_info() {
 		cli_msg "${INFO_MESSAGE}"
 	elif [[ "${DIALOG}" == "zenity" ]]; then
 		gtk_info "${INFO_MESSAGE}";
-		echo "${INFO_MESSAGE}" >> "${LOGOS_LOG}";
+		echo "$(date) ${INFO_MESSAGE}" >> "${LOGOS_LOG}";
 	elif [[ "${DIALOG}" == "kdialog" ]]; then
 		:
 	fi
@@ -188,7 +188,7 @@ logos_warn() {
 	    cli_msg "${WARN_MESSAGE}"
 	elif [[ "${DIALOG}" == "zenity" ]]; then
 		gtk_warn "${WARN_MESSAGE}"
-		echo "${WARN_MESSAGE}" >> "${LOGOS_LOG}";
+		echo "$(date) ${WARN_MESSAGE}" >> "${LOGOS_LOG}";
 	elif [[ "${DIALOG}" == "kdialog" ]]; then
 		:
 	fi
@@ -203,7 +203,7 @@ logos_error() {
 	    cli_msg "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
 	elif [[ "${DIALOG}" == "zenity" ]]; then
 		gtk_error "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
-		echo "${ERROR_MESSAGE}" >> "${LOGOS_LOG}";
+		echo "$(date) ${ERROR_MESSAGE}" >> "${LOGOS_LOG}";
 	elif [[ "${DIALOG}" == "kdialog" ]]; then
 		:
 	fi
@@ -1205,42 +1205,44 @@ postInstall() {
 		logos_error "Installation failed. ${LOGOS_EXE} not found. Exiting…\n\nThe ${FLPRODUCT} executable was not found. This means something went wrong while installing ${FLPRODUCT}. Please contact the Logos on Linux community for help."
 	fi
 }
-# END FUNCTION DECLARATIONS
 
 main() {
-	echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR."
-	debug && logos_info "Debug mode enabled."
+	{ echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR.";
+	debug && logos_info "Debug mode enabled.";
 	# BEGIN PREPARATION
-	checkDependencies; # We verify the user is running a graphical UI and has majority of required dependencies.
-	chooseProduct; # We ask user for his Faithlife product's name and set variables.
-	chooseVersion; # We ask user for his Faithlife product's version, set variables, and create project skeleton.
-	chooseInstallMethod; # We ask user for his desired install method.
+	verbose && date; checkDependencies; # We verify the user is running a graphical UI and has majority of required dependencies.
+	verbose && date; chooseProduct; # We ask user for his Faithlife product's name and set variables.
+	verbose && date; chooseVersion; # We ask user for his Faithlife product's version, set variables, and create project skeleton.
+	verbose && date; chooseInstallMethod; # We ask user for his desired install method.
 	# END PREPARATION
 	if [ -z "${REGENERATE}" ]; then
-		checkExistingInstall;
-		beginInstall;
-		prepareWineBottle; # We run wineboot.
+		verbose && date; checkExistingInstall;
+		verbose && date; beginInstall;
+		verbose && date; prepareWineBottle; # We run wineboot.
 		case "${TARGETVERSION}" in
 			10*)
-				installLogos10; ;; # We run the commands specific to Logos 10.
+				verbose && date; installLogos10; ;; # We run the commands specific to Logos 10.
 			9*)
-				installLogos9; ;; # We run the commands specific to Logos 9.
+				verbose && date; installLogos9; ;; # We run the commands specific to Logos 9.
 			*)
 				logos_error "Installation canceled!" ;;
 		esac
 
+		verbose && date;
 		create_starting_scripts;
 		heavy_wineserver_wait;
 		clean_all;
 
 		LOGOS_EXE=$(find "${WINEPREFIX}" -name ${FLPRODUCT}.exe | grep "${FLPRODUCT}/${FLPRODUCT}.exe"); export LOGOS_EXE;
 
-		postInstall;
+		verbose && date; postInstall;
 	else
 		create_starting_scripts;
 		logos_info "The scripts have been regenerated."
 	fi
+	} | tee "${LOGOS_LOG}";
 }
+# END FUNCTION DECLARATIONS
 
 # BEGIN SCRIPT
 
