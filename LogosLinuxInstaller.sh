@@ -105,9 +105,9 @@ getDialog() {
 			t dialog && DIALOG=dialog && DIALOG_ESCAPE=-- && export DIALOG_ESCAPE && break
 			if test "${XDG_CURRENT_DESKTOP}" != "KDE"; then
 				t zenity && DIALOG=zenity && GUI=true && break
-				t kdialog && DIALOG=kdialog && GUI=true && break
+				#t kdialog && DIALOG=kdialog && GUI=true && break
 			elif test "${XDG_CURRENT_DESKTOP}" == "KDE"; then
-				t kdialog && DIALOG=kdialog && GUI=true && break
+				#t kdialog && DIALOG=kdialog && GUI=true && break
 				t zenity && DIALOG=zenity && GUI=true && break
 			else
 				echo "No dialog program found. Please install either dialog, whiptail, zenity, or kdialog";
@@ -118,9 +118,9 @@ getDialog() {
 		while :; do
 			if test "${XDG_CURRENT_DESKTOP}" != "KDE"; then
 				t zenity && DIALOG=zenity && GUI=true && break
-				t kdialog && DIALOG=kdialog && GUI=true && break
+				#t kdialog && DIALOG=kdialog && GUI=true && break
 			elif test "${XDG_CURRENT_DESKTOP}" == "KDE"; then
-				t kdialog && DIALOG=kdialog && GUI=true && break
+				#t kdialog && DIALOG=kdialog && GUI=true && break
 				t zenity && DIALOG=zenity && GUI=true && break
 			else
 				no-diag-msg "No dialog program found. Please install either zenity or kdialog."
