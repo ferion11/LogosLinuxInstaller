@@ -123,7 +123,7 @@ getDialog() {
 				t kdialog && DIALOG=kdialog && GUI=true && break
 				t zenity && DIALOG=zenity && GUI=true && break
 			else
-				x-terminal-emulator -e echo "No dialog program found. Please install either zenity or kdialog." >> "${LOGOS_LOG}"
+				no-diag-msg "No dialog program found. Please install either zenity or kdialog."
 			fi
 		done;
 	fi; export DIALOG; export GUI;
@@ -153,6 +153,11 @@ mkdir_critical() {
 }
 
 ## BEGIN DIALOG FUNCTIONS
+no-diag-msg() {
+	echo "${1}" >> "${LOGOS_LOG}";
+	xterm -hold -e printf "%s\n" "${1}";
+	die;
+}
 cli_msg() {
 	printf "%s\n" "${1}"
 }
@@ -405,9 +410,9 @@ logos_download() {
 	elif [[ "${DIALOG}" == "zenity" ]]; then
 		gtk_download "${URI}" "${DESTINATION}"
 	elif [[ "${DIALOG}" == "kdialog" ]]; then
-		logos_error "kdialog not implemented."
+		no-diag-msg "kdialog not implemented."
 	else
-			logos_error "No dialog tool found."
+		no-diag-msg "No dialog tool found."
 	fi
 }
 ## END DIALOG FUNCTIONS
@@ -513,10 +518,11 @@ chooseProduct() {
 			productChoice="$($DIALOG --backtitle "${BACKTITLE}" --title "${TITLE}" --radiolist "${QUESTION_TEXT}" 0 0 0 "Logos" "Logos Bible Software." ON "Verbum" "Verbum Bible Software." OFF "Exit" "Exit." OFF 3>&1 1>&2 2>&3 3>&-)"
 		elif [[ "${DIALOG}" == "zenity" ]]; then
 			productChoice="$(zenity --width="700" --height="310" --title="${TITLE}" --text="${QUESTION_TEXT}" --list --radiolist --column "S" --column "Description" TRUE "Logos Bible Software." FALSE "Verbum Bible Software." FALSE "Exit.")"
+			#zenity --width="700" --height="310" --title="${TITLE}" --text="${QUESTION_TEXT}" --list --radiolist --column "S" --column "Description" TRUE "Logos Bible Software." FALSE "Verbum Bible Software." FALSE "Exit."
 		elif [[ "${DIALOG}" == "kdialog" ]]; then
-			logos_error "kdialog not implemented."
+			no-diag-msg "kdialog not implemented."
 		else
-			logos_error "No dialog tool found."
+			no-diag-msg "No dialog tool found"
 		fi
 	else
 		productChoice="${FLPRODUCT}"
@@ -553,9 +559,9 @@ chooseVersion() {
 		elif [[ "${DIALOG}" == "zenity" ]]; then
 			versionChoice="$(zenity --width="700" --height="310" --title="${TITLE}" --text="${QUESTION_TEXT}" --list --radiolist --column "S" --column "Description" TRUE "${FLPRODUCT} 10" FALSE "${FLPRODUCT} 9" FALSE "Exit")"
 		elif [[ "${DIALOG}" == "kdialog" ]]; then
-			logos_error "kdialog not implemented."
+			no-diag-msg "kdialog not implemented."
 		else
-			logos_error "No dialog tool found."
+			no-diag-msg "No dialog tool found."
 		fi
 	else
 		versionChoice="$TARGETVERSION"
@@ -702,9 +708,9 @@ chooseInstallMethod() {
 		elif [[ "${DIALOG}" == "zenity" ]]; then
 			WINEBIN_OPTIONS+=(TRUE "AppImage" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}")
 		elif [[ "${DIALOG}" == "kdialog" ]]; then
-			logos_error "kdialog not implemented."
+			no-diag-msg "kdialog not implemented."
 		else
-			logos_error "No dialog tool found."
+			no-diag-msg "No dialog tool found."
 		fi
 		
 		while read -r line; do
@@ -739,9 +745,9 @@ chooseInstallMethod() {
 			elif [[ "${DIALOG}" == "zenity" ]]; then
 				WINEBIN_OPTIONS+=(FALSE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
 			elif [[ "${DIALOG}" == "kdialog" ]]; then
-				logos_error "kdialog not implemented."
+				no-diag-msg "kdialog not implemented."
 			else
-				logos_error "No dialog tool found."
+				no-diag-msg "No dialog tool found."
 			fi
 		done < "${WORKDIR}/winebinaries"
 	
@@ -767,9 +773,9 @@ chooseInstallMethod() {
 			export WINEBIN_CODE=${installArray[0]}
 			export WINE_EXE=${installArray[2]}
 		elif [[ "${DIALOG}" == "kdialog" ]]; then
-			logos_error "kdialog not implemented."
+			no-diag-msg "kdialog not implemented."
 		else
-			logos_error "No dialog tool found."
+			no-diag-msg "No dialog tool found."
 		fi
 	fi
 	verbose && echo "chooseInstallMethod(): WINEBIN_CODE: ${WINEBIN_CODE}; WINE_EXE: ${WINE_EXE}"
@@ -895,9 +901,9 @@ setWinetricks() {
 						TRUE "1- Use local winetricks." \
 						FALSE "2- Download winetricks from the Internet." )"
 				elif [[ "${DIALOG}" == "kdialog" ]]; then
-					logos_error "kdialog not implemented."
+					no-diag-msg "kdialog not implemented."
 				else
-					logos_error "No dialog tool found."
+					no-diag-msg "No dialog tool found."
 				fi
 
 				case "${winetricksChoice}" in
@@ -961,9 +967,9 @@ winetricks_install() {
 			logos_error "The installation was cancelled!\n * ZENITY_RETURN: ${ZENITY_RETURN}";
 		fi
 	elif [[ "${DIALOG}" == "kdialog" ]]; then
-		logos_error "kdialog not implemented."
+		no-diag-msg "kdialog not implemented."
 	else
-		logos_error "No dialog tool found."
+		no-diag-msg "No dialog tool found."
 	fi
 
 	verbose && echo "winetricks ${*} DONE!";
