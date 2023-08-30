@@ -16,6 +16,8 @@ if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then WINE64_APPIMAGE_FULL_URL="https://
 if [ -z "${WINE64_APPIMAGE_FULL_FILENAME}" ]; then WINE64_APPIMAGE_FULL_FILENAME="$(basename "${WINE64_APPIMAGE_FULL_URL}")"; export WINE64_APPIMAGE_FULL_FILENAME; fi
 if [ -z "${WINE64_APPIMAGE_VERSION}" ]; then WINE64_APPIMAGE_VERSION="v7.18-staging"; export WINE64_APPIMAGE_VERSION; fi
 if [ -z "${WINE64_APPIMAGE_URL}" ]; then WINE64_APPIMAGE_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/v10.0-1/wine-staging_7.18-x86_64.AppImage"; export WINE64_APPIMAGE_URL; fi
+if [ -z "${WINE64_BOTTLE_TARGZ_URL}" ]; then WINE64_BOTTLE_TARGZ_URL="https://github.com/ferion11/wine64_bottle_dotnet/releases/download/v5.11b/wine64_bottle.tar.gz"; export WINE64_BOTTLE_TARGZ_URL; fi
+if [ -z "${WINE64_BOTTLE_TARGZ_NAME}" ]; then WINE64_BOTTLE_TARGZ_NAME="wine64_bottle.tar.gz"; export WINE64_BOTTLE_TARGZ_NAME; fi
 if [ -z "${WINE64_APPIMAGE_FILENAME}" ]; then WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}" .AppImage)"; export WINE64_APPIMAGE_FILENAME; fi
 if [ -z "${APPIMAGE_LINK_SELECTION_NAME}" ]; then APPIMAGE_LINK_SELECTION_NAME="selected_wine.AppImage"; export APPIMAGE_LINK_SELECTION_NAME; fi
 if [ -z "${WINETRICKS_URL}" ]; then WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/5904ee355e37dff4a3ab37e1573c56cffe6ce223/src/winetricks"; export WINETRICKS_URL; fi
@@ -415,6 +417,31 @@ logos_download() {
 		no-diag-msg "No dialog tool found."
 	fi
 }
+logos_reuse_download() {
+	SOURCEURL="${1}"
+	FILE="${2}"
+	TARGETDIR="${3}"
+	DOWNLOADS="${HOME}/Downloads"
+	DIRS=(
+		"${INSTALLDIR}"
+		"${PRESENT_WORKING_DIRECTORY}"
+		"${DOWNLOADS}"
+	)
+	FOUND=1
+	for i in "${DIRS[@]}"; do
+		if [ -f "${i}/${FILE}" ]; then
+			logos_info "${FILE} exists in ${i}. Using it…"
+			cp "${i}/${FILE}" "${TARGETDIR}/" | logos_progress "Copying…" "Copying ${FILE}\ninto ${TARGETDIR}"
+			FOUND=0
+			break
+		fi
+	done
+	if [[ "${FOUND}" == 1 ]]; then
+    	logos_info "${FILE} does not exist. Downloading…"
+    	logos_download "${SOURCEURL}" "${DOWNLOADS}/${FILE}"
+    	cp "${DOWNLOADS}/${FILE}" "${TARGETDIR}/" | logos_progress "Copying…" "Copying: ${FILE}\ninto: ${TARGETDIR}"
+	fi
+}
 ## END DIALOG FUNCTIONS
 # wait on all processes that are using the ${1} directory to finish
 wait_process_using_dir() {
@@ -678,17 +705,7 @@ createWineBinaryList() {
 }
 
 getAppImage() {
-	if [ -f "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
-    	verbose && echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
-		cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | logos_progress "Copying…" "Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}"
-	elif [ -f "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" ]; then
-    	verbose && echo "${WINE64_APPIMAGE_FULL_FILENAME} exists. Using it…"
-    	cp "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | logos_progress "Copying…" "Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}"
-	else
-    	verbose && echo "${WINE64_APPIMAGE_FULL_FILENAME} does not exist. Downloading…"
-    	logos_download "${WINE64_APPIMAGE_FULL_URL}" "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}"
-    	cp "${HOME}/Downloads/${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}/" | logos_progress "Copying…" "Copying: ${WINE64_APPIMAGE_FULL_FILENAME}\ninto: ${APPDIR_BINDIR}"
-	fi
+	logos_reuse_download "${WINE64_APPIMAGE_FULL_URL}" "${WINE64_APPIMAGE_FULL_FILENAME}" "${APPDIR_BINDIR}"
 }
 
 chooseInstallMethod() {
@@ -703,15 +720,17 @@ chooseInstallMethod() {
 		WINEBIN_OPTIONS=()
 		
 		# Add AppImage to list
-		if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
-			# NOTE: The missing quotations in this array are intentional and accounted for below.
-			WINEBIN_OPTIONS+=("AppImage ${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" ON)
-		elif [[ "${DIALOG}" == "zenity" ]]; then
-			WINEBIN_OPTIONS+=(TRUE "AppImage" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}")
-		elif [[ "${DIALOG}" == "kdialog" ]]; then
-			no-diag-msg "kdialog not implemented."
-		else
-			no-diag-msg "No dialog tool found."
+		if [[ "${TARGETVERSION}" != "9" ]]; then
+			if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
+				# NOTE: The missing quotations in this array are intentional and accounted for below.
+				WINEBIN_OPTIONS+=("AppImage ${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" ON)
+			elif [[ "${DIALOG}" == "zenity" ]]; then
+				WINEBIN_OPTIONS+=(TRUE "AppImage" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}")
+			elif [[ "${DIALOG}" == "kdialog" ]]; then
+				no-diag-msg "kdialog not implemented."
+			else
+				no-diag-msg "No dialog tool found."
+			fi
 		fi
 		
 		while read -r line; do
@@ -869,17 +888,7 @@ wine_reg_install() {
 }
 
 downloadWinetricks() {
-	verbose && echo "Downloading winetricks from the Internet…"
-	if [ -f "${PRESENT_WORKING_DIRECTORY}/winetricks" ]; then
-		verbose && echo "A winetricks binary has already been downloaded. Using it…"
-		cp "${PRESENT_WORKING_DIRECTORY}/winetricks" "${APPDIR_BINDIR}"
-	elif [ -f "${HOME}/Downloads/winetricks" ]; then
-		verbose && echo "A winetricks binary has already been downloaded. Using it…"
-		cp "${HOME}/Downloads/winetricks" "${APPDIR_BINDIR}"
-	else
-		verbose && echo "winetricks does not exist. Downloading…"
-		logos_download "${WINETRICKS_URL}" "${APPDIR_BINDIR}"
-	fi
+	logos_reuse_download "${WINETRICKS_URL}" "winetricks" "${APPDIR_BINDIR}"
 	chmod 755 "${APPDIR_BINDIR}/winetricks"
 }
 
@@ -988,18 +997,8 @@ winetricks_dll_install() {
 }
 
 getPremadeWineBottle() {
-	# get and install pre-made wineBottle
-	WINE64_BOTTLE_TARGZ_URL="https://github.com/ferion11/wine64_bottle_dotnet/releases/download/v5.11b/wine64_bottle.tar.gz"
-	WINE64_BOTTLE_TARGZ_NAME="wine64_bottle.tar.gz"
 	verbose && echo "Installing pre-made wineBottle 64bits…"
-	if [ -f "${PRESENT_WORKING_DIRECTORY}/${WINE64_BOTTLE_TARGZ_NAME}" ]; then
-		verbose && echo "${WINE64_BOTTLE_TARGZ_NAME} exist. Using it…"
-		cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
-	else
-		verbose && echo "${WINE64_BOTTLE_TARGZ_NAME} does not exist. Downloading…"
-		logos_download "${WINE64_BOTTLE_TARGZ_URL}" "${WORKDIR}"
-	fi
-
+	logos_reuse_download "${WINE64_BOTTLE_TARGZ_URL}" "${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}"
 	tar xzf "${WORKDIR}"/"${WINE64_BOTTLE_TARGZ_NAME}" -C "${APPDIR}"/ | logos_progress "Extracting…" "Extracting: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${APPDIR}"
 }
 ## END WINE BOTTLE AND WINETRICKS FUNCTIONS
