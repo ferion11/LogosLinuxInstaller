@@ -704,7 +704,8 @@ chooseInstallMethod() {
 		
 		# Add AppImage to list
 		if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
-			WINEBIN_OPTIONS+=("AppImage" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" ON)
+			# NOTE: The missing quotations in this array are intentional and accounted for below.
+			WINEBIN_OPTIONS+=("AppImage ${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" ON)
 		elif [[ "${DIALOG}" == "zenity" ]]; then
 			WINEBIN_OPTIONS+=(TRUE "AppImage" "AppImage of Wine64 ${WINE64_APPIMAGE_FULL_VERSION}" "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}")
 		elif [[ "${DIALOG}" == "kdialog" ]]; then
@@ -723,11 +724,11 @@ chooseInstallMethod() {
 	
 			if [[ "$WINEOPT" == *"/usr/bin/"* ]]; then
 				WINEOPT_CODE="System"
-				WINEOPT_DESCRIPTION="\"Use system's binary (i.e., /usr/bin/wine64). WINE must be 7.18-staging or later. Stable or Devel do not work.\""
+				WINEOPT_DESCRIPTION="\"Use the system binary (i.e., /usr/bin/wine64). WINE must be 7.18-staging or later. Stable or Devel do not work.\""
 				WINEOPT_PATH="${line}"
 			elif [[ "$WINEOPT" == *"Proton"* ]]; then
 				WINEOPT_CODE="Proton"
-				WINEOPT_DESCRIPTION="\"Install using Steam's Proton fork of WINE.\""
+				WINEOPT_DESCRIPTION="\"Install using the Steam Proton fork of WINE.\""
 				WINEOPT_PATH="${line}"
 			elif [[ "$WINEOPT" == *"PlayOnLinux"* ]]; then
 				WINEOPT_CODE="PlayOnLinux"
@@ -741,7 +742,8 @@ chooseInstallMethod() {
 	
 			# Create wine binary option array
 			if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
-				WINEBIN_OPTIONS+=("${WINEOPT_CODE}" "${WINEOPT_PATH}" OFF)
+				# NOTE: The missing quotations in this array are intentional and accounted for below.
+				WINEBIN_OPTIONS+=("${WINEOPT_CODE} ${WINEOPT_PATH}" "${WINEOPT_DESCRIPTION}" OFF)
 			elif [[ "${DIALOG}" == "zenity" ]]; then
 				WINEBIN_OPTIONS+=(FALSE "${WINEOPT_CODE}" "${WINEOPT_DESCRIPTION}" "${WINEOPT_PATH}")
 			elif [[ "${DIALOG}" == "kdialog" ]]; then
@@ -760,7 +762,7 @@ chooseInstallMethod() {
 			installationChoice=$( $DIALOG --backtitle "${BACKTITLE}" --title "${TITLE}" --radiolist "${QUESTION_TEXT}" 0 0 "${WINEBIN_OPTIONS_LENGTH}" "${WINEBIN_OPTIONS[@]}" 3>&1 1>&2 2>&3 3>&- )
 			read -r -a installArray <<< "${installationChoice}"
 			WINEBIN_CODE=$(echo "${installArray[0]}" | awk -F' ' '{print $1}'); export WINEBIN_CODE
-			WINE_EXE=$(echo "${installArray[1]}" | awk -F' ' '{print $2}'); export WINE_EXE
+			WINE_EXE=$(echo "${installArray[0]}" | awk -F' ' '{print $2}'); export WINE_EXE
 		elif [[ "${DIALOG}" == "zenity" ]]; then
 			column_names=(--column "Choice" --column "Code" --column "Description" --column "Path")
 			installationChoice=$(zenity --width=1024 --height=480 \
@@ -804,12 +806,6 @@ beginInstall() {
 	fi
 	if [ -n "${WINEBIN_CODE}" ]; then	
 		case "${WINEBIN_CODE}" in
-			"System"|"Proton"|"PlayOnLinux"|"Custom")
-				verbose && echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using a ${WINEBIN_CODE} WINE64 binary…"
-				if [ -z "${REGENERATE}" ]; then
-					make_skel "none.AppImage"
-				fi
-				;;
 			"AppImage"*)
 				check_libs libfuse;
 				verbose && echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using ${WINE64_APPIMAGE_FULL_VERSION} AppImage…"
@@ -824,6 +820,12 @@ beginInstall() {
 					getAppImage;	
 					chmod +x "${APPDIR_BINDIR}/${WINE64_APPIMAGE_FULL_FILENAME}"
 					export WINE_EXE="${APPDIR_BINDIR}/wine64"
+				fi
+				;;
+			"System"|"Proton"|"PlayOnLinux"|"Custom")
+				verbose && echo "Installing ${FLPRODUCT} Bible ${TARGETVERSION} using a ${WINEBIN_CODE} WINE64 binary…"
+				if [ -z "${REGENERATE}" ]; then
+					make_skel "none.AppImage"
 				fi
 				;;
 			*)
