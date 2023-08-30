@@ -993,11 +993,16 @@ getPremadeWineBottle() {
 	WINE64_BOTTLE_TARGZ_NAME="wine64_bottle.tar.gz"
 	verbose && echo "Installing pre-made wineBottle 64bits…"
 	if [ -f "${PRESENT_WORKING_DIRECTORY}/${WINE64_BOTTLE_TARGZ_NAME}" ]; then
-		verbose && echo "${WINE64_BOTTLE_TARGZ_NAME} exist. Using it…"
-		cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}/" | zenity --progress --title="Copying…" --text="Copying: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}" --pulsate --auto-close --no-cancel
+		verbose && echo "${WINE64_BOTTLE_TARGZ_NAME} exists. Using it…"
+		cp "${PRESENT_WORKING_DIRECTORY}/${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}/" | logos_progress "Copying…" "Copying: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}"
+	if [ -f "${HOME}/Downloads/${WINE64_BOTTLE_TARGZ_NAME}" ]; then
+		verbose && echo "${WINE64_BOTTLE_TARGZ_NAME} exists. Using it…"
+		cp "${HOME}/Downloads/${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}/" | logos_progress "Copying…" "Copying: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}"
 	else
 		verbose && echo "${WINE64_BOTTLE_TARGZ_NAME} does not exist. Downloading…"
-		logos_download "${WINE64_BOTTLE_TARGZ_URL}" "${WORKDIR}"
+		logos_download "${WINE64_BOTTLE_TARGZ_URL}" "${HOME}/Downloads/${WORKDIR}"
+		cp "${HOME}/Downloads/${WINE64_BOTTLE_TARGZ_NAME}" "${WORKDIR}" | logos_progress "Copying…" "Copying:
+${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${WORKDIR}"
 	fi
 
 	tar xzf "${WORKDIR}"/"${WINE64_BOTTLE_TARGZ_NAME}" -C "${APPDIR}"/ | logos_progress "Extracting…" "Extracting: ${WINE64_BOTTLE_TARGZ_NAME}\ninto: ${APPDIR}"
