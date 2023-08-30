@@ -1,4 +1,6 @@
 # Changelog
+* 3.7.4
+  - Fix #194.
 * 3.7.3
   - Fix #186.
   - Add GUI logging at `~/.local/state/Logos_on_Linux/install.log`.
