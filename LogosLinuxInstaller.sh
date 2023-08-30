@@ -422,14 +422,22 @@ logos_reuse_download() {
 	FILE="${2}"
 	TARGETDIR="${3}"
 	DOWNLOADS="${HOME}/Downloads"
-	if [ -f "${PRESENT_WORKING_DIRECTORY}/${FILE}" ]; then
-    	verbose && echo "${FILE} exists. Using it…"
-		cp "${PRESENT_WORKING_DIRECTORY}/${FILE}" "${APPDIR_BINDIR}/" | logos_progress "Copying…" "Copying: ${FILE}\ninto: ${APPDIR_BINDIR}"
-	elif [ -f "${DOWNLOADS}/${FILE}" ]; then
-    	verbose && echo "${FILE} exists. Using it…"
-    	cp "${DOWNLOADS}/${FILE}" "${TARGETDIR}/" | logos_progress "Copying…" "Copying: ${FILE}\ninto: ${APPDIR_BINDIR}"
-	else
-    	verbose && echo "${FILE} does not exist. Downloading…"
+	DIRS=(
+		"${INSTALLDIR}"
+		"${PRESENT_WORKING_DIRECTORY}"
+		"${DOWNLOADS}"
+	)
+	FOUND=1
+	for i in "${DIRS[@]}"; do
+		if [ -f "${i}/${FILE}" ]; then
+			logos_info "${FILE} exists in ${i}. Using it…"
+			cp "${i}/${FILE}" "${TARGETDIR}/" | logos_progress "Copying…" "Copying ${FILE}\ninto ${TARGETDIR}"
+			FOUND=0
+			break
+		fi
+	done
+	if [[ "${FOUND}" == 1 ]]; then
+    	logos_info "${FILE} does not exist. Downloading…"
     	logos_download "${SOURCEURL}" "${DOWNLOADS}/${FILE}"
     	cp "${DOWNLOADS}/${FILE}" "${TARGETDIR}/" | logos_progress "Copying…" "Copying: ${FILE}\ninto: ${TARGETDIR}"
 	fi
