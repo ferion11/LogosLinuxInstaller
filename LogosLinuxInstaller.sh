@@ -74,7 +74,7 @@ die-if-running() {
 			kill -9 "$(cat "${PIDF}")"
 		fi
 	fi
-	trap "rm -f -- '$PIDF'" EXIT
+	trap 'rm -f -- "${PIDF}"' EXIT
 	echo $$ > "${PIDF}"
 }
 

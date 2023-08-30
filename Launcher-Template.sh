@@ -87,6 +87,8 @@ Options:
                                HOME/.local/share/applications.
     --remove-all-index         Removes all index and library catalog files.
     --remove-library-catalog   Removes all library catalog files.
+	--install-bash-completion  Installs the bash completion file to
+                               /etc/bash_completion.d/.
 UEOF
 }
 
@@ -329,6 +331,17 @@ SEOF
 	echo "======= making new ${FLPRODUCT}Bible.desktop shortcut done! ======="
 	exit 0
 }
+
+installBashCompletion() {
+	URL="https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/master/LogosLinuxInstaller.bash"
+	wget -O "${HOME}/Downloads/LogosLinuxInstaller.bash" "${URL}"
+	if [ -d "/etc/bash_completion.d" ]; then
+		sudo mv "${HOME}/Downloads/LogosLinuxInstaller.bash" /etc/bash_completion.d/
+	else
+		echo "ERROR: /etc/bash_completion.d is missing."
+		exit 1
+	fi
+}
 # END FUNCTION DECLARATIONS
 # BEGIN OPTARGS
 RESET_OPTARGS=true
@@ -379,6 +392,8 @@ while getopts "\$OPTSTRING" opt; do
 					removeAllIndex ;;
 				remove-library-catalog)
 					removeLibraryCatalog ;;
+				install-bash-completion)
+					installBashCompletion ;;
 				*)
 					if [ "\$OPTERR" = 1 ] && [ "\${OPTSTRING:0:1}" != ":" ]; then
 						echo "\$TITLE: --\${OPTARG}: undefined option." >&2 && usage >&2 && exit
