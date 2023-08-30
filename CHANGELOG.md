@@ -1,13 +1,19 @@
 # Changelog
+* 3.7.5
+  - Fix #131. [T. H. Wright]
+  - Fix #132. [T. H. Wright]
+  - Fix #157. [T. H. Wright]
+  - Fix #161. [T. H. Wright]
+  - Create logos_reuse_downloads().
 * 3.7.4
-  - Fix #194.
+  - Fix #194. [T. H. Wright]
 * 3.7.3
-  - Fix #186.
-  - Add GUI logging at `~/.local/state/Logos_on_Linux/install.log`.
+  - Fix #186. [T. H. Wright]
+  - Add GUI logging at `~/.local/state/Logos_on_Linux/install.log`. [T. H. Wright]
 * 3.7.2
-  - Fix #178.
-  - Make AppImage default install.
-  - Add options to `-D|--debug`.
+  - Fix #178. [T. H. Wright]
+  - Make AppImage default install. [T. H. Wright]
+  - Add options to `-D|--debug`. [T. H. Wright]
 * 3.7.1
   - Add installer `-V|--verbose`. Fix #165. [T. H. Wright]
   - Add installer `-k|--make_skel` and `-b|--custom-binary-path`. Resolve TODOs. Fix #166. [T. H. Wright]

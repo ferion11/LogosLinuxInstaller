@@ -8,7 +8,7 @@ complete -F _logoslinuxinstaller_completions ./LogosLinuxInstaller.sh
 complete -F _logoslinuxinstaller_completions LogosLinuxInstaller
 
 _logos_completions() {
-	LOGOS_OPTIONS='-h --help -v --version -D --debbug -f --force-root -R --check-resources -e --edit-config -i --indexing -b --backup -r --restore -l --logs -d --dirlink -s --shortcut --remove-all-index --remove-library-catalog'
+	LOGOS_OPTIONS='-h --help -v --version -D --debbug -f --force-root -R --check-resources -e --edit-config -i --indexing -b --backup -r --restore -l --logs -d --dirlink -s --shortcut --remove-all-index --remove-library-catalog --install-bash-completion'
 	COMPREPLY=($(compgen -W "${LOGOS_OPTIONS}" -- "${COMP_WORDS[1]}"))
 }
 
