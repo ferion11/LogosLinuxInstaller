@@ -66,6 +66,18 @@ Options:
 EOF
 }
 
+die-if-running() {
+	PIDF=/tmp/LogosLinuxInstaller.pid
+
+	if [ -f "${PIDF}" ]; then
+		if logos_continue_question "The script is already running on PID $(cat "${PIDF}"). Should it be killed to allow this instance to run?" "The script is already running. Exiting." "1"; then
+			kill -9 "$(cat "${PIDF}")"
+		fi
+	fi
+	trap "rm -f -- '$PIDF'" EXIT
+	echo $$ > "${PIDF}"
+}
+
 die-if-root() {
 	if [ "$(id -u)" -eq '0' ] && [ -z "${LOGOS_FORCE_ROOT}" ]; then
 		logos_error "Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
@@ -213,6 +225,7 @@ logos_error() {
 	TELEGRAM_LINK="https://t.me/linux_logos"
 	MATRIX_LINK="https://matrix.to/#/#logosbible:matrix.org"
     ERROR_MESSAGE="${1}"
+	SECONDARY="${2}"
 	HELP_MESSAGE="If you need help, please consult:\n\n${WIKI_LINK}\n${TELEGRAM_LINK}\n${MATRIX_LINK}"
 	if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
 	    cli_msg "${ERROR_MESSAGE}\n\n${HELP_MESSAGE}";
@@ -222,7 +235,10 @@ logos_error() {
 	elif [[ "${DIALOG}" == "kdialog" ]]; then
 		:
 	fi
-	kill -SIGKILL "-$(($(ps -o pgid= -p "${$}")))"
+	if [ -z "${SECONDARY}" ]; then
+		rm /tmp/LogosLinuxInstaller.pid
+		kill -SIGKILL "-$(($(ps -o pgid= -p "${$}")))"
+	fi
 	exit 1;
 }
 cli_question() {
@@ -240,12 +256,13 @@ cli_question() {
 cli_continue_question() {
 	QUESTION_TEXT="${1}"
 	NO_TEXT="${2}"
-	if ! cli_question "${1}"; then logos_error "${2}"; fi
+	SECONDARY="${3}"
+	if ! cli_question "${QUESTION_TEXT}"; then logos_error "${NO_TEXT}" "${SECONDARY}"; fi
 }
 cli_acknowledge_question() {
 	QUESTION_TEXT=${1}
 	NO_TEXT="${2}"
-	if ! cli_question "${1}"; then logos_info "${2}"; fi
+	if ! cli_question "${QUESTION_TEXT}"; then logos_info "${NO_TEXT}"; fi
 }
 gtk_question() {
 	if zenity --question --width=300 --height=200 --text "$@" --title='Question:'
@@ -256,20 +273,22 @@ gtk_question() {
 gtk_continue_question() {
 	QUESTION_TEXT="${1}"
 	NO_TEXT="${2}"
-	if ! gtk_question "$1"; then logos_error "The installation was cancelled!"; fi
+	SECONDARY="${3}"
+	if ! gtk_question "${QUESTION_TEXT}"; then logos_error "The installation was cancelled!" "${SECONDARY}"; fi
 }
 gtk_acknowledge_question() {
 	QUESTION_TEXT="${1}"
 	NO_TEXT=${2}
-	if ! gtk_question "$1"; then logos_info "${2}"; fi
+	if ! gtk_question "${QUESTION_TEXT}"; then logos_info "${NO_TEXT}"; fi
 }
 logos_continue_question() {
 	QUESTION_TEXT="${1}"
 	NO_TEXT=${2}
+	SECONDARY="${3}"
 	if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
-		cli_continue_question "${QUESTION_TEXT}" "${NO_TEXT}"
+		cli_continue_question "${QUESTION_TEXT}" "${NO_TEXT}" "${SECONDARY}"
 	elif [[ "${DIALOG}" == "zenity" ]]; then
-		gtk_continue_question "${QUESTION_TEXT}" "${NO_TEXT}"
+		gtk_continue_question "${QUESTION_TEXT}" "${NO_TEXT}" "${SECONDARY}"
 	elif [[ "${DIALOG}" == "kdialog" ]]; then
 		:
 	fi
@@ -1267,6 +1286,7 @@ if [ -z "${DIALOG}" ]; then
 	fi
 fi
 
+die-if-running;
 die-if-root;
 
 # BEGIN OPTARGS
