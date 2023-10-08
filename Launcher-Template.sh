@@ -385,7 +385,7 @@ OPTIND=1 # Reset the index.
 while getopts "\$OPTSTRING" opt; do
 	case \$opt in
 		h)  usage && exit ;;
-		v)  echo "$TITLE, $VERSION by $AUTHOR.";
+		v)  echo "$TITLE, $VERSION by $AUTHOR. Logos Installer Version (may be updated since): $LOGOS_EXECUTABLE";
 			"${WINE_EXE}" "--version"
 			exit ;;
 		-)
