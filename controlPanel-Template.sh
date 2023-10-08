@@ -63,7 +63,7 @@ Options:
     --wine64            Run the script's wine64 binary.
     --wineserver        Run the script's wineserver binary.
     --winetricks        Run winetricks.
-    --setAppImage       Set the script's AppImage file. NOTE:
+    --selectAppImage       Set the script's AppImage file. NOTE:
                         Currently broken. Disabled until fixed.
 EEOF
 }
@@ -133,18 +133,18 @@ selectAppImage() {
 		APPIMAGE_DIR="\${APPIMAGE_DIR%?}"
 		#-------
 
-		if [ "\${APPIMAGE_DIR}" != "\${HERE}/data" ]; then
-			if zenity --question --width=300 --height=200 --text="Warning: The AppImage isn't at \"./data/ directory\"\!\nDo you want to copy the AppImage to the \"./data/\" directory keeping portability?" --  title='Warning!'; then
-					[ -f "\${HERE}/data/\${APPIMAGE_FILENAME}" ] && rm -rf "\${HERE}/data/\${APPIMAGE_FILENAME}"
-					cp "\${APPIMAGE_FULLPATH}" "\${HERE}/data/"
-					APPIMAGE_FULLPATH="\${HERE}/data/\${APPIMAGE_FILENAME}"
+		if [ "\${APPIMAGE_DIR}" != "\${HERE}/data/bin" ]; then
+			if zenity --question --width=300 --height=200 --text="Warning: The AppImage isn't at \"./data/bin/ directory\"\!\nDo you want to copy the AppImage to the \"./data/bin/\" directory keeping portability?" --  title='Warning!'; then
+					[ -f "\${HERE}/data/bin/\${APPIMAGE_FILENAME}" ] && rm -rf "\${HERE}/data/bin/\${APPIMAGE_FILENAME}"
+					cp "\${APPIMAGE_FULLPATH}" "\${HERE}/data/bin/"
+					APPIMAGE_FULLPATH="\${HERE}/data/bin/\${APPIMAGE_FILENAME}"
 			else
 				echo "Warning: Linking \${APPIMAGE_FULLPATH} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 					chmod +x "\${APPIMAGE_FULLPATH}"
 					ln -s "\${APPIMAGE_FULLPATH}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 					rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 					mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-					(DISPLAY="" "\${HERE}/controlPanel.sh" "\${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
+					#(DISPLAY="" "\${HERE}/controlPanel.sh" "\${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
 					echo "======= AppImage Selection run done with external link! ======="
 					exit 0
 			fi
@@ -152,10 +152,10 @@ selectAppImage() {
 
 		echo "Info: Linking ../\${APPIMAGE_FILENAME} to ./data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 		chmod +x "\${APPIMAGE_FULLPATH}"
-		ln -s "../\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
+		ln -s "../\${HERE}/data/bin/\${APPIMAGE_FILENAME}" "\${APPIMAGE_LINK_SELECTION_NAME}"
 		rm -rf "\${HERE}/data/bin/\${APPIMAGE_LINK_SELECTION_NAME}"
 		mv "\${APPIMAGE_LINK_SELECTION_NAME}" "\${HERE}/data/bin/"
-		(DISPLAY="" "\${HERE}/controlPanel.sh" "\${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
+		#(DISPLAY="" "\${HERE}/controlPanel.sh" "\${WINE_EXE}" wineboot) | zenity --progress --title="Wine Bottle update" --text="Updating Wine Bottle…" --pulsate --auto-close --no-cancel
 		echo "======= AppImage Selection run done! ======="
 		exit 0
 }
@@ -210,8 +210,9 @@ while getopts "\$OPTSTRING" opt; do
 					shift
 					runWinetricks;
 					exit 0 ;;
-				#selectAppImage)
-					#selectAppImage ;;
+				selectAppImage)
+					selectAppImage;
+     					exit 0;;
 				*)
 					if [ "\$OPTERR" = 1 ] && [ "\${OPTSTRING:0:1}" != ":" ]; then
 						echo "\$TITLE: --\${OPTARG}: undefined option." >&2 && usage >&2 && exit
@@ -248,4 +249,3 @@ debug && echo "Debug mode enabled."
 # restore IFS
 IFS=\${IFS_TMP}
 #-------------------------------------------------
-
