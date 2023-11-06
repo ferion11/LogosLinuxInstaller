@@ -630,9 +630,9 @@ check_libs() {
 
 checkDependencies() {
 	verbose && echo "Checking system for dependencies…"
-	if [ "TARGETVERSION" = "10" ]; then
+	if [ "${TARGETVERSION}" = "10" ]; then
 		check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl;
-	elif [ "TARGETVERSION" = "9" ]; then
+	elif [ "${TARGETVERSION}" = "9" ]; then
 		check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl xwd cabextract;
 	else logos_error "Unknown Logos version."
 	fi
@@ -688,7 +688,7 @@ chooseVersion() {
 	QUESTION_TEXT="Which version of ${FLPRODUCT} should the script install?"
 	if [ -z "$TARGETVERSION" ]; then
 		if [[ "${DIALOG}" == "whiptail" ]] || [[ "${DIALOG}" == "dialog" ]]; then
-			versionChoice="$($DIALOG --backtitle "${BACKTITLE}" --title "${TITLE}" --radiolist "${QUESTION_TEXT}" 0 0 0 "${FLPRODUCT} 10" "10" ON "${FLPRODUCT} 9" "9" OFF "Exit." "Exit." OFF 3>&1 1>&2 2>&3 3>&-)"
+			versionChoice="$(${DIALOG} --backtitle "${BACKTITLE}" --title "${TITLE}" --radiolist "${QUESTION_TEXT}" 0 0 0 "${FLPRODUCT} 10" "10" ON "${FLPRODUCT} 9" "9" OFF "Exit." "Exit." OFF 3>&1 1>&2 2>&3 3>&-)"
 		elif [[ "${DIALOG}" == "zenity" ]]; then
 			versionChoice="$(zenity --width="700" --height="310" --title="${TITLE}" --text="${QUESTION_TEXT}" --list --radiolist --column "S" --column "Description" TRUE "${FLPRODUCT} 10" FALSE "${FLPRODUCT} 9" FALSE "Exit")"
 		elif [[ "${DIALOG}" == "kdialog" ]]; then
@@ -699,6 +699,7 @@ chooseVersion() {
 	else
 		versionChoice="$TARGETVERSION"
 	fi
+	echo "versionChoice is $versionChoice."
 	case "${versionChoice}" in
 		*"10")
 			export TARGETVERSION="10";
@@ -785,7 +786,7 @@ checkPath() {
 createWineBinaryList() {
 	logos_info "Creating binary list."
 	#TODO: Make optarg to add custom path to this array.
-	WINEBIN_PATH_ARRAY=( "/usr/local/bin" "$HOME/bin" "$HOME/PlayOnLinux/wine/linux-amd64/*/bin" "$HOME/.steam/steam/steamapps/common/Proton - Experimental/files/bin" "${CUSTOMBINPATH}" )
+	WINEBIN_PATH_ARRAY=( "/usr/local/bin" "${HOME}/bin" "${HOME}/PlayOnLinux/wine/linux-amd64/*/bin" "${HOME}/.steam/steam/steamapps/common/Proton*/files/bin" "${CUSTOMBINPATH}" )
 
 	# Temporarily modify PATH for additional WINE64 binaries.
 	for p in "${WINEBIN_PATH_ARRAY[@]}"; do
