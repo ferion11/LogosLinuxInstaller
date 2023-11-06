@@ -826,7 +826,7 @@ checkExistingInstall() {
 	if [ -d "${INSTALLDIR}" ]; then
 		if find "${INSTALLDIR}" -name Logos.exe -o -name Verbum.exe | grep -qE "(Logos\/Logos.exe|Verbum\/Verbum.exe)"; then
 			EXISTING_LOGOS_INSTALL=1; export EXISTING_LOGOS_INSTALL;
-			lgoos_error "An install was found at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
+			logos_error "An install was found at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
 		else
 			EXISTING_LOGOS_DIRECTORY=1; export EXISTING_LOGOS_DIRECTORY;
 			logos_error "A directory exists at ${INSTALLDIR}. Please remove/rename it or use another location by setting the INSTALLDIR variable."
