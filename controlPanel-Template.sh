@@ -63,8 +63,8 @@ Options:
     --wine64            Run the script's wine64 binary.
     --wineserver        Run the script's wineserver binary.
     --winetricks        Run winetricks.
-    --selectAppImage       Set the script's AppImage file. NOTE:
-                        Currently broken. Disabled until fixed.
+    --selectAppImage    Set the script's AppImage file.
+
 EEOF
 }
 
