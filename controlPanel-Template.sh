@@ -6,6 +6,7 @@ AUTHOR="${LOGOS_SCRIPT_AUTHOR}"
 
 # BEGIN ENVIRONMENT
 HERE="\$(dirname "\$(readlink -f "\${0}")")"
+if [ -z "${LOGOS_LOG}" ]; then LOGOS_LOG="${HOME}/.local/state/Logos_on_Linux/controlpanel.log"; mkdir -p "${HOME}/.local/state/Logos_on_Linux"; touch "${LOGOS_LOG}"; export LOGOS_LOG; fi
 
 # Save IFS
 IFS_TMP=\${IFS}
@@ -65,10 +66,387 @@ Options:
     --winetricks              Run winetricks.
 	--reinstall-dependencies  Reinstall your distro's dependencies required
 	                          to run Logos.
-    --selectAppImage          Set the script's AppImage file.
+	--updateAppImage          Update to the latest stable Wine AppImage.
+    --selectAppImage          Set the script's Wine AppImage file.
 
 EEOF
 }
+
+verbose() { [[ \$VERBOSE = true ]] && return 0 || return 1; };
+
+debug() {
+	[[ \$DEBUG = true ]] && return 0 || return 1
+}
+
+setDebug() {
+	DEBUG="true";
+	VERBOSE="true";
+	WINEDEBUG="";
+	set -x;
+	echo "Debug mode enabled." >> "\${LOGOS_LOG}";
+}
+
+die() { echo >&2 "\$*"; exit 1; };
+
+die-if-running() {
+	\PIDF=/tmp/LogosLinuxInstaller.pid
+
+	if [ -f "\${PIDF}" ]; then
+		if logos_continue_question "The script is already running on PID $(cat "\${PIDF}"). Should it be killed to allow this instance to run?" "The script is already running. Exiting." "1"; then
+			kill -9 "$(cat "\${PIDF}")"
+		fi
+	fi
+	trap 'rm -f -- "\${PIDF}"' EXIT
+	echo \$$ > "\${PIDF}"
+}
+
+die-if-root() {
+	if [ "\$(id -u)" -eq '0' ] && [ -z "\${LOGOS_FORCE_ROOT}" ]; then
+		logos_error "Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
+	fi
+}
+
+have_dep() {
+	command -v "\$1" >/dev/null 2>&1
+}
+
+# Sources:
+# https://askubuntu.com/a/1021548/680649
+# https://unix.stackexchange.com/a/77138/123999
+getDialog() {
+	if [ -z "\${DISPLAY}" ]; then
+		logos_error "The Control Panel does not work unless you are running a display"
+		exit 1
+	fi
+
+	DIALOG=""
+	DIALOG_ESCAPE=""
+
+	if [[ -t 0 ]]; then
+		verbose && echo "Running in terminal."
+		while :; do
+			t whiptail && DIALOG=whiptail && break
+			t dialog && DIALOG=dialog && DIALOG_ESCAPE=-- && export DIALOG_ESCAPE && break
+			if test "\${XDG_CURRENT_DESKTOP}" != "KDE"; then
+				t zenity && DIALOG=zenity && GUI=true && break
+				#t kdialog && DIALOG=kdialog && GUI=true && break
+			elif test "${XDG_CURRENT_DESKTOP}" == "KDE"; then
+				#t kdialog && DIALOG=kdialog && GUI=true && break
+				t zenity && DIALOG=zenity && GUI=true && break
+			else
+				echo "No dialog program found. Please install either dialog, whiptail, zenity, or kdialog";
+			fi
+		done;
+	else
+		verbose && echo "Running by double click." >> "${LOGOS_LOG}"
+		while :; do
+			if test "\${XDG_CURRENT_DESKTOP}" != "KDE"; then
+				t zenity && DIALOG=zenity && GUI=true && break
+				#t kdialog && DIALOG=kdialog && GUI=true && break
+			elif test "\${XDG_CURRENT_DESKTOP}" == "KDE"; then
+				#t kdialog && DIALOG=kdialog && GUI=true && break
+				t zenity && DIALOG=zenity && GUI=true && break
+			else
+				no-diag-msg "No dialog program found. Please install either zenity or kdialog."
+			fi
+		done;
+	fi; export DIALOG; export GUI;
+}
+## BEGIN DIALOG FUNCTIONS
+no-diag-msg() {
+	echo "\${1}" >> "\${LOGOS_LOG}";
+	xterm -hold -e printf "%s\n" "\${1}";
+	die;
+}
+cli_msg() {
+	printf "%s\n" "\${1}"
+}
+gtk_info() {
+	zenity --info --width=300 --height=200 --text="\$*" --title='Information'
+}
+gtk_progress() {
+	zenity --progress --title="\${1}" --text="\${2}" --pulsate --auto-close --no-cancel
+}
+gtk_warn() {
+	zenity --warning --width=300 --height=200 --text="\$*" --title='Warning!'
+}
+gtk_error() {
+	zenity --error --width=300 --height=200 --text="\$*" --title='Error!'
+}
+logos_info() {
+	INFO_MESSAGE="\${1}"
+	if [[ "\${DIALOG}" == "whiptail" ]] || [[ "\${DIALOG}" == "dialog" ]]; then
+		cli_msg "\${INFO_MESSAGE}"
+	elif [[ "\${DIALOG}" == "zenity" ]]; then
+		gtk_info "\${INFO_MESSAGE}";
+		echo "\$(date) \${INFO_MESSAGE}" >> "\${LOGOS_LOG}";
+	elif [[ "\${DIALOG}" == "kdialog" ]]; then
+		:
+	fi
+}
+logos_progress() {
+	PROGRESS_TITLE="\${1}"
+	PROGRESS_TEXT="\${2}"
+	if [[ "\${DIALOG}" == "whiptail" ]] || [[ "\${DIALOG}" == "dialog" ]]; then
+		cli_msg "\${PROGRESS_TEXT}"
+	elif [[ "\${DIALOG}" == "zenity" ]]; then
+		gtk_progress "\${PROGRESS_TITLE}" "\${PROGRESS_TEXT}"
+	elif [[ "\${DIALOG}" == "kdialog" ]]; then
+		:
+	fi
+}
+logos_warn() {
+    WARN_MESSAGE="\${1}"
+	if [[ "\${DIALOG}" == "whiptail" ]] || [[ "\${DIALOG}" == "dialog" ]]; then
+	    cli_msg "\${WARN_MESSAGE}"
+	elif [[ "\${DIALOG}" == "zenity" ]]; then
+		gtk_warn "\${WARN_MESSAGE}"
+		echo "\$(date) \${WARN_MESSAGE}" >> "\${LOGOS_LOG}";
+	elif [[ "\${DIALOG}" == "kdialog" ]]; then
+		:
+	fi
+}
+logos_error() {
+	WIKI_LINK="https://github.com/ferion11/LogosLinuxInstaller/wiki"
+	TELEGRAM_LINK="https://t.me/linux_logos"
+	MATRIX_LINK="https://matrix.to/#/#logosbible:matrix.org"
+    ERROR_MESSAGE="\${1}"
+	SECONDARY="\${2}"
+	HELP_MESSAGE="If you need help, please consult:\n\n\${WIKI_LINK}\n\${TELEGRAM_LINK}\n\${MATRIX_LINK}"
+	if [[ "\${DIALOG}" == "whiptail" ]] || [[ "\${DIALOG}" == "dialog" ]]; then
+	    cli_msg "\${ERROR_MESSAGE}\n\n\${HELP_MESSAGE}";
+	elif [[ "\${DIALOG}" == "zenity" ]]; then
+		gtk_error "\${ERROR_MESSAGE}\n\n\${HELP_MESSAGE}";
+		echo "\$(date) \${ERROR_MESSAGE}" >> "\${LOGOS_LOG}";
+	elif [[ "\${DIALOG}" == "kdialog" ]]; then
+		:
+	fi
+	if [ -z "\${SECONDARY}" ]; then
+		rm /tmp/LogosLinuxInstaller.pid
+		kill -SIGKILL "-\$((\$(ps -o pgid= -p "\${\$}")))"
+	fi
+	exit 1;
+}
+cli_question() {
+	QUESTION_TEXT=\${1}
+	while true; do
+		read -rp "\${QUESTION_TEXT} [Y/n]: " yn
+
+		case \$yn in
+			[yY]* ) return 0; break;;
+			[nN]* ) return 1; break;;
+			* ) echo "Type Y[es] or N[o].";; 
+		esac
+	done
+}
+cli_continue_question() {
+	QUESTION_TEXT="\${1}"
+	NO_TEXT="\${2}"
+	SECONDARY="\${3}"
+	if ! cli_question "\${QUESTION_TEXT}"; then logos_error "\${NO_TEXT}" "\${SECONDARY}"; fi
+}
+cli_acknowledge_question() {
+	QUESTION_TEXT=\${1}
+	NO_TEXT="\${2}"
+	if ! cli_question "\${QUESTION_TEXT}"; then logos_info "\${NO_TEXT}"; fi
+}
+gtk_question() {
+	if zenity --question --width=300 --height=200 --text "\$@" --title='Question:'
+	then return 0
+	else return 1
+	fi
+}
+gtk_continue_question() {
+	QUESTION_TEXT="\${1}"
+	NO_TEXT="\${2}"
+	SECONDARY="\${3}"
+	if ! gtk_question "\${QUESTION_TEXT}"; then logos_error "The installation was cancelled!" "\${SECONDARY}"; fi
+}
+gtk_acknowledge_question() {
+	QUESTION_TEXT="\${1}"
+	NO_TEXT=\${2}
+	if ! gtk_question "\${QUESTION_TEXT}"; then logos_info "\${NO_TEXT}"; fi
+}
+logos_continue_question() {
+	QUESTION_TEXT="\${1}"
+	NO_TEXT=\${2}
+	SECONDARY="\${3}"
+	if [[ "\${DIALOG}" == "whiptail" ]] || [[ "\${DIALOG}" == "dialog" ]]; then
+		cli_continue_question "\${QUESTION_TEXT}" "\${NO_TEXT}" "\${SECONDARY}"
+	elif [[ "\${DIALOG}" == "zenity" ]]; then
+		gtk_continue_question "\${QUESTION_TEXT}" "\${NO_TEXT}" "\${SECONDARY}"
+	elif [[ "\${DIALOG}" == "kdialog" ]]; then
+		:
+	fi
+}
+logos_acknowledge_question() {
+	QUESTION_TEXT="\${1}"
+	NO_TEXT="\${2}"
+	if [[ "\${DIALOG}" == "whiptail" ]] || [[ "\${DIALOG}" == "dialog" ]]; then
+		cli_acknowledge_question "\${QUESTION_TEXT}" "\${NO_TEXT}"
+	elif [[ "\${DIALOG}" == "zenity" ]]; then
+		gtk_acknowledge_question "\${QUESTION_TEXT}" "\${NO_TEXT}"
+	elif [[ "\${DIALOG}" == "kdialog" ]]; then
+		:
+	fi
+}
+cli_download() {
+	# NOTE: here must be a limitation to handle it easily. \$2 can be dir if it already exists or if it ends with '/'
+	URI="\${1}"
+	DESTINATION="\${2}"
+	# extract last field of URI as filename:
+	FILENAME="\${URI##*/}"
+
+	if [ "\${DESTINATION}" != "\${DESTINATION%/}" ]; then
+		# it has '/' at the end or it is existing directory
+		TARGET="\${DESTINATION}/\${1##*/}"
+		[ -d "\${DESTINATION}" ] || mkdir -p "\${DESTINATION}" || logos_error "Cannot create \${DESTINATION}"
+	elif [ -d "\${DESTINATION}" ]; then
+		# it's existing directory
+		TARGET="\${DESTINATION}/\${1##*/}"
+	else
+		TARGET="\${DESTINATION}"
+		# ensure that the directory where the target file will be exists
+		[ -d "\${DESTINATION%/*}" ] || mkdir -p "\${DESTINATION%/*}" || logos_error "Cannot create directory \${DESTINATION%/*}"
+	fi
+	wget -c "\${URI}" -O "\${TARGET}"
+}
+# shellcheck disable=SC2028
+gtk_download() {
+	# NOTE: here must be a limitation to handle it easily. \$2 can be dir if it already exists or if it ends with '/'
+	URI="\${1}"
+	DESTINATION="\${2}"
+	# extract last field of URI as filename:
+	FILENAME="\${URI##*/}"
+
+	if [ "\${DESTINATION}" != "\${DESTINATION%/}" ]; then
+		# it has '/' at the end or it is existing directory
+		TARGET="\${DESTINATION}/\${1##*/}"
+		[ -d "\${DESTINATION}" ] || mkdir -p "\${DESTINATION}" || logos_error "Cannot create \${DESTINATION}"
+	elif [ -d "\${DESTINATION}" ]; then
+		# it's existing directory
+		TARGET="\${DESTINATION}/\${1##*/}"
+	else
+		TARGET="\${DESTINATION}"
+		# ensure that the directory where the target file will be exists
+		[ -d "\${DESTINATION%/*}" ] || mkdir -p "\${DESTINATION%/*}" || logos_error "Cannot create directory \${DESTINATION%/*}"
+	fi
+
+	pipe_progress="\$(mktemp)"
+	rm -rf "\${pipe_progress}"
+	mkfifo "\${pipe_progress}"
+
+	pipe_wget="\$(mktemp)"
+	rm -rf "\${pipe_wget}"
+	mkfifo "\${pipe_wget}"
+
+	# zenity GUI feedback
+	# NOTE: Abstracting this progress dialog to a function breaks download capabilities due to the pipe.
+	zenity --progress --title "Downloading \${FILENAME}..." --text="Downloading: \${FILENAME}\ninto: \${DESTINATION}\n" --percentage=0 --auto-close < "\${pipe_progress}" &
+	ZENITY_PID="\${!}"
+
+	# download the file with wget:
+	wget -c "\${URI}" -O "\${TARGET}" > "\${pipe_wget}" 2>&1 &
+	WGET_PID="\${!}"
+
+	# process the dialog progress bar
+	total_size="Starting…"
+	percent="0"
+	current="Starting…"
+	speed="Starting…"
+	remain="Starting…"
+	while read -r data; do
+		if echo "\${data}" | grep -q '^Length:' ; then
+			result="\$(echo "\${data}" | grep "^Length:" | sed 's/.*\((.*)\).*/\1/' |  tr -d '()')"
+			if [ \${#result} -le 10 ]; then total_size=\${result} ; fi
+		fi
+
+		if echo "\${data}" | grep -q '[0-9]*%' ;then
+			result="\$(echo "\${data}" | grep -o "[0-9]*%" | tr -d '%')"
+			if [ \${#result} -le 3 ]; then percent=\${result} ; fi
+
+			result="\$(echo "\${data}" | grep "[0-9]*%" | sed 's/\([0-9BKMG]\+\).*/\1/' )"
+			if [ \${#result} -le 10 ]; then current=\${result} ; fi
+
+			result="\$(echo "\${data}" | grep "[0-9]*%" | sed 's/.*\(% [0-9BKMG.]\+\).*/\1/' | tr -d ' %')"
+			if [ \${#result} -le 10 ]; then speed=\${result} ; fi
+
+			result="\$(echo "\${data}" | grep -o "[0-9A-Za-z]*\$" )"
+			if [ \${#result} -le 10 ]; then remain=\${result} ; fi
+		fi
+
+		if [ -z "\$(pgrep -P "\${\$}" zenity)" ]; then
+			WGET_PID_CURRENT="\$(pgrep -P "\${\$}" wget)"
+			[ -n "\${WGET_PID_CURRENT}" ] && kill -SIGKILL "\${WGET_PID_CURRENT}"
+		fi
+
+		[ "\${percent}" == "100" ] && break
+		
+		# Update zenity's progress bar
+		echo "\${percent}"
+		echo "#Downloading: \${FILENAME}\ninto: \${DESTINATION}\n\n\${current} of \${total_size} \(\${percent}%\)\nSpeed : \${speed}/Sec\nEstimated time : \${remain}"
+	done < "\${pipe_wget}" > "\${pipe_progress}"
+
+	wait "\${WGET_PID}"
+	WGET_RETURN="\${?}"
+
+	wait "\${ZENITY_PID}"
+	ZENITY_RETURN="\${?}"
+
+	fuser -TERM -k -w "\${pipe_progress}"
+	rm -rf "\${pipe_progress}"
+
+	fuser -TERM -k -w "\${pipe_wget}"
+	rm -rf "\${pipe_wget}"
+
+	# NOTE: sometimes the process finishes before the wait command, giving the error code 127
+	if [ "\${ZENITY_RETURN}" == "0" ] || [ "\${ZENITY_RETURN}" == "127" ] ; then
+		if [ "\${WGET_RETURN}" != "0" ] && [ "\${WGET_RETURN}" != "127" ] ; then
+			logos_error "ERROR: The installation was cancelled because of an error while attempting a download.\n\nAttmpted Downloading: \${URI}\n\nTarget Destination: \${DESTINATION}\n\n File Name: \${FILENAME}\n\n  - Error Code: WGET_RETURN: \${WGET_RETURN}"
+		fi
+	else
+		logos_error "The installation was cancelled!\n * ZENITY_RETURN: \${ZENITY_RETURN}"
+	fi
+	verbose && echo "\${FILENAME} download finished!"
+}
+logos_download() {
+	URI="\${1}"
+	DESTINATION="\${2}"
+	if [[ "\${DIALOG}" == "whiptail" ]] || [[ "\${DIALOG}" == "dialog" ]]; then
+		cli_download "\${URI}" "\${DESTINATION}"
+	elif [[ "\${DIALOG}" == "zenity" ]]; then
+		gtk_download "\${URI}" "\${DESTINATION}"
+	elif [[ "\${DIALOG}" == "kdialog" ]]; then
+		no-diag-msg "kdialog not implemented."
+	else
+		no-diag-msg "No dialog tool found."
+	fi
+}
+logos_reuse_download() {
+	SOURCEURL="\${1}"
+	FILE="\${2}"
+	TARGETDIR="\${3}"
+	DIRS=(
+		"\${INSTALLDIR}"
+		"\${PRESENT_WORKING_DIRECTORY}"
+		"\${MYDOWNLOADS}"
+	)
+	FOUND=1
+	for i in "\${DIRS[@]}"; do
+		if [ -f "\${i}/\${FILE}" ]; then
+			logos_info "\${FILE} exists in \${i}. Using it…"
+			cp "\${i}/\${FILE}" "\${TARGETDIR}/" | logos_progress "Copying…" "Copying \${FILE}\ninto \${TARGETDIR}"
+			FOUND=0
+			break
+		fi
+	done
+	if [[ "\${FOUND}" == 1 ]]; then
+    	logos_info "\${FILE} does not exist. Downloading…"
+    	logos_download "\${SOURCEURL}" "\${MYDOWNLOADS}/\${FILE}"
+    	cp "\${MYDOWNLOADS}/\${FILE}" "\${TARGETDIR}/" | logos_progress "Copying…" "Copying: \${FILE}\ninto: \${TARGETDIR}"
+	fi
+}
+## END DIALOG FUNCTIONS
 ## BEGIN CHECK DEPENDENCIES FUNCTIONS
 getOS() {
     if [ -f /etc/os-release ]; then
@@ -213,23 +591,6 @@ checkDependencies() {
 	verbose && echo "All dependencies found."
 }
 
-cli_download() {
-	URI="\${1}"
-	DESTINATION="\${2}"
-	FILENAME="\${URI##*/}"
-
-	if [ "\${DESTINATION}" != "\${DESTINATION%/}" ]; then
-		TARGET="\${DESTINATION}/\${1##*/}"
-		[ -d "\${DESTINATION}" ] || mkdir -p "\${DESTINATION}" || echo "Cannot create \${DESTINATION}" && exit 1
-	elif [ -d "\${DESTINATION}" ]; then
-		TARGET="\${DESTINATION}/${1##*/}"
-	else
-		TARGET="\${DESTINATION}"
-		[ -d "\${DESTINATION%/*}" ] || mkdir -p "\${DESTINATION%/*}" || echo "Cannot create directory \${DESTINATION%/*}" && exit 1
-	fi
-	echo "\${URI}"
-	wget --inet4-only -c "\${URI}" -O "\${TARGET}"
-}
 setWinetricks() {
 	if [ -f "\${APPDIR_BINDIR}/winetricks" ]; then
 		WINETRICKSBIN="\${APPDIR_BINDIR}/winetricks"
@@ -252,6 +613,7 @@ setWinetricks() {
 	fi
 	export WINETRICKSBIN
 }
+
 runWinetricks() {
 	if [ ! -z "\${WINETRICKSBIN}" ] && [ -f "\${WINETRICKSBIN}" ]; then
 		:
@@ -260,6 +622,10 @@ runWinetricks() {
 	fi
     "\${WINETRICKSBIN}" "$@"
     "\${WINESERVER_EXE}" -w
+}
+
+updateAppImage() {
+
 }
 
 selectAppImage() {
@@ -305,6 +671,26 @@ selectAppImage() {
 		exit 0
 }
 # END FUNCTION DECLARATIONS
+# BEGIN SCRIPT EXECUTION
+if [ -z "\${DIALOG}" ]; then
+	getDialog;
+	if test "\${GUI}" == "true"; then
+		echo "Running in a GUI. Enabling logging." >> "\${LOGOS_LOG}"
+		setDebug;
+	fi
+fi
+
+die-if-running;
+die-if-root;
+
+main() {
+	{ echo "$LOGOS_SCRIPT_TITLE, $LOGOS_SCRIPT_VERSION by $LOGOS_SCRIPT_AUTHOR.";
+	# BEGIN PREPARATION
+	verbose && date; getOS;
+	verbose && date; getPackageManager;
+	} | tee -a "\$LOGOS_LOG"
+}
+
 # BEGIN OPTARGS
 RESET_OPTARGS=true
 for arg in "\$@"
@@ -360,6 +746,9 @@ while getopts "\$OPTSTRING" opt; do
 					getPackageManager;
 					checkDependencies;
 					exit 0 ;;
+				updateAppImage)
+					updateAppImage;
+     					exit 0;;
 				selectAppImage)
 					selectAppImage;
      					exit 0;;
@@ -378,16 +767,7 @@ fi
 shift \$((OPTIND-1))
 # END OPTARGS
 
-# BEGIN DIE IF ROOT
-if [ "\$(id -u)" -eq '0' ] && [ -z "\${LOGOS_FORCE_ROOT}" ]; then
-	echo "* Running Wine/winetricks as root is highly discouraged. Use -f|--force-root if you must run as root. See  https://wiki.winehq.org/FAQ#Should_I_run_Wine_as_root.3F"
-	exit 1;
-fi
-# END DIE IF ROOT
-
-debug() {
-	[[ \$DEBUG = true ]] && return 0 || return 1
-}
+main;
 
 debug && echo "Debug mode enabled."
 

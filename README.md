@@ -80,7 +80,8 @@ Options:
     --winetricks              Run winetricks.
 	--reinstall-dependencies  Reinstall your distro's dependencies required
 	                          to run Logos.
-    --selectAppImage          Set the script's AppImage file.
+	--updateAppImage          Update to the latest stable Wine AppImage.
+    --selectAppImage          Set the script's Wine AppImage file.
 ```
 
 # Installation [WIP]
