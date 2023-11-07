@@ -11,11 +11,11 @@ export LOGOS_SCRIPT_VERSION="3.7.5" # Script version for this Installer Script
 #####
 
 # BEGIN ENVIRONMENT
-if [ -z "${WINE64_APPIMAGE_FULL_VERSION}" ]; then WINE64_APPIMAGE_FULL_VERSION="v7.18-staging"; export WINE64_APPIMAGE_FULL_VERSION; fi
+if [ -z "${WINE64_APPIMAGE_FULL_VERSION}" ]; then WINE64_APPIMAGE_FULL_VERSION="v8.19-devel"; export WINE64_APPIMAGE_FULL_VERSION; fi
 if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then WINE64_APPIMAGE_FULL_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/wine-devel-8.19/wine-devel_8.19-x86_64.AppImage"; export WINE64_APPIMAGE_FULL_URL; fi
 if [ -z "${WINE64_APPIMAGE_FULL_FILENAME}" ]; then WINE64_APPIMAGE_FULL_FILENAME="$(basename "${WINE64_APPIMAGE_FULL_URL}")"; export WINE64_APPIMAGE_FULL_FILENAME; fi
-if [ -z "${WINE64_APPIMAGE_VERSION}" ]; then WINE64_APPIMAGE_VERSION="v7.18-staging"; export WINE64_APPIMAGE_VERSION; fi
-if [ -z "${WINE64_APPIMAGE_URL}" ]; then WINE64_APPIMAGE_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/v10.0-1/wine-staging_7.18-x86_64.AppImage"; export WINE64_APPIMAGE_URL; fi
+if [ -z "${WINE64_APPIMAGE_VERSION}" ]; then WINE64_APPIMAGE_VERSION="v8.19-devel"; export WINE64_APPIMAGE_VERSION; fi
+if [ -z "${WINE64_APPIMAGE_URL}" ]; then WINE64_APPIMAGE_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/wine-devel-8.19/wine-devel_8.19-x86_64.AppImage"; export WINE64_APPIMAGE_URL; fi
 if [ -z "${WINE64_BOTTLE_TARGZ_URL}" ]; then WINE64_BOTTLE_TARGZ_URL="https://github.com/ferion11/wine64_bottle_dotnet/releases/download/v5.11b/wine64_bottle.tar.gz"; export WINE64_BOTTLE_TARGZ_URL; fi
 if [ -z "${WINE64_BOTTLE_TARGZ_NAME}" ]; then WINE64_BOTTLE_TARGZ_NAME="wine64_bottle.tar.gz"; export WINE64_BOTTLE_TARGZ_NAME; fi
 if [ -z "${WINE64_APPIMAGE_FILENAME}" ]; then WINE64_APPIMAGE_FILENAME="$(basename "${WINE64_APPIMAGE_URL}" .AppImage)"; export WINE64_APPIMAGE_FILENAME; fi
@@ -25,6 +25,7 @@ if [ -z "${LAUNCHER_TEMPLATE_URL}" ]; then LAUNCHER_TEMPLATE_URL="https://raw.gi
 if [ -z "${CONTROL_PANEL_TEMPLATE_URL}" ]; then CONTROL_PANEL_TEMPLATE_URL="https://raw.githubusercontent.com/ferion11/LogosLinuxInstaller/master/controlPanel-Template.sh"; export CONTROL_PANEL_TEMPLATE_URL; fi
 if [ -z "${WINETRICKS_DOWNLOADER+x}" ]; then WINETRICKS_DOWNLOADER="wget" ; export WINETRICKS_DOWNLOADER; fi
 if [ -z "${WINETRICKS_UNATTENDED+x}" ]; then WINETRICKS_UNATTENDED="" ; export WINETRICKS_UNATTENDED; fi
+if [ -z "${MYDOWNLOADS}" ]; then MYDOWNLOADS="${HOME}/Downloads"; export MYDOWNLOADS; fi
 if [ -z "${WORKDIR}" ]; then WORKDIR="$(mktemp -d /tmp/LBS.XXXXXXXX)"; export WORKDIR ; fi
 if [ -z "${PRESENT_WORKING_DIRECTORY}" ]; then PRESENT_WORKING_DIRECTORY="${PWD}" ; export PRESENT_WORKING_DIRECTORY; fi
 if [ -z "${LOGOS_FORCE_ROOT+x}" ]; then export LOGOS_FORCE_ROOT="" ; fi
@@ -440,11 +441,10 @@ logos_reuse_download() {
 	SOURCEURL="${1}"
 	FILE="${2}"
 	TARGETDIR="${3}"
-	DOWNLOADS="${HOME}/Downloads"
 	DIRS=(
 		"${INSTALLDIR}"
 		"${PRESENT_WORKING_DIRECTORY}"
-		"${DOWNLOADS}"
+		"${MYDOWNLOADS}"
 	)
 	FOUND=1
 	for i in "${DIRS[@]}"; do
@@ -457,8 +457,8 @@ logos_reuse_download() {
 	done
 	if [[ "${FOUND}" == 1 ]]; then
     	logos_info "${FILE} does not exist. Downloading…"
-    	logos_download "${SOURCEURL}" "${DOWNLOADS}/${FILE}"
-    	cp "${DOWNLOADS}/${FILE}" "${TARGETDIR}/" | logos_progress "Copying…" "Copying: ${FILE}\ninto: ${TARGETDIR}"
+    	logos_download "${SOURCEURL}" "${MYDOWNLOADS}/${FILE}"
+    	cp "${MYDOWNLOADS}/${FILE}" "${TARGETDIR}/" | logos_progress "Copying…" "Copying: ${FILE}\ninto: ${TARGETDIR}"
 	fi
 }
 ## END DIALOG FUNCTIONS
@@ -516,6 +516,8 @@ make_skel() {
 getOS() {
     if [ -f /etc/os-release ]; then
         # freedesktop.org and systemd
+		# The following line is needed for SC1091:
+		# shellcheck source=/dev/null
         source /etc/os-release
         OS="${ID}"
         OS_RELEASE="${VERSION_ID}"
@@ -525,11 +527,15 @@ getOS() {
         OS_RELEASE="$(lsb_release -sr)"
     elif [ -f /etc/lsb-release ]; then
         # For some versions of Debian/Ubuntu without lsb_release command
+		# The following line is needed for SC1091:
+		# shellcheck source=/dev/null
         source /etc/lsb-release
         OS="${DISTRIB_ID}"
+		# shellcheck disable=SC2034
         OS_RELEASE="${DISTRIB_RELEASE}"
     elif [ -f /etc/debian_version ]; then
         OS=Debian
+		# shellcheck disable=SC2034
         OS_RELEASE="$(cat /etc/debian_version)"
     elif [ -f /etc/SuSe-release ]; then
         :
@@ -537,6 +543,7 @@ getOS() {
         :
     else
         OS="$(uname -s)"
+		# shellcheck disable=SC2034
         OS_RELEASE="$(uname -r)"
     fi
 }
@@ -604,7 +611,7 @@ check_commands() {
 	if [ "${#MISSING_CMD[@]}" -ne 0 ]; then
 		if [ -n "${PACKAGE_MANGER}" ]; then
 			logos_continue_question "Your ${OS} install is missing the command(s): ${MISSING_CMD[*]}. To continue, the script will attempt to install the package(s): ${PACKAGES} by using (${PACKAGE_MANAGER}). Proceed?" "Your system is missing the command(s) ${MISSING_CMD[*]}. Please install your distro's package(s) associated with ${MISSING_CMD[*]} for ${OS}.\n ${EXTRA_INFO}"
-			installPackages ${PACKAGES}
+			installPackages "${PACKAGES}"
 		else
 			logos_error "The script could not determine your ${OS} install's package manager or it is unsupported. Your computer is missing the command(s) ${MISSING_CMD[*]}. Please install your distro's package(s) associated with ${MISSING_CMD[*]} for ${OS}.\n${EXTRA_INFO}"
 		fi
@@ -620,7 +627,7 @@ check_libs() {
 		else
 			if [ -n "${PACKAGE_MANGER}" ]; then
 				logos_continue_question "Your ${OS} install is missing the library: ${lib}. To continue, the script will attempt to install the library by using ${PACKAGE_MANAGER}. Proceed?" "Your system does not have lib: ${lib}. Please install the package associated with ${lib} for ${OS}.\n ${EXTRA_INFO}"
-				installPackages ${LIBRARYPACKAGES}
+				installPackages "${LIBRARYPACKAGES}"
 			else
 				logos_error "The script could not determine your ${OS} install's package manager or it is unsupported. Your computer is missing the library: ${lib}. Please install the package associated with ${lib} for ${OS}.\n ${EXTRA_INFO}"
 			fi
@@ -783,6 +790,18 @@ checkPath() {
 
 }
 
+checkAppImages() {
+	DIR="${1}"
+	readarray -t APPIMAGESARR < <(find "${DIR}" -iname "wine*x86_64*AppImage")
+	for appimage in "${APPIMAGESARR[@]}"; do
+		if [ -x "${appimage}" ]; then
+			echo "${appimage}" >> "${WORKDIR}/winebinaries"
+		else
+			: # Not executable"
+		fi
+	done
+}
+
 createWineBinaryList() {
 	logos_info "Creating binary list."
 	#TODO: Make optarg to add custom path to this array.
@@ -797,6 +816,13 @@ createWineBinaryList() {
 
 	# Check each directory in PATH for wine64; add to list
 	checkPath wine64 > "${WORKDIR}/winebinaries"
+	
+	APPIMAGEDIR="$(grep "destination" "${HOME}/.config/appimagelauncher.cfg" | awk -F'=' '{print $2}' | sed "s/^\s//")"
+	APPIMAGEDIR="${APPIMAGEDIR/#\~/$HOME}"
+	export APPIMAGEDIR
+	
+	checkAppImages "${APPIMAGEDIR}"
+	checkAppImages "${MYDOWNLOADS}"
 
 	cp "${WORKDIR}/winebinaries" "${WORKDIR}/winebinaries.bak"
 
@@ -847,17 +873,25 @@ chooseInstallMethod() {
 				WINEOPT="$line"
 			fi
 	
-			if [[ "$WINEOPT" == *"/usr/bin/"* ]]; then
+			if [[ "${WINEOPT}" == *"/usr/bin/"* ]]; then
 				WINEOPT_CODE="System"
 				WINEOPT_DESCRIPTION="\"Use the system binary (i.e., /usr/bin/wine64). WINE must be 7.18-staging or later. Stable or Devel do not work.\""
 				WINEOPT_PATH="${line}"
-			elif [[ "$WINEOPT" == *"Proton"* ]]; then
+			elif [[ "${WINEOPT}" == *"Proton"* ]]; then
 				WINEOPT_CODE="Proton"
 				WINEOPT_DESCRIPTION="\"Install using the Steam Proton fork of WINE.\""
 				WINEOPT_PATH="${line}"
-			elif [[ "$WINEOPT" == *"PlayOnLinux"* ]]; then
+			elif [[ "${WINEOPT}" == *"PlayOnLinux"* ]]; then
 				WINEOPT_CODE="PlayOnLinux"
 				WINEOPT_DESCRIPTION="\"Install using a PlayOnLinux WINE64 binary.\""
+				WINEOPT_PATH="${line}"
+			elif [[ "${WINEOPT}" == *"Downloads"* ]]; then
+				WINEOPT_CODE="AppImage"
+				WINEOPT_DESCRIPTION="\"Install using a non-default AppImage.\""
+				WINEOPT_PATH="${line}"
+			elif [[ "${WINEOPT}" == *"${APPIMAGEDIR}"* ]]; then
+				WINEOPT_CODE="AppImage"
+				WINEOPT_DESCRIPTION="\"Install using an integrated non-default AppImage.\""
 				WINEOPT_PATH="${line}"
 			else
 				WINEOPT_CODE="Custom"
