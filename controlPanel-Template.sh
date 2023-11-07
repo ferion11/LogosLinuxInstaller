@@ -55,17 +55,162 @@ Usage: ./\$TITLE
 Interact with ${FLPRODUCT} Bible Software in Wine on Linux.
 
 Options:
-    -h   --help         Prints this help message and exit.
-    -v   --version      Prints version information and exit.
-    -D   --debug        Makes Wine print out additional info.
-    -f   --force-root   Sets LOGOS_FORCE_ROOT to true, which permits
-                        the root user to run the script.
-    --wine64            Run the script's wine64 binary.
-    --wineserver        Run the script's wineserver binary.
-    --winetricks        Run winetricks.
-    --selectAppImage    Set the script's AppImage file.
+    -h   --help               Prints this help message and exit.
+    -v   --version            Prints version information and exit.
+    -D   --debug              Makes Wine print out additional info.
+    -f   --force-root         Sets LOGOS_FORCE_ROOT to true, which permits
+                              the root user to run the script.
+    --wine64                  Run the script's wine64 binary.
+    --wineserver              Run the script's wineserver binary.
+    --winetricks              Run winetricks.
+	--reinstall-dependencies  Reinstall your distro's dependencies required
+	                          to run Logos.
+    --selectAppImage          Set the script's AppImage file.
 
 EEOF
+}
+## BEGIN CHECK DEPENDENCIES FUNCTIONS
+getOS() {
+    if [ -f /etc/os-release ]; then
+        # freedesktop.org and systemd
+		# The following line is needed for SC1091:
+		# shellcheck source=/dev/null
+        source /etc/os-release
+        OS="\${ID}"
+        OS_RELEASE="\${VERSION_ID}"
+    elif type lsb_release >/dev/null 2>&1; then
+        # linuxbase.org
+        OS="\$(lsb_release -si)"
+        OS_RELEASE="\$(lsb_release -sr)"
+    elif [ -f /etc/lsb-release ]; then
+        # For some versions of Debian/Ubuntu without lsb_release command
+		# The following line is needed for SC1091:
+		# shellcheck source=/dev/null
+        source /etc/lsb-release
+        OS="\${DISTRIB_ID}"
+		# shellcheck disable=SC2034
+        OS_RELEASE="\${DISTRIB_RELEASE}"
+    elif [ -f /etc/debian_version ]; then
+        OS=Debian
+		# shellcheck disable=SC2034
+        OS_RELEASE="\$(cat /etc/debian_version)"
+    elif [ -f /etc/SuSe-release ]; then
+        :
+    elif [ -f /etc/redhat-release ]; then
+        :
+    else
+        OS="\$(uname -s)"
+		# shellcheck disable=SC2034
+        OS_RELEASE="\$(uname -r)"
+    fi
+}
+
+getPackageManager() {
+	if [ -x "\$(command -v sudo)" ]; then
+		SUPERUSERDO="sudo"
+	elif [ -x "\$(command -v doas)" ]; then
+		SUPERUSERDO="doas"
+	else
+		:	
+	fi
+
+	if [ -x "\$(command -v apt)" ]; then
+		PACKAGE_MANAGER="apt install -y"
+		PACKAGES="mktemp patch lsof wget find sed grep gawk tr winbind cabextract x11-apps bc libxml2-utils curl fuse3"
+	elif [ -x "\$(command -v dnf)" ]; then
+		PACKAGE_MANAGER="dnf install -y"
+		PACKAGES="patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl"
+	elif [ -x "\$(command -v yum)" ]; then
+		PACKAGE_MANAGER="yum install -y"
+		PACKAGES="patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl"
+	elif [ -x "\$(command -v pamac)" ]; then
+		PACKAGE_MANAGER="pamac install --no-upgrade --no-confirm"
+		PACKAGES="patch lsof wget sed grep gawk cabextract samba bc libxml2 curl"
+	elif [ -x "\$(command -v pacman)" ]; then
+		PACKAGE_MANAGER='pacman -Syu --overwrite \* --noconfirm --needed'
+		PACKAGES="patch lsof wget sed grep gawk cabextract samba bc libxml2 curl print-manager system-config-printer cups-filters nss-mdns foomatic-db-engine foomatic-db-ppds foomatic-db-nonfree-ppds ghostscript glibc samba extra-rel/apparmor core-rel/libcurl-gnutls winetricks cabextract appmenu-gtk-module patch bc lib32-libjpeg-turbo qt5-virtualkeyboard wine-staging giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap gnutls lib32-gnutls mpg123 lib32-mpg123 openal lib32-openal v4l-utils lib32-v4l-utils libpulse lib32-libpulse libgpg-error lib32-libgpg-error alsa-plugins lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo lib32-libjpeg-turbo sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama ncurses lib32-ncurses ocl-icd lib32-ocl-icd libxslt lib32-libxslt libva lib32-libva gtk3 lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader"
+	elif [ -x "\$(command -v apk)" ]; then
+		# PACKAGE_MANAGER="apk add"
+		# PACKAGES="patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl"
+		:
+	elif [ -x "\$(command -v zypper)" ]; then
+		# PACKAGE_MANAGER="zypper install"
+		# PACKAGES=""
+		:
+	elif [ -x "\$(command -v pkg)" ]; then
+		# PACKAGE_MANAGER="pkg install"
+		# PACKAGES=""
+		:
+	else
+		verbose && echo "Your distribution's package manager could not be determined."
+	fi
+	if [ -n "\${SUPERUSERDO}" ]; then export SUPERUSERDO; fi
+	if [ -n "\${PACKAGE_MANAGER}" ]; then export PACKAGE_MANAGER; fi
+	if [ -n "\${PACKAGES}" ]; then export PACKAGES; fi
+}
+
+installPackages() {
+	"\${SUPERUSERDO}" "\${PACKAGE_MANAGER}" "$@"
+}
+
+check_commands() {
+	if [ -z "\${SUPERUSERDO}" ]; then logos_error "Your distribution appears to be missing the ability to escalate privileges (e.g., sudo, doas). Please install either sudo or doas."; fi
+	for cmd in "\$@"; do
+		if have_dep "\${cmd}"; then
+			verbose && echo "* command \${cmd} is installed!"
+		else
+			verbose && echo "* command \${cmd} not installed!"
+			MISSING_CMD+=("\${cmd}")
+		fi
+	done
+	if [ "\${#MISSING_CMD[@]}" -ne 0 ]; then
+		if [ -n "\${PACKAGE_MANGER}" ]; then
+			logos_continue_question "Your \${OS} install is missing the command(s): \${MISSING_CMD[*]}. To continue, the script will attempt to install the package(s): \${PACKAGES} by using (\${PACKAGE_MANAGER}). Proceed?" "Your system is missing the command(s) \${MISSING_CMD[*]}. Please install your distro's package(s) associated with \${MISSING_CMD[*]} for \${OS}.\n \${EXTRA_INFO}"
+			if [ "\${OS}" = "Steam" ]; then
+				"\${SUPERUSERDO}" steamos-readonly disable
+				"\${SUPERUSERDO}" pacman-key --init
+				"\${SUPERUSERDO}" pacman-key --populate archlinux
+			fi
+			installPackages "${PACKAGES}"
+			if [ "\$OS" = "Steam" ]; then
+				"\${SUPERUSERDO}" sed -i 's/mymachines resolve/mymachines mdns_minimal [NOTFOUND=return] resolve/' /etc/nsswitch.conf
+				"\${SUPERUSERDO}" locale-gen
+				"\${SUPERUSERDO}" systemctl enable --now avahi-daemon
+				"\${SUPERUSERDO}" systemctl enable --now cups
+				"\${SUPERUSERDO}" steamos-readonly enable
+			fi
+		else
+			logos_error "The script could not determine your \${OS} install's package manager or it is unsupported. Your computer is missing the command(s) \${MISSING_CMD[*]}. Please install your distro's package(s) associated with \${MISSING_CMD[*]} for \${OS}.\n\${EXTRA_INFO}"
+		fi
+	fi
+}
+# shellcheck disable=SC2001
+check_libs() {
+	if [ -z "\${SUPERUSERDO}" ]; then logos_error "Your distribution appears to be missing the ability to escalate privileges (e.g., sudo, doas). Please install either sudo or doas."; fi
+	for lib in "\$@"; do
+		HAVE_LIB="\$(ldconfig -N -v "$(sed 's/:/ /g' <<< "\${LD_LIBRARY_PATH}")" 2>/dev/null | grep "\${lib}")"
+		if [ -n "\${HAVE_LIB}" ]; then
+			verbose && echo "* \${lib} is installed!"
+		else
+			if [ -n "\${PACKAGE_MANGER}" ]; then
+				logos_continue_question "Your \${OS} install is missing the library: \${lib}. To continue, the script will attempt to install the library by using \${PACKAGE_MANAGER}. Proceed?" "Your system does not have lib: \${lib}. Please install the package associated with \${lib} for \${OS}.\n \${EXTRA_INFO}"
+				installPackages "\${PACKAGES}"
+			else
+				logos_error "The script could not determine your \${OS} install's package manager or it is unsupported. Your computer is missing the library: \${lib}. Please install the package associated with \${lib} for \${OS}.\n \${EXTRA_INFO}"
+			fi
+		fi
+	done
+}
+
+checkDependencies() {
+	verbose && echo "Checking system for dependencies…"
+	if [ "${TARGETVERSION}" = "10" ]; then
+		check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl;
+	elif [ "${TARGETVERSION}" = "9" ]; then
+		check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl xwd cabextract;
+	else logos_error "Unknown Logos version."
+	fi
+	verbose && echo "All dependencies found."
 }
 
 cli_download() {
@@ -209,6 +354,11 @@ while getopts "\$OPTSTRING" opt; do
 				winetricks)
 					shift
 					runWinetricks;
+					exit 0 ;;
+				reinstall-dependencies)
+					getOS;
+					getPackageManager;
+					checkDependencies;
 					exit 0 ;;
 				selectAppImage)
 					selectAppImage;

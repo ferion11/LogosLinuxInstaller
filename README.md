@@ -69,17 +69,18 @@ Options:
 Usage: ./controlPanel.sh
 Interact with Logos Bible Software in Wine on Linux.
 
-Options:x
-    -h   --help         Prints this help message and exit.
-    -v   --version      Prints version information and exit.
-    -D   --debug        Makes Wine print out additional info.
-    -f   --force-root   Sets LOGOS_FORCE_ROOT to true, which permits
-                        the root user to run the script.
-    --wine64            Run the script's wine64 binary.
-    --wineserver        Run the script's wineserver binary.
-    --winetricks        Run winetricks.
-    --setAppImage       Set the script's AppImage file. NOTE:
-                        Currently broken. Disabled until fixed.
+Options:
+    -h   --help               Prints this help message and exit.
+    -v   --version            Prints version information and exit.
+    -D   --debug              Makes Wine print out additional info.
+    -f   --force-root         Sets LOGOS_FORCE_ROOT to true, which permits
+                              the root user to run the script.
+    --wine64                  Run the script's wine64 binary.
+    --wineserver              Run the script's wineserver binary.
+    --winetricks              Run winetricks.
+	--reinstall-dependencies  Reinstall your distro's dependencies required
+	                          to run Logos.
+    --selectAppImage          Set the script's AppImage file.
 ```
 
 # Installation [WIP]
