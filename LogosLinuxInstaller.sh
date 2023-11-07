@@ -558,17 +558,16 @@ getPackageManager() {
 	fi
 
 	if [ -x "$(command -v apt)" ]; then
-		PACKAGE_MANAGER="apt install"
-		PACKAGES="mktemp patch lsof wget find sed grep gawk tr winbind cabextract x11-apps bc libxml2-utils curl"
-		LIBRARYPACKAGES="fuse3"
+		PACKAGE_MANAGER="apt install -y"
+		PACKAGES="mktemp patch lsof wget find sed grep gawk tr winbind cabextract x11-apps bc libxml2-utils curl fuse3"
 	elif [ -x "$(command -v dnf)" ]; then
-		PACKAGE_MANAGER="dnf install"
+		PACKAGE_MANAGER="dnf install -y"
 		PACKAGES="patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl"
 	elif [ -x "$(command -v yum)" ]; then
-		PACKAGE_MANAGER="yum install"
+		PACKAGE_MANAGER="yum install -y"
 		PACKAGES="patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl"
 	elif [ -x "$(command -v pamac)" ]; then
-		PACKAGE_MANAGER="pamac install --no-upgrade"
+		PACKAGE_MANAGER="pamac install --no-upgrade --no-confirm"
 		PACKAGES="patch lsof wget sed grep gawk cabextract samba bc libxml2 curl"
 	elif [ -x "$(command -v pacman)" ]; then
 		PACKAGE_MANAGER='pacman -Syu --overwrite \* --noconfirm --needed'
@@ -591,7 +590,6 @@ getPackageManager() {
 	if [ -n "${SUPERUSERDO}" ]; then export SUPERUSERDO; fi
 	if [ -n "${PACKAGE_MANAGER}" ]; then export PACKAGE_MANAGER; fi
 	if [ -n "${PACKAGES}" ]; then export PACKAGES; fi
-	if [ -n "${LIBRARYPACKAGES}" ]; then export LIBRARYPACKAGES; fi
 }
 
 installPackages() {
@@ -639,7 +637,7 @@ check_libs() {
 		else
 			if [ -n "${PACKAGE_MANGER}" ]; then
 				logos_continue_question "Your ${OS} install is missing the library: ${lib}. To continue, the script will attempt to install the library by using ${PACKAGE_MANAGER}. Proceed?" "Your system does not have lib: ${lib}. Please install the package associated with ${lib} for ${OS}.\n ${EXTRA_INFO}"
-				installPackages "${LIBRARYPACKAGES}"
+				installPackages "${PACKAGES}"
 			else
 				logos_error "The script could not determine your ${OS} install's package manager or it is unsupported. Your computer is missing the library: ${lib}. Please install the package associated with ${lib} for ${OS}.\n ${EXTRA_INFO}"
 			fi
