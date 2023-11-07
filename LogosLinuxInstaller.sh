@@ -571,8 +571,8 @@ getPackageManager() {
 		PACKAGE_MANAGER="pamac install --no-upgrade"
 		PACKAGES="patch lsof wget sed grep gawk cabextract samba bc libxml2 curl"
 	elif [ -x "$(command -v pacman)" ]; then
-		PACKAGE_MANAGER="pacman -S"
-		PACKAGES="patch lsof wget sed grep gawk cabextract samba bc libxml2 curl"
+		PACKAGE_MANAGER='pacman -Syu --overwrite \* --noconfirm --needed'
+		PACKAGES="patch lsof wget sed grep gawk cabextract samba bc libxml2 curl print-manager system-config-printer cups-filters nss-mdns foomatic-db-engine foomatic-db-ppds foomatic-db-nonfree-ppds ghostscript glibc samba extra-rel/apparmor core-rel/libcurl-gnutls winetricks cabextract appmenu-gtk-module patch bc lib32-libjpeg-turbo qt5-virtualkeyboard wine-staging giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap gnutls lib32-gnutls mpg123 lib32-mpg123 openal lib32-openal v4l-utils lib32-v4l-utils libpulse lib32-libpulse libgpg-error lib32-libgpg-error alsa-plugins lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo lib32-libjpeg-turbo sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama ncurses lib32-ncurses ocl-icd lib32-ocl-icd libxslt lib32-libxslt libva lib32-libva gtk3 lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader"
 	elif [ -x "$(command -v apk)" ]; then
 		# PACKAGE_MANAGER="apk add"
 		# PACKAGES="patch mod_auth_ntlm_winbind samba-winbind cabextract bc libxml2 curl"
@@ -611,7 +611,19 @@ check_commands() {
 	if [ "${#MISSING_CMD[@]}" -ne 0 ]; then
 		if [ -n "${PACKAGE_MANGER}" ]; then
 			logos_continue_question "Your ${OS} install is missing the command(s): ${MISSING_CMD[*]}. To continue, the script will attempt to install the package(s): ${PACKAGES} by using (${PACKAGE_MANAGER}). Proceed?" "Your system is missing the command(s) ${MISSING_CMD[*]}. Please install your distro's package(s) associated with ${MISSING_CMD[*]} for ${OS}.\n ${EXTRA_INFO}"
+			if [ "${OS}" = "Steam" ]; then
+				"${SUPERUSERDO}" steamos-readonly disable
+				"${SUPERUSERDO}" pacman-key --init
+				"${SUPERUSERDO}" pacman-key --populate archlinux
+			fi
 			installPackages "${PACKAGES}"
+			if [ "$OS" = "Steam" ]; then
+				"${SUPERUSERDO}" sed -i 's/mymachines resolve/mymachines mdns_minimal [NOTFOUND=return] resolve/' /etc/nsswitch.conf
+				"${SUPERUSERDO}" locale-gen
+				"${SUPERUSERDO}" systemctl enable --now avahi-daemon
+				"${SUPERUSERDO}" systemctl enable --now cups
+				"${SUPERUSERDO}" steamos-readonly enable
+			fi
 		else
 			logos_error "The script could not determine your ${OS} install's package manager or it is unsupported. Your computer is missing the command(s) ${MISSING_CMD[*]}. Please install your distro's package(s) associated with ${MISSING_CMD[*]} for ${OS}.\n${EXTRA_INFO}"
 		fi
