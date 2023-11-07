@@ -11,6 +11,11 @@ export LOGOS_SCRIPT_VERSION="3.7.5" # Script version for this Installer Script
 #####
 
 # BEGIN ENVIRONMENT
+if [ -z "${DEFAULT_CONFIG_PATH}" ]; then DEFAULT_CONFIG_PATH="${HOME}/.config/Logos_on_Linux/Logos_on_Linux.conf"; export DEFAULT_CONFIG_PATH; fi
+if [ -z "${LOGOS_LOG}" ]; then LOGOS_LOG="${HOME}/.local/state/Logos_on_Linux/install.log"; mkdir -p "${HOME}/.local/state/Logos_on_Linux"; touch "${LOGOS_LOG}"; export LOGOS_LOG; fi
+if [ -z "${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; fi; export WINEDEBUG # Make wine output less verbose
+if [ -z "${DEBUG}" ]; then DEBUG="FALSE"; fi; export DEBUG
+if [ -z "${VERBOSE}" ]; then VERBOSE="FALSE"; fi; export VERBOSE
 if [ -z "${WINE64_APPIMAGE_FULL_VERSION}" ]; then WINE64_APPIMAGE_FULL_VERSION="v8.19-devel"; export WINE64_APPIMAGE_FULL_VERSION; fi
 if [ -z "${WINE64_APPIMAGE_FULL_URL}" ]; then WINE64_APPIMAGE_FULL_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/wine-devel-8.19/wine-devel_8.19-x86_64.AppImage"; export WINE64_APPIMAGE_FULL_URL; fi
 if [ -z "${WINE64_APPIMAGE_FULL_FILENAME}" ]; then WINE64_APPIMAGE_FULL_FILENAME="$(basename "${WINE64_APPIMAGE_FULL_URL}")"; export WINE64_APPIMAGE_FULL_FILENAME; fi
@@ -31,11 +36,6 @@ if [ -z "${PRESENT_WORKING_DIRECTORY}" ]; then PRESENT_WORKING_DIRECTORY="${PWD}
 if [ -z "${LOGOS_FORCE_ROOT+x}" ]; then export LOGOS_FORCE_ROOT="" ; fi
 if [ -z "${WINEBOOT_GUI+x}" ]; then export WINEBOOT_GUI="" ; fi
 if [ -z "${EXTRA_INFO}" ]; then EXTRA_INFO="The following packages are usually necessary: winbind cabextract libjpeg8."; export EXTRA_INFO; fi
-if [ -z "${DEFAULT_CONFIG_PATH}" ]; then DEFAULT_CONFIG_PATH="${HOME}/.config/Logos_on_Linux/Logos_on_Linux.conf"; export DEFAULT_CONFIG_PATH; fi
-if [ -z "${LOGOS_LOG}" ]; then LOGOS_LOG="${HOME}/.local/state/Logos_on_Linux/install.log"; mkdir -p "${HOME}/.local/state/Logos_on_Linux"; touch "${LOGOS_LOG}"; export LOGOS_LOG; fi
-if [ -z "${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; fi; export WINEDEBUG # Make wine output less verbose
-if [ -z "${DEBUG}" ]; then DEBUG="FALSE"; fi; export DEBUG
-if [ -z "${VERBOSE}" ]; then VERBOSE="FALSE"; fi; export VERBOSE
 
 # END ENVIRONMENT
 # BEGIN FUNCTION DECLARATIONS

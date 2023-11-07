@@ -6,7 +6,15 @@ AUTHOR="${LOGOS_SCRIPT_AUTHOR}"
 
 # BEGIN ENVIRONMENT
 HERE="\$(dirname "\$(readlink -f "\${0}")")"
-if [ -z "${LOGOS_LOG}" ]; then LOGOS_LOG="${HOME}/.local/state/Logos_on_Linux/controlpanel.log"; mkdir -p "${HOME}/.local/state/Logos_on_Linux"; touch "${LOGOS_LOG}"; export LOGOS_LOG; fi
+if [ -z "\${LOGOS_LOG}" ]; then LOGOS_LOG="${HOME}/.local/state/Logos_on_Linux/controlpanel.log"; mkdir -p "${HOME}/.local/state/Logos_on_Linux"; touch "${LOGOS_LOG}"; export LOGOS_LOG; fi
+if [ -z "\${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; fi; export WINEDEBUG # Make wine output less verbose
+if [ -z "\${DEBUG}" ]; then DEBUG="FALSE"; fi; export DEBUG
+if [ -z "\${VERBOSE}" ]; then VERBOSE="FALSE"; fi; export VERBOSE
+if [ -z "\${WINE64_APPIMAGE_FULL_VERSION}" ]; then WINE64_APPIMAGE_FULL_VERSION="v8.19-devel"; export WINE64_APPIMAGE_FULL_VERSION; fi
+if [ -z "\${WINE64_APPIMAGE_FULL_URL}" ]; then WINE64_APPIMAGE_FULL_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/wine-devel-8.19/wine-devel_8.19-x86_64.AppImage"; export WINE64_APPIMAGE_FULL_URL; fi
+if [ -z "\${WINE64_APPIMAGE_FULL_FILENAME}" ]; then WINE64_APPIMAGE_FULL_FILENAME="$(basename "${WINE64_APPIMAGE_FULL_URL}")"; export WINE64_APPIMAGE_FULL_FILENAME; fi
+if [ -z "\${WINE64_APPIMAGE_VERSION}" ]; then WINE64_APPIMAGE_VERSION="v8.19-devel"; export WINE64_APPIMAGE_VERSION; fi
+if [ -z "\${WINE64_APPIMAGE_URL}" ]; then WINE64_APPIMAGE_URL="https://github.com/ferion11/LogosLinuxInstaller/releases/download/wine-devel-8.19/wine-devel_8.19-x86_64.AppImage"; export WINE64_APPIMAGE_URL; fi
 
 # Save IFS
 IFS_TMP=\${IFS}
@@ -43,9 +51,7 @@ else
 	export APPDIR_BINDIR="${APPDIR_BINDIR}"; export APPDIR_BINDIR
 	export APPIMAGE_LINK_SELECTION_NAME="${APPIMAGE_LINK_SELECTION_NAME}"; export APPIMAGE_LINK_SELECTION_NAME;
 fi
-if [ -z "${WINETRICKS_URL}" ]; then WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"; export WINETRICKS_URL; fi
-
-if [ -z "\${WINEDEBUG}" ]; then WINEDEBUG="fixme-all,err-all"; export WINEDEBUG; fi # Make wine output less verbose
+if [ -z "\${WINETRICKS_URL}" ]; then WINETRICKS_URL="https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"; export WINETRICKS_URL; fi
 # END ENVIRONMENT
 # BEGIN FUNCTION DECLARATIONS
 usage() {
@@ -582,9 +588,9 @@ check_libs() {
 
 checkDependencies() {
 	verbose && echo "Checking system for dependencies…"
-	if [ "${TARGETVERSION}" = "10" ]; then
+	if [ "\${TARGETVERSION}" = "10" ]; then
 		check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl;
-	elif [ "${TARGETVERSION}" = "9" ]; then
+	elif [ "\${TARGETVERSION}" = "9" ]; then
 		check_commands mktemp patch lsof wget find sed grep ntlm_auth awk tr bc xmllint curl xwd cabextract;
 	else logos_error "Unknown Logos version."
 	fi
@@ -625,7 +631,7 @@ runWinetricks() {
 }
 
 updateAppImage() {
-
+	:
 }
 
 selectAppImage() {
