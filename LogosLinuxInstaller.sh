@@ -173,7 +173,7 @@ no-diag-msg() {
 	die;
 }
 cli_msg() {
-	printf "%s\n" "${1}"
+	printf "%s\n" "${1}" | sed 's/\\n/\n/g'
 }
 gtk_info() {
 	zenity --info --width=300 --height=200 --text="$*" --title='Information'
