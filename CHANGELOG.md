@@ -1,4 +1,8 @@
 # Changelog
+* 3.8.0
+  - Fix #169. [T. H. Wright, J. Bernard]
+  - Fix #203. [T. H. Wright, J. Goodman]
+  - Fix #210. [T. H. Wright]
 * 3.7.5
   - Fix #131. [T. H. Wright]
   - Fix #132. [T. H. Wright]
