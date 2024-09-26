@@ -5,6 +5,7 @@
 
 This project is now archived, all future development is now on our new python installer which has more features etc.
 See the new project here: https://github.com/FaithLife-Community/LogosLinuxInstaller
+
 This repository contains a set of bash scripts for installing Logos Bible (Verbum) Software on Linux.
 
 # Usage
